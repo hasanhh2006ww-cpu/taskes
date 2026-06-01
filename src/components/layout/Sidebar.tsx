@@ -33,15 +33,20 @@ interface SidebarProps {
 export function Sidebar({ view, onViewChange }: SidebarProps) {
   const { filter, setFilter, setActiveProjectId, activeProjectId, tasks } = useTaskStore();
   const { projects, addProject, deleteProject } = useProjectStore();
-  const { darkMode, toggleDarkMode } = useUIStore();
+  const { darkMode, toggleDarkMode, setSidebarOpen } = useUIStore();
 
   const todayStr = getToday();
   const todayCount = tasks.filter((t) => t.dueDate === todayStr && !t.completed).length;
 
   const importantCount = tasks.filter((t) => t.important && !t.completed).length;
 
+  function handleNavClick(fn: () => void) {
+    fn();
+    setSidebarOpen(false);
+  }
+
   return (
-    <aside className="flex h-full w-60 flex-col border-e border-zinc-200/60 bg-white/50 backdrop-blur-xl dark:border-zinc-800/60 dark:bg-zinc-950/50">
+    <aside className="flex h-full w-64 flex-col border-e border-zinc-200/60 bg-white/95 backdrop-blur-xl dark:border-zinc-800/60 dark:bg-zinc-950/95">
       <div className="flex items-center gap-2 px-4 pt-5 pb-4">
         <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-500 text-sm font-bold text-white">
           م
@@ -51,7 +56,7 @@ export function Sidebar({ view, onViewChange }: SidebarProps) {
 
       <nav className="flex-1 space-y-0.5 px-2">
         <button
-          onClick={() => onViewChange('dashboard')}
+          onClick={() => handleNavClick(() => onViewChange('dashboard'))}
           className={cn(
             'flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors',
             view === 'dashboard'
@@ -68,10 +73,10 @@ export function Sidebar({ view, onViewChange }: SidebarProps) {
         {NAV_ITEMS.map((item) => (
           <button
             key={item.filter}
-            onClick={() => {
+            onClick={() => handleNavClick(() => {
               onViewChange('app');
               setFilter(item.filter);
-            }}
+            })}
             className={cn(
               'flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors',
               filter === item.filter && !activeProjectId
@@ -110,10 +115,10 @@ export function Sidebar({ view, onViewChange }: SidebarProps) {
         {projects.map((project) => (
           <div key={project.id} className="group flex items-center">
             <button
-              onClick={() => {
+              onClick={() => handleNavClick(() => {
                 onViewChange('app');
                 setActiveProjectId(project.id);
-              }}
+              })}
               className={cn(
                 'flex flex-1 items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors',
                 activeProjectId === project.id
@@ -130,7 +135,7 @@ export function Sidebar({ view, onViewChange }: SidebarProps) {
                   deleteProject(project.id);
                 }
               }}
-              className="me-1 rounded p-1 text-zinc-300 opacity-0 transition-all hover:bg-rose-50 hover:text-rose-500 group-hover:opacity-100 dark:text-zinc-600 dark:hover:bg-rose-950/30 dark:hover:text-rose-400"
+              className="me-1 rounded p-1.5 text-zinc-300 opacity-0 transition-all hover:bg-rose-50 hover:text-rose-500 group-hover:opacity-100 dark:text-zinc-600 dark:hover:bg-rose-950/30 dark:hover:text-rose-400 sm:p-1"
             >
               <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

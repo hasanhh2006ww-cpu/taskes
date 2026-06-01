@@ -55,14 +55,14 @@ export function TaskDetail() {
       transition={{ duration: 0.2 }}
       className="flex h-full flex-col"
     >
-      <div className="flex items-center justify-between px-6 pt-5 pb-3">
+      <div className="flex items-center justify-between px-4 pt-5 pb-3 md:px-6">
         <h2 className="text-sm font-medium text-zinc-400 dark:text-zinc-500">التفاصيل</h2>
         <Button size="icon" onClick={() => setActiveTaskId(null)}>
           <X className="h-4 w-4" />
         </Button>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-6 pb-6">
+      <div className="flex-1 overflow-y-auto px-4 pb-6 md:px-6">
         <input
           value={editTitle}
           onChange={(e) => setEditTitle(e.target.value)}
@@ -72,7 +72,7 @@ export function TaskDetail() {
 
         <div className="space-y-3">
           <div className="flex items-center gap-2">
-            <span className="w-20 shrink-0 text-xs font-medium text-zinc-400 dark:text-zinc-500">الحالة</span>
+            <span className="w-16 shrink-0 text-xs font-medium text-zinc-400 dark:text-zinc-500 md:w-20">الحالة</span>
             <button
               onClick={() => toggleComplete(t.id)}
               className={cn(
@@ -87,7 +87,7 @@ export function TaskDetail() {
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="w-20 shrink-0 text-xs font-medium text-zinc-400 dark:text-zinc-500">الأولوية</span>
+            <span className="w-16 shrink-0 text-xs font-medium text-zinc-400 dark:text-zinc-500 md:w-20">الأولوية</span>
             <div className="flex gap-1">
               {PRIORITIES.map((p) => (
                 <button
@@ -119,7 +119,7 @@ export function TaskDetail() {
 
           {project && (
             <div className="flex items-center gap-2">
-              <span className="w-20 shrink-0 text-xs font-medium text-zinc-400 dark:text-zinc-500">المشروع</span>
+              <span className="w-16 shrink-0 text-xs font-medium text-zinc-400 dark:text-zinc-500 md:w-20">المشروع</span>
               <span
                 className="inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium leading-4"
                 style={{ backgroundColor: project.color + '20', color: project.color }}
@@ -130,7 +130,7 @@ export function TaskDetail() {
           )}
 
           <div className="flex items-center gap-2">
-            <span className="w-20 shrink-0 text-xs font-medium text-zinc-400 dark:text-zinc-500">تاريخ الإنشاء</span>
+            <span className="w-16 shrink-0 text-xs font-medium text-zinc-400 dark:text-zinc-500 md:w-20">تاريخ الإنشاء</span>
             <span className="text-xs text-zinc-500 dark:text-zinc-400">
               {new Date(t.createdAt).toLocaleDateString('ar-SA', {
                 month: 'short',
@@ -143,11 +143,11 @@ export function TaskDetail() {
 
         <div className="mt-6 flex gap-2">
           <Button variant="ghost" size="sm" onClick={() => toggleImportant(t.id)}>
-            <Star className={cn('h-3.5 w-3.5', t.important && 'fill-amber-400 text-amber-400')} />
+            <Star className={cn('h-4 w-4 md:h-3.5 md:w-3.5', t.important && 'fill-amber-400 text-amber-400')} />
             {t.important ? 'مهمة' : 'مهمة'}
           </Button>
           <Button variant="danger" size="sm" onClick={() => deleteTask(t.id)}>
-            <Trash2 className="h-3.5 w-3.5" /> حذف
+            <Trash2 className="h-4 w-4 md:h-3.5 md:w-3.5" /> حذف
           </Button>
         </div>
       </div>

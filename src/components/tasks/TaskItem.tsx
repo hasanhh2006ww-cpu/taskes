@@ -50,7 +50,7 @@ export const TaskItem = memo(function TaskItem({ task }: TaskItemProps) {
       ref={setNodeRef}
       style={style}
       className={cn(
-        'group flex items-start gap-2 rounded-xl border p-3',
+        'group flex items-start gap-2 rounded-xl border p-2.5 sm:p-3',
         'border-zinc-200/60 bg-white/70 hover:border-zinc-300/60 hover:shadow-sm',
         'dark:border-zinc-800/60 dark:bg-zinc-900/70 dark:hover:border-zinc-700/60',
         isDragging && 'z-50 scale-105 shadow-xl opacity-90',
@@ -79,7 +79,7 @@ export const TaskItem = memo(function TaskItem({ task }: TaskItemProps) {
       </button>
 
       <div
-        className="min-w-0 flex-1 cursor-pointer"
+        className="min-w-0 flex-1 cursor-pointer py-0.5"
         onClick={() => setActiveTaskId(task.id)}
       >
         <span
@@ -103,12 +103,12 @@ export const TaskItem = memo(function TaskItem({ task }: TaskItemProps) {
 
       <Button size="icon" onClick={() => toggleImportant(task.id)}>
         <Star
-          className={cn('h-3.5 w-3.5', task.important && 'fill-amber-400 text-amber-400')}
+          className={cn('h-4 w-4 md:h-3.5 md:w-3.5', task.important && 'fill-amber-400 text-amber-400')}
         />
       </Button>
 
       <Button size="icon" variant="danger" onClick={() => deleteTask(task.id)}>
-        <Trash2 className="h-3.5 w-3.5" />
+        <Trash2 className="h-4 w-4 md:h-3.5 md:w-3.5" />
       </Button>
     </motion.div>
   );

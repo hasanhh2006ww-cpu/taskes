@@ -31,7 +31,7 @@ my-taske/
 │   │
 │   ├── components/
 │   │   ├── layout/
-│   │   │   └── Sidebar.tsx        # Nav, projects (click/delete), theme toggle
+│   │   │   └── Sidebar.tsx        # Responsive: overlay mobile, fixed desktop
 │   │   ├── tasks/
 │   │   │   ├── TaskItem.tsx       # Draggable task card (React.memo)
 │   │   │   ├── TaskList.tsx       # DnD context, add task input, filter display
@@ -70,15 +70,17 @@ my-taske/
 ## [SYSTEM_FLOW]
 
 ```
-User Input (keyboard/mouse)
+User Input (keyboard/mouse/touch)
     │
-    ├── Sidebar click (Dashboard) → onViewChange('dashboard')
-    ├── Sidebar click (nav item) → onViewChange('app') + setFilter
-    ├── Sidebar click (project) → onViewChange('app') + setActiveProjectId
+    ├── Hamburger (mobile) → toggle sidebar overlay
+    ├── Sidebar backdrop (mobile) → close sidebar
+    ├── Sidebar click (Dashboard) → onViewChange('dashboard') + close sidebar
+    ├── Sidebar click (nav item) → onViewChange('app') + setFilter + close sidebar
+    ├── Sidebar click (project) → onViewChange('app') + setActiveProjectId + close sidebar
     ├── Sidebar delete (×) → deleteProject + confirm
     ├── Input (N) → focus task input
     ├── Input + Enter → addTask
-    ├── TaskItem click → setActiveTaskId (opens Detail panel)
+    ├── TaskItem tap → setActiveTaskId (full-screen detail on mobile, panel on desktop)
     ├── Drag handle → reorderTasks (@dnd-kit sortable)
     ├── Check circle → toggleComplete
     ├── Star → toggleImportant
@@ -113,6 +115,12 @@ User Input (keyboard/mouse)
 | 15 | التنقل Dashboard ↔ المهام لا يعمل | إضافة onViewChange('app') لكل nav item ومشروع | ✅ |
 | 16 | حذف المشاريع غير موجود | إضافة زر حذف (×) بجانب كل مشروع مع confirm | ✅ |
 | 17 | الضغط على المشروع لا يفتح عرض المهام | إضافة onViewChange('app') لزر المشروع | ✅ |
+| 18 | الموقع لا يعمل على الموبايل — Sidebar ثابت | Sidebar يصبح overlay مع hamburger + backdrop | ✅ |
+| 19 | TaskDetail لا يتكيّف مع الشاشات الصغيرة | يصبح full-screen على الموبايل | ✅ |
+| 20 | أزرار صغيرة صعبة الضغط على الهاتف | تكبير `44px` touch target عبر `md:` breakpoints | ✅ |
+| 21 | padding كبير على الموبايل | تقليل `px-6` → `px-4 md:px-6` | ✅ |
+| 22 | أزرار الأولوية تفيض | `flex-col` على الموبايل + `sm:flex-row` | ✅ |
+| 23 | CommandPalette لا يتكيّف | `px-4` + `pt-[10vh] sm:pt-[15vh]` | ✅ |
 
 ## [ORPHANS & PENDING]
 
@@ -125,3 +133,4 @@ User Input (keyboard/mouse)
 | `date-fns` dependency | Not used | installed but unused, kept for future |
 | Static build warning: localStorage | Known | harmless, occurs during SSR |
 | RTL animation direction | Done | TaskDetail slides from x:-20 (right in RTL) |
+| Responsive design | Done | Mobile sidebar overlay, full-screen detail, 44px touch targets |

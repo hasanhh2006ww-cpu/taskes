@@ -25,13 +25,13 @@ export function Dashboard() {
 
   return (
     <div className="flex h-full flex-col">
-      <div className="px-6 pt-5 pb-3">
-        <h1 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">لوحة التحكم</h1>
-        <p className="text-sm text-zinc-400 dark:text-zinc-500">نظرة سريعة على مهامك</p>
+      <div className="px-4 pt-5 pb-3 md:px-6">
+        <h1 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 md:text-xl">لوحة التحكم</h1>
+        <p className="text-xs text-zinc-400 dark:text-zinc-500 md:text-sm">نظرة سريعة على مهامك</p>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-6 pb-6">
-        <div className="grid grid-cols-2 gap-3">
+      <div className="flex-1 overflow-y-auto px-4 pb-6 md:px-6">
+        <div className="grid grid-cols-2 gap-2 sm:gap-3">
           {stats.map((stat) => (
             <div
               key={stat.label}
