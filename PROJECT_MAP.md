@@ -31,7 +31,7 @@ my-taske/
 │   │
 │   ├── components/
 │   │   ├── layout/
-│   │   │   └── Sidebar.tsx        # Nav items, projects list, theme toggle
+│   │   │   └── Sidebar.tsx        # Nav, projects (click/delete), theme toggle
 │   │   ├── tasks/
 │   │   │   ├── TaskItem.tsx       # Draggable task card (React.memo)
 │   │   │   ├── TaskList.tsx       # DnD context, add task input, filter display
@@ -72,7 +72,10 @@ my-taske/
 ```
 User Input (keyboard/mouse)
     │
-    ├── Sidebar click → setFilter / setActiveProjectId
+    ├── Sidebar click (Dashboard) → onViewChange('dashboard')
+    ├── Sidebar click (nav item) → onViewChange('app') + setFilter
+    ├── Sidebar click (project) → onViewChange('app') + setActiveProjectId
+    ├── Sidebar delete (×) → deleteProject + confirm
     ├── Input (N) → focus task input
     ├── Input + Enter → addTask
     ├── TaskItem click → setActiveTaskId (opens Detail panel)
@@ -107,6 +110,9 @@ User Input (keyboard/mouse)
 | 12 | لا RTL ولا ترجمة عربية | dir=rtl, lang=ar, ترجمة كاملة لجميع النصوص | ✅ |
 | 13 | خط عربي غير مناسب | استخدام Cairo من next/font | ✅ |
 | 14 | يجب استخدام ml/mr في RTL | تحويل إلى ms/me/border-e/border-s/text-start | ✅ |
+| 15 | التنقل Dashboard ↔ المهام لا يعمل | إضافة onViewChange('app') لكل nav item ومشروع | ✅ |
+| 16 | حذف المشاريع غير موجود | إضافة زر حذف (×) بجانب كل مشروع مع confirm | ✅ |
+| 17 | الضغط على المشروع لا يفتح عرض المهام | إضافة onViewChange('app') لزر المشروع | ✅ |
 
 ## [ORPHANS & PENDING]
 

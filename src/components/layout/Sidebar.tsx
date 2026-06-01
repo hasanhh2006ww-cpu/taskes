@@ -32,7 +32,7 @@ interface SidebarProps {
 
 export function Sidebar({ view, onViewChange }: SidebarProps) {
   const { filter, setFilter, setActiveProjectId, activeProjectId, tasks } = useTaskStore();
-  const { projects, addProject } = useProjectStore();
+  const { projects, addProject, deleteProject } = useProjectStore();
   const { darkMode, toggleDarkMode } = useUIStore();
 
   const todayStr = getToday();
@@ -69,6 +69,7 @@ export function Sidebar({ view, onViewChange }: SidebarProps) {
           <button
             key={item.filter}
             onClick={() => {
+              onViewChange('app');
               setFilter(item.filter);
             }}
             className={cn(
@@ -107,19 +108,35 @@ export function Sidebar({ view, onViewChange }: SidebarProps) {
         </div>
 
         {projects.map((project) => (
-          <button
-            key={project.id}
-            onClick={() => setActiveProjectId(project.id)}
-            className={cn(
-              'flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors',
-              activeProjectId === project.id
-                ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400'
-                : 'text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800/60'
-            )}
-          >
-            <FolderKanban className="h-4 w-4" style={{ color: project.color }} />
-            <span className="flex-1 text-start truncate">{project.name}</span>
-          </button>
+          <div key={project.id} className="group flex items-center">
+            <button
+              onClick={() => {
+                onViewChange('app');
+                setActiveProjectId(project.id);
+              }}
+              className={cn(
+                'flex flex-1 items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors',
+                activeProjectId === project.id
+                  ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400'
+                  : 'text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800/60'
+              )}
+            >
+              <FolderKanban className="h-4 w-4" style={{ color: project.color }} />
+              <span className="flex-1 text-start truncate">{project.name}</span>
+            </button>
+            <button
+              onClick={() => {
+                if (confirm(`هل تريد حذف "${project.name}"؟`)) {
+                  deleteProject(project.id);
+                }
+              }}
+              className="me-1 rounded p-1 text-zinc-300 opacity-0 transition-all hover:bg-rose-50 hover:text-rose-500 group-hover:opacity-100 dark:text-zinc-600 dark:hover:bg-rose-950/30 dark:hover:text-rose-400"
+            >
+              <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
         ))}
       </nav>
 
