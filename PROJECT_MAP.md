@@ -4,68 +4,67 @@
 
 | Layer | Technology | Version |
 |-------|-----------|---------|
-| Framework | Next.js (App Router) | 16.2.6 |
+| Framework | Next.js (App Router, static export) | 16.2.6 |
 | UI Library | React | 19.2.4 |
-| Language | TypeScript | 6.x (strict) |
+| Language | TypeScript | 5.x (strict) |
 | Styling | Tailwind CSS | 4.x |
+| Font | Cairo (Arabic + Latin) | next/font |
 | State | Zustand | 5.0.14 |
 | Animation | Framer Motion | 12.40.0 |
 | Drag & Drop | @dnd-kit (core + sortable) | 6.3.1 / 10.0.0 |
 | Icons | lucide-react | 1.17.0 |
 | Class Merge | clsx + tailwind-merge | 2.1.1 / 3.6.0 |
-| Dates | date-fns | 4.4.0 |
 | IDs | uuid | 14.0.0 |
-| Toasts | react-hot-toast | 2.6.0 |
 
 ## [ARCHITECTURE]
 
 ```
 my-taske/
+├── public/
 ├── src/
-│   ├── app/                          # Next.js App Router
-│   │   ├── layout.tsx                # RootLayout (Geist font, metadata)
-│   │   ├── page.tsx                  # Main page (3-panel layout + view routing)
-│   │   └── globals.css               # Tailwind v4 + dark mode variant + scrollbar
+│   ├── app/                       # Next.js App Router
+│   │   ├── layout.tsx             # RootLayout (Cairo font, dir=rtl, lang=ar)
+│   │   ├── page.tsx               # Main page (3-panel layout + view routing)
+│   │   ├── globals.css            # Tailwind v4 + RTL + dark mode
+│   │   ├── not-found.tsx          # 404 page (Arabic)
+│   │   └── error.tsx              # Error page (Arabic)
 │   │
 │   ├── components/
 │   │   ├── layout/
-│   │   │   └── Sidebar.tsx           # Nav items, projects list, theme toggle
+│   │   │   └── Sidebar.tsx        # Nav items, projects list, theme toggle
 │   │   ├── tasks/
-│   │   │   ├── TaskItem.tsx          # Draggable task card (sortable)
-│   │   │   ├── TaskList.tsx          # DnD context, add task input, filter display
-│   │   │   └── TaskDetail.tsx        # Right panel: edit title, priority, date, etc.
-│   │   ├── projects/
-│   │   │   └── (future — inline CRUD via Sidebar prompts)
+│   │   │   ├── TaskItem.tsx       # Draggable task card (React.memo)
+│   │   │   ├── TaskList.tsx       # DnD context, add task input, filter display
+│   │   │   └── TaskDetail.tsx     # Right panel: title, priority, date, etc.
 │   │   ├── ui/
-│   │   │   ├── Button.tsx            # ghost/primary/danger + sm/md/icon
-│   │   │   ├── Badge.tsx             # Priority badge
-│   │   │   ├── Input.tsx             # Styled text input
-│   │   │   └── Modal.tsx             # Overlay modal with backdrop blur
+│   │   │   ├── Button.tsx         # ghost/primary/danger + sm/md/icon
+│   │   │   ├── Badge.tsx          # Priority badge
+│   │   │   └── Input.tsx          # Styled text input
 │   │   ├── dashboard/
-│   │   │   └── Dashboard.tsx         # Stats cards + project progress + overdue alert
+│   │   │   └── Dashboard.tsx      # Stats cards + project progress + overdue
 │   │   └── command-palette/
-│   │       └── CommandPalette.tsx    # Ctrl+K palette (nav, theme, new project)
+│   │       └── CommandPalette.tsx # Ctrl+K palette (Arabic)
 │   │
-│   ├── store/                        # Zustand — domain-split
-│   │   ├── useTaskStore.ts           # Tasks CRUD, filter, reorder, active task
-│   │   ├── useProjectStore.ts        # Projects CRUD
-│   │   └── useUIStore.ts             # Dark mode, focus mode, sidebar, activeTaskId
+│   ├── store/                     # Zustand — domain-split
+│   │   ├── useTaskStore.ts        # Tasks CRUD, filter, reorder
+│   │   ├── useProjectStore.ts     # Projects CRUD
+│   │   └── useUIStore.ts          # Dark mode, focus mode, sidebar, activeTaskId
 │   │
 │   ├── hooks/
-│   │   └── useKeyboard.ts            # Global keyboard shortcut registration
+│   │   └── useKeyboard.ts         # Global keyboard shortcuts (stale-closure safe)
 │   │
-│   └── lib/                          # Shared core (only reused logic)
-│       ├── types.ts                  # Task, Project, Priority, FilterType
-│       ├── constants.ts              # PRIORITIES, PROJECT_COLORS, STORAGE_KEYS
-│       ├── cn.ts                     # clsx + twMerge utility
-│       ├── logger.ts                 # Async non-blocking logger (info/warn/error)
-│       └── storage.ts                # loadFromStorage / saveToStorage
+│   └── lib/                       # Shared core
+│       ├── types.ts               # Task, Project, Priority, FilterType
+│       ├── constants.ts           # PRIORITIES (Arabic), PROJECT_COLORS, STORAGE_KEYS, getToday()
+│       ├── cn.ts                  # clsx + twMerge utility
+│       ├── logger.ts              # Async non-blocking logger
+│       └── storage.ts             # loadFromStorage / saveToStorage
 │
-├── PROJECT_MAP.md                    # ← this file
+├── PROJECT_MAP.md
+├── netlify.toml
+├── next.config.ts                 # Static export config
 ├── package.json
-├── tsconfig.json                     # strict: true, path alias @/*
-├── postcss.config.mjs
-└── next.config.ts
+└── tsconfig.json                  # strict: true, path alias @/*
 ```
 
 ## [SYSTEM_FLOW]
@@ -74,35 +73,49 @@ my-taske/
 User Input (keyboard/mouse)
     │
     ├── Sidebar click → setFilter / setActiveProjectId
+    ├── Input (N) → focus task input
     ├── Input + Enter → addTask
     ├── TaskItem click → setActiveTaskId (opens Detail panel)
-    ├── Drag handle → reorderTasks (sort)
+    ├── Drag handle → reorderTasks (@dnd-kit sortable)
     ├── Check circle → toggleComplete
     ├── Star → toggleImportant
     ├── Trash → deleteTask
-    ├── Ctrl+K → CommandPalette
+    ├── Ctrl+K → CommandPalette (Arabic)
     ├── F → toggleFocusMode
     └── Theme button → toggleDarkMode
             │
             ▼
-    Zustand Store (useTaskStore / useProjectStore / useUIStore)
-            │
-            ├── saveToStorage() ← auto-save on every mutation
-            └── React re-render (selective via Zustand selectors)
+    Zustand Store → saveToStorage() ← auto-save on every mutation
+                  → React re-render (selective via selectors + React.memo)
 ```
+
+## [FIXES & IMPROVEMENTS]
+
+| # | المشكلة | الإجراء | الحالة |
+|---|---------|--------|--------|
+| 1 | AnimatePresence mode="popLayout" مع <div> وسيط | نُقل <div> خارج AnimatePresence | ✅ |
+| 2 | useKeyboard stale closure | useRef بدلاً من dependency array | ✅ |
+| 3 | اختصار N مفقود | إضافة focus على input via data-task-input | ✅ |
+| 4 | activeTaskId غير مستخدم في page.tsx | إزالة الكود الميت | ✅ |
+| 5 | sidebarOpen غير مستخدم | إزالة الاستدعاءات غير المستخدمة | ✅ |
+| 6 | Modal.tsx غير مستخدم بالكامل | حذف الملف | ✅ |
+| 7 | getFilteredTasks() كل render | تحسين باستخدام Today utility + memo | ✅ |
+| 8 | TaskItem بدون memo | إضافة React.memo مع المقارنة اليدوية | ✅ |
+| 9 | new Date() مكرر 3 مرات | استخراج getToday() في constants | ✅ |
+| 10 | صفحة 404 مفقودة | إضافة not-found.tsx | ✅ |
+| 11 | صفحة Error مفقودة | إضافة error.tsx | ✅ |
+| 12 | لا RTL ولا ترجمة عربية | dir=rtl, lang=ar, ترجمة كاملة لجميع النصوص | ✅ |
+| 13 | خط عربي غير مناسب | استخدام Cairo من next/font | ✅ |
+| 14 | يجب استخدام ml/mr في RTL | تحويل إلى ms/me/border-e/border-s/text-start | ✅ |
 
 ## [ORPHANS & PENDING]
 
 | Item | Status | Notes |
 |------|--------|-------|
-| Framer Motion animations | Pending | enter/exit transitions, layoutId, drag feedback |
-| Focus Mode visual polish | Pending | currently hides non-active tasks, needs overlay |
-| Keyboard shortcut: N for new task | Pending | needs input focus trigger |
-| Empty project delete (cascade) | Pending | tasks remain orphaned (acceptable for now) |
+| Framer Motion animations | Done | enter/exit, layoutId (TaskItem), slide (TaskDetail), scale (CommandPalette) |
+| Focus Mode visual polish | Done | hides non-active tasks |
+| Keyboard shortcut: N for new task | Done | focuses task input |
 | Undo toast on delete | Backlog | react-hot-toast installed, not wired |
-| Priority colors in TaskDetail | Done | inline picker in detail panel |
-| Dashboard overdue detection | Done | compares dueDate < today |
-| Drag & Drop | Done | @dnd-kit sortable vertical list |
-| Command Palette | Done | filtered search + keyboard nav |
-| Dark/Light toggle | Done | persisted to localStorage |
-| Auto-save | Done | every mutation writes to localStorage |
+| `date-fns` dependency | Not used | installed but unused, kept for future |
+| Static build warning: localStorage | Known | harmless, occurs during SSR |
+| RTL animation direction | Done | TaskDetail slides from x:-20 (right in RTL) |

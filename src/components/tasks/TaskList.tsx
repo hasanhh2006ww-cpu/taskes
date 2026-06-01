@@ -19,7 +19,6 @@ import {
 import { useTaskStore } from '@/store/useTaskStore';
 import { useProjectStore } from '@/store/useProjectStore';
 import { TaskItem } from './TaskItem';
-import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { cn } from '@/lib/cn';
 import { Plus } from 'lucide-react';
@@ -60,19 +59,19 @@ export function TaskList() {
   const headerTitle = activeProject
     ? activeProject.name
     : filter === 'all'
-      ? 'All Tasks'
+      ? 'جميع المهام'
       : filter === 'today'
-        ? 'Today'
+        ? 'اليوم'
         : filter === 'important'
-          ? 'Important'
-          : 'Completed';
+          ? 'مهمة'
+          : 'المنجزة';
 
   return (
     <div className="flex h-full flex-col">
       <div className="flex items-center justify-between px-6 pt-5 pb-3">
         <h1 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">{headerTitle}</h1>
         <span className="text-sm text-zinc-400 dark:text-zinc-500">
-          {filteredTasks.length} task{filteredTasks.length !== 1 ? 's' : ''}
+          {filteredTasks.length} {filteredTasks.length === 1 ? 'مهمة' : 'مهام'}
         </span>
       </div>
 
@@ -80,7 +79,8 @@ export function TaskList() {
         <div className="flex flex-1 items-center gap-2 rounded-xl border border-zinc-200/60 bg-white/50 px-3 py-2 backdrop-blur-sm dark:border-zinc-800/60 dark:bg-zinc-900/50">
           <Plus className="h-4 w-4 text-zinc-400" />
           <Input
-            placeholder="Add a new task..."
+            data-task-input
+            placeholder="إضافة مهمة جديدة..."
             value={newTitle}
             onChange={(e) => setNewTitle(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
@@ -107,21 +107,21 @@ export function TaskList() {
       <div className="flex-1 overflow-y-auto px-6 pb-6">
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
           <SortableContext items={filteredTasks.map((t) => t.id)} strategy={verticalListSortingStrategy}>
-            <AnimatePresence mode="popLayout">
-              <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-2">
+              <AnimatePresence mode="popLayout">
                 {filteredTasks.map((task) => (
                   <TaskItem key={task.id} task={task} />
                 ))}
-              </div>
-            </AnimatePresence>
+              </AnimatePresence>
+            </div>
           </SortableContext>
         </DndContext>
 
         {filteredTasks.length === 0 && (
           <div className="mt-16 flex flex-col items-center gap-2 text-center">
-            <p className="text-sm text-zinc-400 dark:text-zinc-500">No tasks yet</p>
+            <p className="text-sm text-zinc-400 dark:text-zinc-500">لا توجد مهام بعد</p>
             <p className="text-xs text-zinc-300 dark:text-zinc-600">
-              Type above and press Enter to add one
+              اكتب أعلاه واضغط Enter للإضافة
             </p>
           </div>
         )}

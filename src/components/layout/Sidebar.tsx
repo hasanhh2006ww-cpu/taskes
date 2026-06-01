@@ -5,6 +5,7 @@ import { useTaskStore } from '@/store/useTaskStore';
 import { useProjectStore } from '@/store/useProjectStore';
 import { useUIStore } from '@/store/useUIStore';
 import { Button } from '@/components/ui/Button';
+import { getToday } from '@/lib/constants';
 import {
   LayoutDashboard,
   ListTodo,
@@ -18,10 +19,10 @@ import {
 type View = 'app' | 'dashboard';
 
 const NAV_ITEMS = [
-  { label: 'All Tasks', icon: ListTodo, filter: 'all' as const },
-  { label: 'Today', icon: Calendar, filter: 'today' as const },
-  { label: 'Important', icon: Star, filter: 'important' as const },
-  { label: 'Completed', icon: CheckCircle2, filter: 'completed' as const },
+  { label: 'جميع المهام', icon: ListTodo, filter: 'all' as const },
+  { label: 'اليوم', icon: Calendar, filter: 'today' as const },
+  { label: 'المهمة', icon: Star, filter: 'important' as const },
+  { label: 'المنجزة', icon: CheckCircle2, filter: 'completed' as const },
 ];
 
 interface SidebarProps {
@@ -32,20 +33,18 @@ interface SidebarProps {
 export function Sidebar({ view, onViewChange }: SidebarProps) {
   const { filter, setFilter, setActiveProjectId, activeProjectId, tasks } = useTaskStore();
   const { projects, addProject } = useProjectStore();
-  const { darkMode, toggleDarkMode, setSidebarOpen } = useUIStore();
+  const { darkMode, toggleDarkMode } = useUIStore();
 
-  const todayCount = tasks.filter((t) => {
-    const today = new Date().toISOString().split('T')[0];
-    return t.dueDate === today && !t.completed;
-  }).length;
+  const todayStr = getToday();
+  const todayCount = tasks.filter((t) => t.dueDate === todayStr && !t.completed).length;
 
   const importantCount = tasks.filter((t) => t.important && !t.completed).length;
 
   return (
-    <aside className="flex h-full w-60 flex-col border-r border-zinc-200/60 bg-white/50 backdrop-blur-xl dark:border-zinc-800/60 dark:bg-zinc-950/50">
+    <aside className="flex h-full w-60 flex-col border-e border-zinc-200/60 bg-white/50 backdrop-blur-xl dark:border-zinc-800/60 dark:bg-zinc-950/50">
       <div className="flex items-center gap-2 px-4 pt-5 pb-4">
         <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-500 text-sm font-bold text-white">
-          M
+          م
         </div>
         <span className="text-base font-semibold text-zinc-900 dark:text-zinc-100">My Taske</span>
       </div>
@@ -61,7 +60,7 @@ export function Sidebar({ view, onViewChange }: SidebarProps) {
           )}
         >
           <LayoutDashboard className="h-4 w-4" />
-          <span className="flex-1 text-left">Dashboard</span>
+          <span className="flex-1 text-start">لوحة التحكم</span>
         </button>
 
         <div className="my-2 border-t border-zinc-200/50 dark:border-zinc-800/50" />
@@ -71,7 +70,6 @@ export function Sidebar({ view, onViewChange }: SidebarProps) {
             key={item.filter}
             onClick={() => {
               setFilter(item.filter);
-              setSidebarOpen(true);
             }}
             className={cn(
               'flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors',
@@ -81,7 +79,7 @@ export function Sidebar({ view, onViewChange }: SidebarProps) {
             )}
           >
             <item.icon className="h-4 w-4" />
-            <span className="flex-1 text-left">{item.label}</span>
+            <span className="flex-1 text-start">{item.label}</span>
             {item.filter === 'today' && todayCount > 0 && (
               <span className="text-[11px] text-zinc-400">{todayCount}</span>
             )}
@@ -95,12 +93,12 @@ export function Sidebar({ view, onViewChange }: SidebarProps) {
 
         <div className="mb-1 flex items-center justify-between px-3">
           <span className="text-[11px] font-medium uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
-            Projects
+            المشاريع
           </span>
           <Button
             size="icon"
             onClick={() => {
-              const name = prompt('Project name:');
+              const name = prompt('اسم المشروع:');
               if (name?.trim()) addProject(name.trim());
             }}
           >
@@ -120,7 +118,7 @@ export function Sidebar({ view, onViewChange }: SidebarProps) {
             )}
           >
             <FolderKanban className="h-4 w-4" style={{ color: project.color }} />
-            <span className="flex-1 text-left truncate">{project.name}</span>
+            <span className="flex-1 text-start truncate">{project.name}</span>
           </button>
         ))}
       </nav>
@@ -130,7 +128,7 @@ export function Sidebar({ view, onViewChange }: SidebarProps) {
           onClick={toggleDarkMode}
           className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-zinc-500 transition-colors hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800/60"
         >
-          {darkMode ? '☀️ Light' : '🌙 Dark'}
+          {darkMode ? '☀️ فاتح' : '🌙 ليلي'}
         </button>
       </div>
     </aside>

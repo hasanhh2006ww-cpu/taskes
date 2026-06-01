@@ -3,8 +3,8 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme inline {
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-cairo);
+  --font-mono: var(--font-cairo);
 }
 
 * {
@@ -17,7 +17,7 @@
 }
 
 body {
-  font-family: var(--font-sans), system-ui, sans-serif;
+  font-family: var(--font-cairo), system-ui, sans-serif;
 }
 
 ::selection {

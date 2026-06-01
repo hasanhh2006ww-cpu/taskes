@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { useTaskStore } from '@/store/useTaskStore';
 import { useProjectStore } from '@/store/useProjectStore';
 import { Button } from '@/components/ui/Button';
@@ -32,7 +32,7 @@ export function TaskDetail() {
         className="flex h-full items-center justify-center px-6"
       >
         <p className="text-center text-sm text-zinc-400 dark:text-zinc-500">
-          Select a task to view details
+          اختر مهمة لعرض التفاصيل
         </p>
       </motion.div>
     );
@@ -50,13 +50,13 @@ export function TaskDetail() {
   return (
     <motion.div
       key={t.id}
-      initial={{ opacity: 0, x: 20 }}
+      initial={{ opacity: 0, x: -20 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.2 }}
       className="flex h-full flex-col"
     >
       <div className="flex items-center justify-between px-6 pt-5 pb-3">
-        <h2 className="text-sm font-medium text-zinc-400 dark:text-zinc-500">Details</h2>
+        <h2 className="text-sm font-medium text-zinc-400 dark:text-zinc-500">التفاصيل</h2>
         <Button size="icon" onClick={() => setActiveTaskId(null)}>
           <X className="h-4 w-4" />
         </Button>
@@ -72,7 +72,7 @@ export function TaskDetail() {
 
         <div className="space-y-3">
           <div className="flex items-center gap-2">
-            <span className="w-20 text-xs font-medium text-zinc-400 dark:text-zinc-500">Status</span>
+            <span className="w-20 shrink-0 text-xs font-medium text-zinc-400 dark:text-zinc-500">الحالة</span>
             <button
               onClick={() => toggleComplete(t.id)}
               className={cn(
@@ -82,12 +82,12 @@ export function TaskDetail() {
                   : 'bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400'
               )}
             >
-              {t.completed ? 'Completed' : 'In Progress'}
+              {t.completed ? 'مكتمل' : 'قيد التنفيذ'}
             </button>
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="w-20 text-xs font-medium text-zinc-400 dark:text-zinc-500">Priority</span>
+            <span className="w-20 shrink-0 text-xs font-medium text-zinc-400 dark:text-zinc-500">الأولوية</span>
             <div className="flex gap-1">
               {PRIORITIES.map((p) => (
                 <button
@@ -107,8 +107,8 @@ export function TaskDetail() {
           </div>
 
           <div className="flex items-center gap-2">
-            <Calendar className="h-3.5 w-3.5 text-zinc-400" />
-            <span className="text-xs font-medium text-zinc-400 dark:text-zinc-500">Due Date</span>
+            <Calendar className="h-3.5 w-3.5 shrink-0 text-zinc-400" />
+            <span className="text-xs font-medium text-zinc-400 dark:text-zinc-500">تاريخ الاستحقاق</span>
             <input
               type="date"
               value={t.dueDate || ''}
@@ -119,7 +119,7 @@ export function TaskDetail() {
 
           {project && (
             <div className="flex items-center gap-2">
-              <span className="w-20 text-xs font-medium text-zinc-400 dark:text-zinc-500">Project</span>
+              <span className="w-20 shrink-0 text-xs font-medium text-zinc-400 dark:text-zinc-500">المشروع</span>
               <span
                 className="inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium leading-4"
                 style={{ backgroundColor: project.color + '20', color: project.color }}
@@ -130,9 +130,9 @@ export function TaskDetail() {
           )}
 
           <div className="flex items-center gap-2">
-            <span className="w-20 text-xs font-medium text-zinc-400 dark:text-zinc-500">Created</span>
+            <span className="w-20 shrink-0 text-xs font-medium text-zinc-400 dark:text-zinc-500">تاريخ الإنشاء</span>
             <span className="text-xs text-zinc-500 dark:text-zinc-400">
-              {new Date(t.createdAt).toLocaleDateString('en-US', {
+              {new Date(t.createdAt).toLocaleDateString('ar-SA', {
                 month: 'short',
                 day: 'numeric',
                 year: 'numeric',
@@ -144,10 +144,10 @@ export function TaskDetail() {
         <div className="mt-6 flex gap-2">
           <Button variant="ghost" size="sm" onClick={() => toggleImportant(t.id)}>
             <Star className={cn('h-3.5 w-3.5', t.important && 'fill-amber-400 text-amber-400')} />
-            {t.important ? 'Starred' : 'Star'}
+            {t.important ? 'مهمة' : 'مهمة'}
           </Button>
           <Button variant="danger" size="sm" onClick={() => deleteTask(t.id)}>
-            <Trash2 className="h-3.5 w-3.5" /> Delete
+            <Trash2 className="h-3.5 w-3.5" /> حذف
           </Button>
         </div>
       </div>

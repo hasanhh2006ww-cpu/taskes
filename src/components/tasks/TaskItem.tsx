@@ -1,5 +1,6 @@
 'use client';
 
+import { memo } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { motion } from 'framer-motion';
@@ -16,7 +17,7 @@ interface TaskItemProps {
   task: Task;
 }
 
-export function TaskItem({ task }: TaskItemProps) {
+export const TaskItem = memo(function TaskItem({ task }: TaskItemProps) {
   const { toggleComplete, toggleImportant, deleteTask, setActiveTaskId, activeTaskId } = useTaskStore();
   const { focusMode } = useUIStore();
 
@@ -68,7 +69,7 @@ export function TaskItem({ task }: TaskItemProps) {
 
       <button
         onClick={() => toggleComplete(task.id)}
-        className="mt-0.5 text-zinc-300 hover:text-indigo-500 dark:text-zinc-600 dark:hover:text-indigo-400"
+        className="mt-0.5 shrink-0 text-zinc-300 hover:text-indigo-500 dark:text-zinc-600 dark:hover:text-indigo-400"
       >
         {task.completed ? (
           <CheckCircle2 className="h-4 w-4 text-indigo-500 dark:text-indigo-400" />
@@ -78,7 +79,7 @@ export function TaskItem({ task }: TaskItemProps) {
       </button>
 
       <div
-        className="flex-1 min-w-0 cursor-pointer"
+        className="min-w-0 flex-1 cursor-pointer"
         onClick={() => setActiveTaskId(task.id)}
       >
         <span
@@ -90,8 +91,8 @@ export function TaskItem({ task }: TaskItemProps) {
           {task.title}
         </span>
         {task.dueDate && (
-          <span className="ml-2 text-[11px] text-zinc-400 dark:text-zinc-500">
-            {new Date(task.dueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+          <span className="me-2 text-[11px] text-zinc-400 dark:text-zinc-500">
+            {new Date(task.dueDate).toLocaleDateString('ar-SA', { month: 'short', day: 'numeric' })}
           </span>
         )}
       </div>
@@ -111,4 +112,4 @@ export function TaskItem({ task }: TaskItemProps) {
       </Button>
     </motion.div>
   );
-}
+});

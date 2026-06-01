@@ -16,11 +16,17 @@ type View = 'app' | 'dashboard';
 
 export default function Home() {
   const [view, setView] = useState<View>('app');
-  const { darkMode, focusMode, toggleFocusMode } = useUIStore();
-  const activeTaskId = useUIStore((s) => s.activeTaskId);
+  const { focusMode, toggleFocusMode } = useUIStore();
 
   useKeyboard([
     { key: 'f', handler: () => toggleFocusMode() },
+    {
+      key: 'n',
+      handler: () => {
+        const input = document.querySelector<HTMLInputElement>('[data-task-input]');
+        input?.focus();
+      },
+    },
   ]);
 
   useEffect(() => {
@@ -48,14 +54,14 @@ export default function Home() {
           <div className="flex flex-1">
             <div
               className={cn(
-                'flex-1 overflow-hidden border-r border-zinc-200/60 dark:border-zinc-800/60',
-                focusMode && 'max-w-2xl mx-auto border-r-0'
+                'flex-1 overflow-hidden border-e border-zinc-200/60 dark:border-zinc-800/60',
+                focusMode && 'max-w-2xl mx-auto border-e-0'
               )}
             >
               <TaskList />
             </div>
 
-            <div className={cn('w-80 flex-shrink-0', focusMode && 'hidden')}>
+            <div className={cn('w-80 shrink-0', focusMode && 'hidden')}>
               <TaskDetail />
             </div>
           </div>

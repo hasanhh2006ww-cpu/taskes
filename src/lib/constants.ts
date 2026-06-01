@@ -1,9 +1,9 @@
 import type { Priority } from './types';
 
 export const PRIORITIES: { label: string; value: Priority; color: string }[] = [
-  { label: 'Low', value: 'low', color: 'bg-blue-400/20 text-blue-400' },
-  { label: 'Medium', value: 'medium', color: 'bg-amber-400/20 text-amber-400' },
-  { label: 'High', value: 'high', color: 'bg-rose-400/20 text-rose-400' },
+  { label: 'منخفض', value: 'low', color: 'bg-blue-400/20 text-blue-400' },
+  { label: 'متوسط', value: 'medium', color: 'bg-amber-400/20 text-amber-400' },
+  { label: 'عالي', value: 'high', color: 'bg-rose-400/20 text-rose-400' },
 ];
 
 export const PROJECT_COLORS = [
@@ -17,3 +17,7 @@ export const STORAGE_KEYS = {
   PROJECTS: 'my-taske-projects',
   UI: 'my-taske-ui',
 } as const;
+
+export function getToday(): string {
+  return new Date().toISOString().split('T')[0];
+}

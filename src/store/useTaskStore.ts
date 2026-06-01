@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { v4 as uuid } from 'uuid';
 import type { Task, FilterType, Priority } from '@/lib/types';
 import { loadFromStorage, saveToStorage } from '@/lib/storage';
-import { STORAGE_KEYS } from '@/lib/constants';
+import { STORAGE_KEYS, getToday } from '@/lib/constants';
 
 interface TaskState {
   tasks: Task[];
@@ -100,8 +100,7 @@ export const useTaskStore = create<TaskState>((set, get) => ({
 
     switch (filter) {
       case 'today':
-        const today = new Date().toISOString().split('T')[0];
-        filtered = filtered.filter((t) => t.dueDate === today);
+        filtered = filtered.filter((t) => t.dueDate === getToday());
         break;
       case 'important':
         filtered = filtered.filter((t) => t.important);

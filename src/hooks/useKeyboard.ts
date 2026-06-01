@@ -1,18 +1,20 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 interface Shortcut {
   key: string;
   ctrl?: boolean;
-  meta?: boolean;
   handler: () => void;
 }
 
 export function useKeyboard(shortcuts: Shortcut[]) {
+  const shortcutsRef = useRef(shortcuts);
+  shortcutsRef.current = shortcuts;
+
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
-      for (const s of shortcuts) {
+      for (const s of shortcutsRef.current) {
         const matchCtrl = s.ctrl ? e.ctrlKey || e.metaKey : !e.ctrlKey && !e.metaKey;
         if (e.key.toLowerCase() === s.key.toLowerCase() && matchCtrl) {
           e.preventDefault();
@@ -23,5 +25,5 @@ export function useKeyboard(shortcuts: Shortcut[]) {
     }
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [shortcuts]);
+  }, []);
 }
