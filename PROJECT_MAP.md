@@ -21,7 +21,7 @@
 ```
 my-taske/
 ├── public/
-│   ├── ph.png                    # Logo image
+│   ├── logo.svg                   # SVG logo (checkmark + My Taske)
 ├── src/
 │   ├── app/                       # Next.js App Router
 │   │   ├── layout.tsx             # RootLayout (Cairo font, dir=rtl, lang=ar)
@@ -32,7 +32,7 @@ my-taske/
 │   │
 │   ├── components/
 │   │   ├── layout/
-│   │   │   └── Sidebar.tsx        # Responsive: overlay mobile, fixed desktop + logo (next/image)
+│   │   │   └── Sidebar.tsx        # Responsive: overlay mobile, fixed desktop + SVG logo
 │   │   ├── tasks/
 │   │   │   ├── TaskItem.tsx       # Draggable task card (React.memo)
 │   │   │   ├── TaskList.tsx       # DnD context, add task input, filter display
@@ -122,7 +122,8 @@ User Input (keyboard/mouse/touch)
 | 21 | padding كبير على الموبايل | تقليل `px-6` → `px-4 md:px-6` | ✅ |
 | 22 | أزرار الأولوية تفيض | `flex-col` على الموبايل + `sm:flex-row` | ✅ |
 | 23 | CommandPalette لا يتكيّف | `px-4` + `pt-[10vh] sm:pt-[15vh]` | ✅ |
-| 24 | الشعار نصي فقط (حرف "م") | استبدال الصورة بـ `next/image` + `ph.png` | ✅ |
+| 24 | الشعار نصي فقط (حرف "م") | SVG شعار متجهي: checkmark + "My Taske" (Google-style) | ✅ |
+| 25 | شعار PNG غير متجهي | استبدال `ph.png` بـ `logo.svg` متجهي + إزالة `next/image` | ✅ |
 
 ## [ORPHANS & PENDING]
 
@@ -134,5 +135,7 @@ User Input (keyboard/mouse/touch)
 | Undo toast on delete | Backlog | react-hot-toast installed, not wired |
 | `date-fns` dependency | Not used | installed but unused, kept for future |
 | Static build warning: localStorage | Known | harmless, occurs during SSR |
+| `public/ph.png` | Deprecated | replaced by `public/logo.svg` (can be deleted) |
 | RTL animation direction | Done | TaskDetail slides from x:-20 (right in RTL) |
 | Responsive design | Done | Mobile sidebar overlay, full-screen detail, 44px touch targets |
+| SVG logo (Google-style) | Done | `public/logo.svg` — checkmark icon + "My Taske" text, scalable |
