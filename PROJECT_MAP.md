@@ -21,6 +21,7 @@
 ```
 my-taske/
 ├── public/
+│   ├── ph.png                    # Logo image
 ├── src/
 │   ├── app/                       # Next.js App Router
 │   │   ├── layout.tsx             # RootLayout (Cairo font, dir=rtl, lang=ar)
@@ -31,7 +32,7 @@ my-taske/
 │   │
 │   ├── components/
 │   │   ├── layout/
-│   │   │   └── Sidebar.tsx        # Responsive: overlay mobile, fixed desktop
+│   │   │   └── Sidebar.tsx        # Responsive: overlay mobile, fixed desktop + logo (next/image)
 │   │   ├── tasks/
 │   │   │   ├── TaskItem.tsx       # Draggable task card (React.memo)
 │   │   │   ├── TaskList.tsx       # DnD context, add task input, filter display
@@ -121,6 +122,7 @@ User Input (keyboard/mouse/touch)
 | 21 | padding كبير على الموبايل | تقليل `px-6` → `px-4 md:px-6` | ✅ |
 | 22 | أزرار الأولوية تفيض | `flex-col` على الموبايل + `sm:flex-row` | ✅ |
 | 23 | CommandPalette لا يتكيّف | `px-4` + `pt-[10vh] sm:pt-[15vh]` | ✅ |
+| 24 | الشعار نصي فقط (حرف "م") | استبدال الصورة بـ `next/image` + `ph.png` | ✅ |
 
 ## [ORPHANS & PENDING]
 

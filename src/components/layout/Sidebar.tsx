@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { cn } from '@/lib/cn';
 import { useTaskStore } from '@/store/useTaskStore';
 import { useProjectStore } from '@/store/useProjectStore';
@@ -48,9 +49,7 @@ export function Sidebar({ view, onViewChange }: SidebarProps) {
   return (
     <aside className="flex h-full w-64 flex-col border-e border-zinc-200/60 bg-white/95 backdrop-blur-xl dark:border-zinc-800/60 dark:bg-zinc-950/95">
       <div className="flex items-center gap-2 px-4 pt-5 pb-4">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-500 text-sm font-bold text-white">
-          م
-        </div>
+        <Image src="/ph.png" alt="My Taske" width={32} height={32} className="h-8 w-8 rounded-lg object-contain" />
         <span className="text-base font-semibold text-zinc-900 dark:text-zinc-100">My Taske</span>
       </div>
 
