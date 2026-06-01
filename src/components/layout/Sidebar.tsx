@@ -1,0 +1,138 @@
+'use client';
+
+import { cn } from '@/lib/cn';
+import { useTaskStore } from '@/store/useTaskStore';
+import { useProjectStore } from '@/store/useProjectStore';
+import { useUIStore } from '@/store/useUIStore';
+import { Button } from '@/components/ui/Button';
+import {
+  LayoutDashboard,
+  ListTodo,
+  Calendar,
+  Star,
+  CheckCircle2,
+  Plus,
+  FolderKanban,
+} from 'lucide-react';
+
+type View = 'app' | 'dashboard';
+
+const NAV_ITEMS = [
+  { label: 'All Tasks', icon: ListTodo, filter: 'all' as const },
+  { label: 'Today', icon: Calendar, filter: 'today' as const },
+  { label: 'Important', icon: Star, filter: 'important' as const },
+  { label: 'Completed', icon: CheckCircle2, filter: 'completed' as const },
+];
+
+interface SidebarProps {
+  view: 'app' | 'dashboard';
+  onViewChange: (view: 'app' | 'dashboard') => void;
+}
+
+export function Sidebar({ view, onViewChange }: SidebarProps) {
+  const { filter, setFilter, setActiveProjectId, activeProjectId, tasks } = useTaskStore();
+  const { projects, addProject } = useProjectStore();
+  const { darkMode, toggleDarkMode, setSidebarOpen } = useUIStore();
+
+  const todayCount = tasks.filter((t) => {
+    const today = new Date().toISOString().split('T')[0];
+    return t.dueDate === today && !t.completed;
+  }).length;
+
+  const importantCount = tasks.filter((t) => t.important && !t.completed).length;
+
+  return (
+    <aside className="flex h-full w-60 flex-col border-r border-zinc-200/60 bg-white/50 backdrop-blur-xl dark:border-zinc-800/60 dark:bg-zinc-950/50">
+      <div className="flex items-center gap-2 px-4 pt-5 pb-4">
+        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-500 text-sm font-bold text-white">
+          M
+        </div>
+        <span className="text-base font-semibold text-zinc-900 dark:text-zinc-100">My Taske</span>
+      </div>
+
+      <nav className="flex-1 space-y-0.5 px-2">
+        <button
+          onClick={() => onViewChange('dashboard')}
+          className={cn(
+            'flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors',
+            view === 'dashboard'
+              ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400'
+              : 'text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800/60'
+          )}
+        >
+          <LayoutDashboard className="h-4 w-4" />
+          <span className="flex-1 text-left">Dashboard</span>
+        </button>
+
+        <div className="my-2 border-t border-zinc-200/50 dark:border-zinc-800/50" />
+
+        {NAV_ITEMS.map((item) => (
+          <button
+            key={item.filter}
+            onClick={() => {
+              setFilter(item.filter);
+              setSidebarOpen(true);
+            }}
+            className={cn(
+              'flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors',
+              filter === item.filter && !activeProjectId
+                ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400'
+                : 'text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800/60'
+            )}
+          >
+            <item.icon className="h-4 w-4" />
+            <span className="flex-1 text-left">{item.label}</span>
+            {item.filter === 'today' && todayCount > 0 && (
+              <span className="text-[11px] text-zinc-400">{todayCount}</span>
+            )}
+            {item.filter === 'important' && importantCount > 0 && (
+              <span className="text-[11px] text-zinc-400">{importantCount}</span>
+            )}
+          </button>
+        ))}
+
+        <div className="my-3 border-t border-zinc-200/50 dark:border-zinc-800/50" />
+
+        <div className="mb-1 flex items-center justify-between px-3">
+          <span className="text-[11px] font-medium uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+            Projects
+          </span>
+          <Button
+            size="icon"
+            onClick={() => {
+              const name = prompt('Project name:');
+              if (name?.trim()) addProject(name.trim());
+            }}
+          >
+            <Plus className="h-3.5 w-3.5" />
+          </Button>
+        </div>
+
+        {projects.map((project) => (
+          <button
+            key={project.id}
+            onClick={() => setActiveProjectId(project.id)}
+            className={cn(
+              'flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors',
+              activeProjectId === project.id
+                ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400'
+                : 'text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800/60'
+            )}
+          >
+            <FolderKanban className="h-4 w-4" style={{ color: project.color }} />
+            <span className="flex-1 text-left truncate">{project.name}</span>
+          </button>
+        ))}
+      </nav>
+
+      <div className="border-t border-zinc-200/60 px-2 py-3 dark:border-zinc-800/60">
+        <button
+          onClick={toggleDarkMode}
+          className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-zinc-500 transition-colors hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800/60"
+        >
+          {darkMode ? '☀️ Light' : '🌙 Dark'}
+        </button>
+      </div>
+    </aside>
+  );
+}

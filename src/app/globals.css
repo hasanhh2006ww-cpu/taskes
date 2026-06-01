@@ -1,0 +1,29 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme inline {
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: theme('colors.zinc.200') transparent;
+}
+
+.dark * {
+  scrollbar-color: theme('colors.zinc.700') transparent;
+}
+
+body {
+  font-family: var(--font-sans), system-ui, sans-serif;
+}
+
+::selection {
+  background-color: theme('colors.indigo.200/40');
+}
+
+.dark ::selection {
+  background-color: theme('colors.indigo.700/40');
+}

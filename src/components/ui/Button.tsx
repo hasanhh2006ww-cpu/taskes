@@ -1,0 +1,41 @@
+'use client';
+
+import type { ButtonHTMLAttributes, ReactNode } from 'react';
+import { cn } from '@/lib/cn';
+
+interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+  variant?: 'ghost' | 'primary' | 'danger';
+  size?: 'sm' | 'md' | 'icon';
+  children: ReactNode;
+}
+
+export function Button({
+  variant = 'ghost',
+  size = 'md',
+  className,
+  children,
+  ...props
+}: ButtonProps) {
+  return (
+    <button
+      className={cn(
+        'inline-flex items-center justify-center rounded-lg transition-all duration-150 active:scale-95',
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500',
+        variant === 'ghost' &&
+          'text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800',
+        variant === 'primary' &&
+          'bg-indigo-500 text-white hover:bg-indigo-600 shadow-sm',
+        variant === 'danger' &&
+          'text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/30',
+        size === 'sm' && 'h-7 px-2 text-xs gap-1',
+        size === 'md' && 'h-9 px-3 text-sm gap-1.5',
+        size === 'icon' && 'h-8 w-8',
+        props.disabled && 'opacity-40 pointer-events-none',
+        className
+      )}
+      {...props}
+    >
+      {children}
+    </button>
+  );
+}
