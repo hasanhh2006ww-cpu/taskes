@@ -18,6 +18,7 @@ interface TaskState {
   toggleComplete: (id: string) => void;
   toggleImportant: (id: string) => void;
   reorderTasks: (fromIndex: number, toIndex: number) => void;
+  incrementPomodoro: (id: string) => void;
   getFilteredTasks: () => Task[];
 }
 
@@ -47,6 +48,7 @@ export const useTaskStore = create<TaskState>((set, get) => ({
       important: false,
       createdAt: Date.now(),
       order: tasks.length,
+      pomodoroCount: 0,
     };
     const updated = [...tasks, newTask];
     set({ tasks: updated, activeTaskId: newTask.id });
@@ -88,6 +90,14 @@ export const useTaskStore = create<TaskState>((set, get) => ({
     const reordered = tasks.map((t, i) => ({ ...t, order: i }));
     set({ tasks: reordered });
     saveToStorage(STORAGE_KEYS.TASKS, reordered);
+  },
+
+  incrementPomodoro: (id) => {
+    const tasks = get().tasks.map((t) =>
+      t.id === id ? { ...t, pomodoroCount: t.pomodoroCount + 1 } : t
+    );
+    set({ tasks });
+    saveToStorage(STORAGE_KEYS.TASKS, tasks);
   },
 
   getFilteredTasks: () => {

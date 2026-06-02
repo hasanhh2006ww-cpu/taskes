@@ -16,6 +16,7 @@ export const STORAGE_KEYS = {
   TASKS: 'my-taske-tasks',
   PROJECTS: 'my-taske-projects',
   UI: 'my-taske-ui',
+  FOCUS_SESSION: 'my-taske-focus-session',
 } as const;
 
 export function getToday(): string {

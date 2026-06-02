@@ -51,14 +51,14 @@ my-taske/
 │   ├── store/                     # Zustand — domain-split
 │   │   ├── useTaskStore.ts        # Tasks CRUD, filter, reorder
 │   │   ├── useProjectStore.ts     # Projects CRUD
-│   │   └── useUIStore.ts          # Dark mode, focus mode, sidebar, activeTaskId
+│   │   └── useUIStore.ts          # Dark mode, focus mode, sidebar, activeTaskId, focusSession
 │   │
 │   ├── hooks/
 │   │   └── useKeyboard.ts         # Global keyboard shortcuts (stale-closure safe)
 │   │
 │   └── lib/                       # Shared core
-│       ├── types.ts               # Task, Project, Priority, FilterType
-│       ├── constants.ts           # PRIORITIES (Arabic), PROJECT_COLORS, STORAGE_KEYS, getToday()
+│       ├── types.ts               # Task (pomodoroCount), Project, Priority, FilterType, FocusSession
+│       ├── constants.ts           # PRIORITIES (Arabic), PROJECT_COLORS, STORAGE_KEYS (incl. FOCUS_SESSION), getToday()
 │       ├── cn.ts                  # clsx + twMerge utility
 │       ├── logger.ts              # Async non-blocking logger
 │       └── storage.ts             # loadFromStorage / saveToStorage
@@ -90,11 +90,13 @@ User Input (keyboard/mouse/touch)
     ├── Trash → deleteTask
     ├── Ctrl+K → CommandPalette (Arabic)
     ├── F → toggleFocusMode (full-screen overlay)
+    ├── FocusMode: Smart resume → restores last session from localStorage
     ├── FocusMode: Start/Pause → toggle timer
     ├── FocusMode: Reset → reset timer
     ├── FocusMode: Sound toggle → rain ambient on/off
     ├── FocusMode: Prev/Next → navigate tasks
-    ├── FocusMode: X → exit focus mode
+    ├── FocusMode: ✓ complete → incrementPomodoro + trophy animation + chime
+    ├── FocusMode: X → save session + exit
     └── Theme button → toggleDarkMode
             │
             ▼
@@ -132,6 +134,10 @@ User Input (keyboard/mouse/touch)
 | 24 | الشعار نصي فقط (حرف "م") | SVG شعار متجهي: checkmark + "My Taske" (Google-style) | ✅ |
 | 25 | شعار PNG غير متجهي | استبدال `ph.png` بـ `logo.svg` متجهي + إزالة `next/image` | ✅ |
 | 26 | لا يوجد وضع تركيز | FocusMode: Pomodoro 25/5 + صوت مطر + Dark UI + تنقل بين المهام | ✅ |
+| 27 | Focus Mode لا يحفظ الحالة | Smart Resume: حفظ/استرجاع الجلسة من localStorage | ✅ |
+| 28 | لا يوجد عداد جلسات Pomodoro | `pomodoroCount` لكل مهمة + عرض العدد في FocusMode | ✅ |
+| 29 | لا يوجد feedback عند الإنجاز | Trophy animation + صوت احتفال عند إكمال جلسة | ✅ |
+| 30 | لا يوجد smart task selection | اختيار تلقائي لأول مهمة غير مكتملة عند الدخول | ✅ |
 
 ## [ORPHANS & PENDING]
 
@@ -139,6 +145,7 @@ User Input (keyboard/mouse/touch)
 |------|--------|-------|
 | Framer Motion animations | Done | enter/exit, layoutId (TaskItem), slide (TaskDetail), scale (CommandPalette) |
 | Focus Mode visual polish | Done | Full-screen overlay: Pomodoro timer, rain sound, dark gradient, task nav |
+| Focus Mode Pro | Done | Smart resume, pomodoro count, completion feedback (trophy + chime), session stats |
 | Keyboard shortcut: N for new task | Done | focuses task input |
 | Undo toast on delete | Backlog | react-hot-toast installed, not wired |
 | `date-fns` dependency | Not used | installed but unused, kept for future |

@@ -13,6 +13,7 @@ export interface Task {
   createdAt: number;
   order: number;
   important: boolean;
+  pomodoroCount: number;
 }
 
 export interface Project {
