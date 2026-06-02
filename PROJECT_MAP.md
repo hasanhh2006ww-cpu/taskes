@@ -51,14 +51,14 @@ my-taske/
 │   ├── store/                     # Zustand — domain-split
 │   │   ├── useTaskStore.ts        # Tasks CRUD, filter, reorder
 │   │   ├── useProjectStore.ts     # Projects CRUD
-│   │   └── useUIStore.ts          # Dark mode, focus mode, sidebar, activeTaskId, focusSession
+│   │   └── useUIStore.ts          # Dark mode, focus mode, sidebar, activeTaskId, focusSession, focusSettings
 │   │
 │   ├── hooks/
 │   │   └── useKeyboard.ts         # Global keyboard shortcuts (stale-closure safe)
 │   │
 │   └── lib/                       # Shared core
 │       ├── types.ts               # Task (pomodoroCount), Project, Priority, FilterType, FocusSession
-│       ├── constants.ts           # PRIORITIES (Arabic), PROJECT_COLORS, STORAGE_KEYS (incl. FOCUS_SESSION), getToday()
+│       ├── constants.ts           # PRIORITIES (Arabic), PROJECT_COLORS, STORAGE_KEYS (incl. FOCUS_SETTINGS), FOCUS_PRESETS, getToday()
 │       ├── cn.ts                  # clsx + twMerge utility
 │       ├── logger.ts              # Async non-blocking logger
 │       └── storage.ts             # loadFromStorage / saveToStorage
@@ -140,6 +140,9 @@ User Input (keyboard/mouse/touch)
 | 29 | لا يوجد feedback عند الإنجاز | Trophy animation + صوت احتفال عند إكمال جلسة | ✅ |
 | 30 | لا يوجد smart task selection | اختيار تلقائي لأول مهمة غير مكتملة عند الدخول | ✅ |
 | 31 | Focus Mode لا يظهر — لا يوجد زر مرئي | زر "وضع التركيز" في Sidebar + اختصار F | ✅ |
+| 32 | لا يمكن تخصيص وقت البومودورو | Presets (25/5, 50/10, 90/20) + إدخال يدوي + حفظ في localStorage | ✅ |
+| 33 | صوت مطر محلي فقط | استبدال بـ YouTube iframe — رابط خلفي + play/pause | ✅ |
+| 34 | لا توجد إعداداتFocus Mode | Settings panel: مدة العمل/الاستراحة + رابط YouTube | ✅ |
 
 ## [ORPHANS & PENDING]
 
@@ -148,6 +151,7 @@ User Input (keyboard/mouse/touch)
 | Framer Motion animations | Done | enter/exit, layoutId (TaskItem), slide (TaskDetail), scale (CommandPalette) |
 | Focus Mode visual polish | Done | Full-screen overlay: Pomodoro timer, rain sound, dark gradient, task nav |
 | Focus Mode Pro | Done | Smart resume, pomodoro count, completion feedback (trophy + chime), session stats |
+| Focus Mode Settings | Done | Custom durations (presets 25/5, 50/10, 90/20 + manual), YouTube background audio, settings panel |
 | Keyboard shortcut: N for new task | Done | focuses task input |
 | Undo toast on delete | Backlog | react-hot-toast installed, not wired |
 | `date-fns` dependency | Not used | installed but unused, kept for future |

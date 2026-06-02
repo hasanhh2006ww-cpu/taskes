@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useUIStore } from '@/store/useUIStore';
 import { useTaskStore } from '@/store/useTaskStore';
+import { FOCUS_PRESETS } from '@/lib/constants';
 import { cn } from '@/lib/cn';
 import {
   Play,
@@ -19,26 +20,22 @@ import {
   Coffee,
   Zap,
   Trophy,
+  Settings,
+  Link,
 } from 'lucide-react';
 
-const WORK_MIN = 25;
-const BREAK_MIN = 5;
-
-function generateRainBuffer(ctx: AudioContext): AudioBuffer {
-  const sampleRate = ctx.sampleRate;
-  const duration = 4;
-  const length = sampleRate * duration;
-  const buffer = ctx.createBuffer(2, length, sampleRate);
-  for (let ch = 0; ch < 2; ch++) {
-    const data = buffer.getChannelData(ch);
-    let last = 0;
-    for (let i = 0; i < length; i++) {
-      const white = Math.random() * 2 - 1;
-      last = last * 0.97 + white * 0.03;
-      data[i] = last * 3.5;
-    }
+function extractYoutubeId(url: string): string | null {
+  const patterns = [
+    /youtube\.com\/watch\?v=([^&]+)/,
+    /youtu\.be\/([^?]+)/,
+    /youtube\.com\/embed\/([^?]+)/,
+    /youtube\.com\/shorts\/([^?]+)/,
+  ];
+  for (const p of patterns) {
+    const m = url.match(p);
+    if (m) return m[1];
   }
-  return buffer;
+  return null;
 }
 
 function playChime(ctx: AudioContext) {
@@ -79,6 +76,8 @@ export function FocusMode() {
     focusSession,
     saveFocusSession,
     clearFocusSession,
+    focusSettings,
+    updateFocusSettings,
   } = useUIStore();
   const {
     tasks,
@@ -103,60 +102,49 @@ export function FocusMode() {
   const [phase, setPhase] = useState<'work' | 'break'>(() => focusSession?.phase ?? 'work');
   const [secondsLeft, setSecondsLeft] = useState(() => {
     if (focusSession) return focusSession.secondsLeft;
-    return WORK_MIN * 60;
+    return focusSettings.workMin * 60;
   });
   const [completedSessions, setCompletedSessions] = useState(() => focusSession?.completedSessions ?? 0);
   const [running, setRunning] = useState(false);
   const [soundOn, setSoundOn] = useState(true);
   const [showComplete, setShowComplete] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+
+  const [settingsWork, setSettingsWork] = useState(focusSettings.workMin);
+  const [settingsBreak, setSettingsBreak] = useState(focusSettings.breakMin);
+  const [settingsUrl, setSettingsUrl] = useState(focusSettings.youtubeUrl);
 
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const ctxRef = useRef<AudioContext | null>(null);
-  const sourceRef = useRef<AudioBufferSourceNode | null>(null);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
 
-  const totalSec = phase === 'work' ? WORK_MIN * 60 : BREAK_MIN * 60;
+  const { workMin, breakMin } = focusSettings;
+  const totalSec = phase === 'work' ? workMin * 60 : breakMin * 60;
   const progress = 1 - secondsLeft / totalSec;
   const mm = String(Math.floor(secondsLeft / 60)).padStart(2, '0');
   const ss = String(secondsLeft % 60).padStart(2, '0');
-
-  const taskProgress = task
-    ? Math.min(100, Math.round(((task.pomodoroCount + (phase === 'work' && running ? progress : 0)) / Math.max(1, task.pomodoroCount + 1)) * 100))
-    : 0;
 
   const getCtx = useCallback(() => {
     if (!ctxRef.current) ctxRef.current = new AudioContext();
     return ctxRef.current;
   }, []);
 
-  const startRain = useCallback(() => {
-    try {
-      const ctx = getCtx();
-      if (ctx.state === 'suspended') ctx.resume();
-      if (sourceRef.current) return;
-      const buf = generateRainBuffer(ctx);
-      const src = ctx.createBufferSource();
-      src.buffer = buf;
-      src.loop = true;
-      const gain = ctx.createGain();
-      gain.gain.value = 0.12;
-      src.connect(gain).connect(ctx.destination);
-      src.start();
-      sourceRef.current = src;
-    } catch { /* silent */ }
-  }, [getCtx]);
+  const youtubeId = settingsUrl ? extractYoutubeId(settingsUrl) : null;
 
-  const stopRain = useCallback(() => {
-    try {
-      sourceRef.current?.stop();
-      sourceRef.current?.disconnect();
-      sourceRef.current = null;
-    } catch { /* silent */ }
+  const sendYTCommand = useCallback((command: string) => {
+    iframeRef.current?.contentWindow?.postMessage(
+      JSON.stringify({ event: 'command', func: command, args: [] }),
+      '*'
+    );
   }, []);
 
   useEffect(() => {
-    if (running && soundOn) startRain();
-    else stopRain();
-  }, [running, soundOn, startRain, stopRain]);
+    if (!running || !soundOn || !youtubeId) {
+      try { sendYTCommand('pauseVideo'); } catch { /* silent */ }
+      return;
+    }
+    try { sendYTCommand('playVideo'); } catch { /* silent */ }
+  }, [running, soundOn, youtubeId, sendYTCommand]);
 
   useEffect(() => {
     if (running) {
@@ -180,17 +168,17 @@ export function FocusMode() {
   const resetTimer = useCallback(() => {
     if (intervalRef.current) clearInterval(intervalRef.current);
     setRunning(false);
-    setSecondsLeft(phase === 'work' ? WORK_MIN * 60 : BREAK_MIN * 60);
-  }, [phase]);
+    setSecondsLeft(phase === 'work' ? workMin * 60 : breakMin * 60);
+  }, [phase, workMin, breakMin]);
 
   const switchPhase = useCallback(
     (next: 'work' | 'break') => {
       if (intervalRef.current) clearInterval(intervalRef.current);
       setRunning(false);
       setPhase(next);
-      setSecondsLeft(next === 'work' ? WORK_MIN * 60 : BREAK_MIN * 60);
+      setSecondsLeft(next === 'work' ? workMin * 60 : breakMin * 60);
     },
-    []
+    [workMin, breakMin]
   );
 
   useEffect(() => {
@@ -210,7 +198,7 @@ export function FocusMode() {
   }, [secondsLeft, running, phase, switchPhase, currentTaskId, incrementPomodoro]);
 
   useEffect(() => {
-    if (currentTaskId && (running || secondsLeft !== WORK_MIN * 60)) {
+    if (currentTaskId && (running || secondsLeft !== workMin * 60)) {
       saveFocusSession({
         taskId: currentTaskId,
         phase,
@@ -218,21 +206,20 @@ export function FocusMode() {
         completedSessions,
       });
     }
-  }, [currentTaskId, phase, secondsLeft, completedSessions, running, saveFocusSession]);
+  }, [currentTaskId, phase, secondsLeft, completedSessions, running, saveFocusSession, workMin]);
 
   useEffect(() => {
     return () => {
-      stopRain();
       if (intervalRef.current) clearInterval(intervalRef.current);
       if (ctxRef.current) {
         ctxRef.current.close().catch(() => {});
         ctxRef.current = null;
       }
     };
-  }, [stopRain]);
+  }, []);
 
   const handleExit = () => {
-    stopRain();
+    try { sendYTCommand('pauseVideo'); } catch { /* silent */ }
     if (intervalRef.current) clearInterval(intervalRef.current);
     if (ctxRef.current) {
       ctxRef.current.close().catch(() => {});
@@ -271,6 +258,24 @@ export function FocusMode() {
     }, 2200);
   };
 
+  const saveSettings = () => {
+    const w = Math.max(1, Math.min(180, settingsWork));
+    const b = Math.max(1, Math.min(60, settingsBreak));
+    updateFocusSettings({ workMin: w, breakMin: b, youtubeUrl: settingsUrl });
+    setSettingsWork(w);
+    setSettingsBreak(b);
+    setPhase(phase);
+    setSecondsLeft(phase === 'work' ? w * 60 : b * 60);
+    setShowSettings(false);
+  };
+
+  const applyPreset = (work: number, brk: number) => {
+    setSettingsWork(work);
+    setSettingsBreak(brk);
+    updateFocusSettings({ workMin: work, breakMin: brk });
+    setSecondsLeft(phase === 'work' ? work * 60 : brk * 60);
+  };
+
   const radius = 70;
   const circumference = 2 * Math.PI * radius;
   const dashOffset = circumference * (1 - progress);
@@ -283,6 +288,19 @@ export function FocusMode() {
       transition={{ duration: 0.3 }}
       className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-gradient-to-br from-zinc-950 via-zinc-900 to-indigo-950 text-white"
     >
+      {/* Hidden YouTube iframe */}
+      {youtubeId && (
+        <iframe
+          ref={iframeRef}
+          width="0"
+          height="0"
+          className="pointer-events-none absolute opacity-0"
+          src={`https://www.youtube.com/embed/${youtubeId}?enablejsapi=1&autoplay=0&loop=1&playlist=${youtubeId}`}
+          allow="autoplay"
+          title="background audio"
+        />
+      )}
+
       {/* Completion overlay */}
       <AnimatePresence>
         {showComplete && (
@@ -305,7 +323,7 @@ export function FocusMode() {
               transition={{ delay: 0.3 }}
               className="mt-6 text-2xl font-bold text-white"
             >
-              أحسنت! 🎉
+              أحسنت!
             </motion.p>
             <motion.p
               initial={{ opacity: 0 }}
@@ -319,13 +337,124 @@ export function FocusMode() {
         )}
       </AnimatePresence>
 
-      {/* Exit + Sound controls */}
+      {/* Settings panel */}
+      <AnimatePresence>
+        {showSettings && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 z-[115] flex items-center justify-center bg-black/60 backdrop-blur-sm"
+            onClick={() => setShowSettings(false)}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              onClick={(e) => e.stopPropagation()}
+              className="mx-4 w-full max-w-sm rounded-2xl border border-white/10 bg-zinc-900 p-5 shadow-2xl"
+            >
+              <div className="mb-4 flex items-center justify-between">
+                <h3 className="text-sm font-semibold text-white">إعدادات التركيز</h3>
+                <button onClick={() => setShowSettings(false)} className="text-white/40 hover:text-white">
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+
+              {/* Presets */}
+              <div className="mb-4">
+                <label className="mb-2 block text-xs text-white/40">Presets</label>
+                <div className="flex gap-2">
+                  {FOCUS_PRESETS.map((p) => (
+                    <button
+                      key={p.label}
+                      onClick={() => applyPreset(p.work, p.break)}
+                      className={cn(
+                        'flex-1 rounded-lg border px-2 py-2 text-xs font-medium transition-all',
+                        settingsWork === p.work && settingsBreak === p.break
+                          ? 'border-indigo-500/50 bg-indigo-500/20 text-indigo-300'
+                          : 'border-white/10 text-white/50 hover:border-white/20 hover:text-white/70'
+                      )}
+                    >
+                      {p.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Custom times */}
+              <div className="mb-4 flex gap-3">
+                <div className="flex-1">
+                  <label className="mb-1 block text-xs text-white/40">عمل (دقيقة)</label>
+                  <input
+                    type="number"
+                    min={1}
+                    max={180}
+                    value={settingsWork}
+                    onChange={(e) => setSettingsWork(Number(e.target.value))}
+                    className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white outline-none focus:border-indigo-500/50"
+                  />
+                </div>
+                <div className="flex-1">
+                  <label className="mb-1 block text-xs text-white/40">استراحة (دقيقة)</label>
+                  <input
+                    type="number"
+                    min={1}
+                    max={60}
+                    value={settingsBreak}
+                    onChange={(e) => setSettingsBreak(Number(e.target.value))}
+                    className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white outline-none focus:border-indigo-500/50"
+                  />
+                </div>
+              </div>
+
+              {/* YouTube URL */}
+              <div className="mb-4">
+                <label className="mb-1 block text-xs text-white/40">رابط YouTube للصوت</label>
+                <div className="flex gap-2">
+                  <div className="relative flex-1">
+                    <Link className="absolute start-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-white/30" />
+                    <input
+                      type="url"
+                      value={settingsUrl}
+                      onChange={(e) => setSettingsUrl(e.target.value)}
+                      placeholder="https://youtube.com/watch?v=..."
+                      className="w-full rounded-lg border border-white/10 bg-white/5 py-2 pe-3 ps-8 text-sm text-white outline-none placeholder:text-white/20 focus:border-indigo-500/50"
+                    />
+                  </div>
+                </div>
+                {youtubeId && (
+                  <p className="mt-1.5 text-[10px] text-emerald-400/70">✓ رابط صالح</p>
+                )}
+              </div>
+
+              <button
+                onClick={saveSettings}
+                className="w-full rounded-lg bg-indigo-500 py-2.5 text-sm font-medium text-white transition-colors hover:bg-indigo-600"
+              >
+                حفظ
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Top controls */}
       <div className="absolute top-4 right-4 flex items-center gap-2 md:top-6 md:right-6">
         <button
-          onClick={() => setSoundOn(!soundOn)}
+          onClick={() => {
+            setSoundOn(!soundOn);
+            if (soundOn) try { sendYTCommand('pauseVideo'); } catch { /* silent */ }
+          }}
           className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 text-white/70 backdrop-blur-sm transition-colors hover:bg-white/20 hover:text-white"
         >
           {soundOn ? <Volume2 className="h-5 w-5" /> : <VolumeX className="h-5 w-5" />}
+        </button>
+        <button
+          onClick={() => setShowSettings(true)}
+          className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 text-white/70 backdrop-blur-sm transition-colors hover:bg-white/20 hover:text-white"
+        >
+          <Settings className="h-5 w-5" />
         </button>
         <button
           onClick={handleExit}
@@ -410,7 +539,7 @@ export function FocusMode() {
             {mm}:{ss}
           </motion.span>
           <span className="mt-1 text-xs text-white/40">
-            {phase === 'work' ? `${WORK_MIN} دقيقة` : `${BREAK_MIN} دقائق`}
+            {phase === 'work' ? `${workMin} دقيقة` : `${breakMin} دقائق`}
           </span>
         </div>
       </div>

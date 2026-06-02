@@ -17,7 +17,14 @@ export const STORAGE_KEYS = {
   PROJECTS: 'my-taske-projects',
   UI: 'my-taske-ui',
   FOCUS_SESSION: 'my-taske-focus-session',
+  FOCUS_SETTINGS: 'my-taske-focus-settings',
 } as const;
+
+export const FOCUS_PRESETS = [
+  { label: '25 / 5', work: 25, break: 5 },
+  { label: '50 / 10', work: 50, break: 10 },
+  { label: '90 / 20', work: 90, break: 20 },
+] as const;
 
 export function getToday(): string {
   return new Date().toISOString().split('T')[0];
