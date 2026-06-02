@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { AnimatePresence } from 'framer-motion';
 import { useUIStore } from '@/store/useUIStore';
 import { useKeyboard } from '@/hooks/useKeyboard';
 import { Sidebar } from '@/components/layout/Sidebar';
@@ -8,6 +9,7 @@ import { TaskList } from '@/components/tasks/TaskList';
 import { TaskDetail } from '@/components/tasks/TaskDetail';
 import { Dashboard } from '@/components/dashboard/Dashboard';
 import { CommandPalette } from '@/components/command-palette/CommandPalette';
+import { FocusMode } from '@/components/focus/FocusMode';
 import { cn } from '@/lib/cn';
 import { loadFromStorage } from '@/lib/storage';
 import { STORAGE_KEYS } from '@/lib/constants';
@@ -103,6 +105,10 @@ export default function Home() {
       )}
 
       <CommandPalette />
+
+      <AnimatePresence>
+        {focusMode && <FocusMode />}
+      </AnimatePresence>
     </div>
   );
 }

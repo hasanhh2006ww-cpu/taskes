@@ -33,6 +33,8 @@ my-taske/
 │   ├── components/
 │   │   ├── layout/
 │   │   │   └── Sidebar.tsx        # Responsive: overlay mobile, fixed desktop + SVG logo
+│   │   ├── focus/
+│   │   │   └── FocusMode.tsx      # Focus mode: Pomodoro + rain sound + dark UI
 │   │   ├── tasks/
 │   │   │   ├── TaskItem.tsx       # Draggable task card (React.memo)
 │   │   │   ├── TaskList.tsx       # DnD context, add task input, filter display
@@ -87,7 +89,12 @@ User Input (keyboard/mouse/touch)
     ├── Star → toggleImportant
     ├── Trash → deleteTask
     ├── Ctrl+K → CommandPalette (Arabic)
-    ├── F → toggleFocusMode
+    ├── F → toggleFocusMode (full-screen overlay)
+    ├── FocusMode: Start/Pause → toggle timer
+    ├── FocusMode: Reset → reset timer
+    ├── FocusMode: Sound toggle → rain ambient on/off
+    ├── FocusMode: Prev/Next → navigate tasks
+    ├── FocusMode: X → exit focus mode
     └── Theme button → toggleDarkMode
             │
             ▼
@@ -124,13 +131,14 @@ User Input (keyboard/mouse/touch)
 | 23 | CommandPalette لا يتكيّف | `px-4` + `pt-[10vh] sm:pt-[15vh]` | ✅ |
 | 24 | الشعار نصي فقط (حرف "م") | SVG شعار متجهي: checkmark + "My Taske" (Google-style) | ✅ |
 | 25 | شعار PNG غير متجهي | استبدال `ph.png` بـ `logo.svg` متجهي + إزالة `next/image` | ✅ |
+| 26 | لا يوجد وضع تركيز | FocusMode: Pomodoro 25/5 + صوت مطر + Dark UI + تنقل بين المهام | ✅ |
 
 ## [ORPHANS & PENDING]
 
 | Item | Status | Notes |
 |------|--------|-------|
 | Framer Motion animations | Done | enter/exit, layoutId (TaskItem), slide (TaskDetail), scale (CommandPalette) |
-| Focus Mode visual polish | Done | hides non-active tasks |
+| Focus Mode visual polish | Done | Full-screen overlay: Pomodoro timer, rain sound, dark gradient, task nav |
 | Keyboard shortcut: N for new task | Done | focuses task input |
 | Undo toast on delete | Backlog | react-hot-toast installed, not wired |
 | `date-fns` dependency | Not used | installed but unused, kept for future |
