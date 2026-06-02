@@ -56,7 +56,7 @@ export function Sidebar({ view, onViewChange }: SidebarProps) {
         <button
           onClick={() => handleNavClick(() => onViewChange('dashboard'))}
           className={cn(
-            'flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors',
+            'flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors min-h-[44px]',
             view === 'dashboard'
               ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400'
               : 'text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800/60'
@@ -76,7 +76,7 @@ export function Sidebar({ view, onViewChange }: SidebarProps) {
               setFilter(item.filter);
             })}
             className={cn(
-              'flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors',
+              'flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors min-h-[44px]',
               filter === item.filter && !activeProjectId
                 ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400'
                 : 'text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800/60'
@@ -118,7 +118,7 @@ export function Sidebar({ view, onViewChange }: SidebarProps) {
                 setActiveProjectId(project.id);
               })}
               className={cn(
-                'flex flex-1 items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors',
+                'flex flex-1 items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors min-h-[44px]',
                 activeProjectId === project.id
                   ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400'
                   : 'text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800/60'
@@ -133,7 +133,7 @@ export function Sidebar({ view, onViewChange }: SidebarProps) {
                   deleteProject(project.id);
                 }
               }}
-              className="me-1 rounded p-1.5 text-zinc-300 opacity-0 transition-all hover:bg-rose-50 hover:text-rose-500 group-hover:opacity-100 dark:text-zinc-600 dark:hover:bg-rose-950/30 dark:hover:text-rose-400 sm:p-1"
+              className="me-1 rounded p-2 text-zinc-300 opacity-0 transition-all hover:bg-rose-50 hover:text-rose-500 group-hover:opacity-100 dark:text-zinc-600 dark:hover:bg-rose-950/30 dark:hover:text-rose-400 md:p-1"
             >
               <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -146,7 +146,7 @@ export function Sidebar({ view, onViewChange }: SidebarProps) {
       <div className="border-t border-zinc-200/60 px-2 py-3 dark:border-zinc-800/60">
         <button
           onClick={toggleFocusMode}
-          className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-zinc-500 transition-colors hover:bg-indigo-50 hover:text-indigo-600 dark:text-zinc-400 dark:hover:bg-indigo-950/40 dark:hover:text-indigo-400"
+          className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-zinc-500 transition-colors min-h-[44px] hover:bg-indigo-50 hover:text-indigo-600 dark:text-zinc-400 dark:hover:bg-indigo-950/40 dark:hover:text-indigo-400"
         >
           <Target className="h-4 w-4" />
           <span>وضع التركيز</span>
@@ -154,7 +154,7 @@ export function Sidebar({ view, onViewChange }: SidebarProps) {
         </button>
         <button
           onClick={toggleDarkMode}
-          className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-zinc-500 transition-colors hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800/60"
+          className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-zinc-500 transition-colors min-h-[44px] hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800/60"
         >
           {darkMode ? '☀️ فاتح' : '🌙 ليلي'}
         </button>

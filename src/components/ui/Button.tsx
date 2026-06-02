@@ -27,9 +27,9 @@ export function Button({
           'bg-indigo-500 text-white hover:bg-indigo-600 shadow-sm',
         variant === 'danger' &&
           'text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/30',
-        size === 'sm' && 'h-8 px-2.5 text-xs gap-1 md:h-7 md:px-2',
-        size === 'md' && 'h-10 px-3 text-sm gap-1.5 md:h-9',
-        size === 'icon' && 'h-10 w-10 md:h-8 md:w-8',
+        size === 'sm' && 'h-10 px-2.5 text-xs gap-1 md:h-7 md:px-2',
+        size === 'md' && 'h-11 px-3 text-sm gap-1.5 md:h-9',
+        size === 'icon' && 'h-11 w-11 md:h-8 md:w-8',
         props.disabled && 'opacity-40 pointer-events-none',
         className
       )}

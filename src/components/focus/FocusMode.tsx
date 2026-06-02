@@ -352,7 +352,7 @@ export function FocusMode() {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 10 }}
               onClick={(e) => e.stopPropagation()}
-              className="mx-4 w-full max-w-sm rounded-2xl border border-white/10 bg-zinc-900 p-5 shadow-2xl"
+              className="mx-4 max-h-[85vh] w-full max-w-sm overflow-y-auto rounded-2xl border border-white/10 bg-zinc-900 p-5 shadow-2xl"
             >
               <div className="mb-4 flex items-center justify-between">
                 <h3 className="text-sm font-semibold text-white">إعدادات التركيز</h3>
@@ -370,7 +370,7 @@ export function FocusMode() {
                       key={p.label}
                       onClick={() => applyPreset(p.work, p.break)}
                       className={cn(
-                        'flex-1 rounded-lg border px-2 py-2 text-xs font-medium transition-all',
+                        'flex-1 rounded-lg border px-2 py-2.5 text-xs font-medium transition-all min-h-[44px] sm:min-h-0 sm:py-2',
                         settingsWork === p.work && settingsBreak === p.break
                           ? 'border-indigo-500/50 bg-indigo-500/20 text-indigo-300'
                           : 'border-white/10 text-white/50 hover:border-white/20 hover:text-white/70'
@@ -392,7 +392,7 @@ export function FocusMode() {
                     max={180}
                     value={settingsWork}
                     onChange={(e) => setSettingsWork(Number(e.target.value))}
-                    className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white outline-none focus:border-indigo-500/50"
+                    className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none min-h-[44px] focus:border-indigo-500/50 sm:min-h-0 sm:py-2"
                   />
                 </div>
                 <div className="flex-1">
@@ -403,7 +403,7 @@ export function FocusMode() {
                     max={60}
                     value={settingsBreak}
                     onChange={(e) => setSettingsBreak(Number(e.target.value))}
-                    className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white outline-none focus:border-indigo-500/50"
+                    className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none min-h-[44px] focus:border-indigo-500/50 sm:min-h-0 sm:py-2"
                   />
                 </div>
               </div>
@@ -419,7 +419,7 @@ export function FocusMode() {
                       value={settingsUrl}
                       onChange={(e) => setSettingsUrl(e.target.value)}
                       placeholder="https://youtube.com/watch?v=..."
-                      className="w-full rounded-lg border border-white/10 bg-white/5 py-2 pe-3 ps-8 text-sm text-white outline-none placeholder:text-white/20 focus:border-indigo-500/50"
+                      className="w-full rounded-lg border border-white/10 bg-white/5 py-2.5 pe-3 ps-8 text-sm text-white outline-none placeholder:text-white/20 min-h-[44px] focus:border-indigo-500/50 sm:min-h-0 sm:py-2"
                     />
                   </div>
                 </div>
@@ -430,7 +430,7 @@ export function FocusMode() {
 
               <button
                 onClick={saveSettings}
-                className="w-full rounded-lg bg-indigo-500 py-2.5 text-sm font-medium text-white transition-colors hover:bg-indigo-600"
+                className="w-full rounded-lg bg-indigo-500 py-3 text-sm font-medium text-white transition-colors min-h-[44px] hover:bg-indigo-600"
               >
                 حفظ
               </button>
@@ -440,25 +440,25 @@ export function FocusMode() {
       </AnimatePresence>
 
       {/* Top controls */}
-      <div className="absolute top-4 right-4 flex items-center gap-2 md:top-6 md:right-6">
+      <div className="absolute top-3 right-3 flex items-center gap-2 sm:top-4 sm:right-4 md:top-6 md:right-6">
         <button
           onClick={() => {
             setSoundOn(!soundOn);
             if (soundOn) try { sendYTCommand('pauseVideo'); } catch { /* silent */ }
           }}
-          className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 text-white/70 backdrop-blur-sm transition-colors hover:bg-white/20 hover:text-white"
+          className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/10 text-white/70 backdrop-blur-sm transition-colors hover:bg-white/20 hover:text-white md:h-10 md:w-10"
         >
           {soundOn ? <Volume2 className="h-5 w-5" /> : <VolumeX className="h-5 w-5" />}
         </button>
         <button
           onClick={() => setShowSettings(true)}
-          className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 text-white/70 backdrop-blur-sm transition-colors hover:bg-white/20 hover:text-white"
+          className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/10 text-white/70 backdrop-blur-sm transition-colors hover:bg-white/20 hover:text-white md:h-10 md:w-10"
         >
           <Settings className="h-5 w-5" />
         </button>
         <button
           onClick={handleExit}
-          className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 text-white/70 backdrop-blur-sm transition-colors hover:bg-rose-500/20 hover:text-rose-400"
+          className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/10 text-white/70 backdrop-blur-sm transition-colors hover:bg-rose-500/20 hover:text-rose-400 md:h-10 md:w-10"
         >
           <X className="h-5 w-5" />
         </button>
@@ -469,26 +469,26 @@ export function FocusMode() {
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
-        className="absolute top-4 left-4 flex items-center gap-3 md:top-6 md:left-6"
+        className="absolute top-3 left-3 flex items-center gap-2 sm:top-4 sm:left-4 md:top-6 md:left-6"
       >
-        <div className="flex items-center gap-1.5 rounded-lg bg-white/5 px-3 py-1.5 text-xs text-white/50">
-          <Zap className="h-3.5 w-3.5 text-amber-400" />
-          <span>{completedSessions} جلسة مكتملة</span>
+        <div className="flex items-center gap-1.5 rounded-lg bg-white/5 px-2 py-1.5 text-[11px] text-white/50 sm:px-3 sm:text-xs">
+          <Zap className="h-3 w-3 text-amber-400 sm:h-3.5 sm:w-3.5" />
+          <span>{completedSessions} جلسة</span>
         </div>
-        {task && (
-          <div className="flex items-center gap-1.5 rounded-lg bg-white/5 px-3 py-1.5 text-xs text-white/50">
-            <Clock className="h-3.5 w-3.5 text-indigo-400" />
-            <span>{task.pomodoroCount} pomodoro</span>
+        {task && task.pomodoroCount > 0 && (
+          <div className="flex items-center gap-1.5 rounded-lg bg-white/5 px-2 py-1.5 text-[11px] text-white/50 sm:px-3 sm:text-xs">
+            <Clock className="h-3 w-3 text-indigo-400 sm:h-3.5 sm:w-3.5" />
+            <span>{task.pomodoroCount} pom</span>
           </div>
         )}
       </motion.div>
 
       {/* Phase toggle */}
-      <div className="mb-8 flex items-center gap-1 rounded-xl bg-white/5 p-1">
+      <div className="mb-6 flex items-center gap-1 rounded-xl bg-white/5 p-1 sm:mb-8">
         <button
           onClick={() => switchPhase('work')}
           className={cn(
-            'flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all',
+            'flex items-center gap-1.5 rounded-lg px-3 py-2.5 text-sm font-medium transition-all sm:gap-2 sm:px-4',
             phase === 'work'
               ? 'bg-indigo-500/20 text-indigo-300'
               : 'text-white/50 hover:text-white/70'
@@ -500,7 +500,7 @@ export function FocusMode() {
         <button
           onClick={() => switchPhase('break')}
           className={cn(
-            'flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all',
+            'flex items-center gap-1.5 rounded-lg px-3 py-2.5 text-sm font-medium transition-all sm:gap-2 sm:px-4',
             phase === 'break'
               ? 'bg-emerald-500/20 text-emerald-300'
               : 'text-white/50 hover:text-white/70'
@@ -512,9 +512,24 @@ export function FocusMode() {
       </div>
 
       {/* Timer circle */}
-      <div className="relative mb-8">
-        <svg width="164" height="164" className="-rotate-90">
-          <circle cx="82" cy="82" r={radius} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="6" />
+      <div className="relative mb-6 sm:mb-8">
+        <svg width="140" height="140" className="-rotate-90 sm:w-[164px] sm:h-[164px]">
+          <circle cx="70" cy="70" r={60} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="6" className="sm:hidden" />
+          <motion.circle
+            cx="70"
+            cy="70"
+            r={60}
+            fill="none"
+            stroke={phase === 'work' ? '#818cf8' : '#34d399'}
+            strokeWidth="6"
+            strokeLinecap="round"
+            strokeDasharray={2 * Math.PI * 60}
+            initial={{ strokeDashoffset: 2 * Math.PI * 60 }}
+            animate={{ strokeDashoffset: 2 * Math.PI * 60 * (1 - progress) }}
+            transition={{ duration: 0.8, ease: 'easeOut' }}
+            className="sm:hidden"
+          />
+          <circle cx="82" cy="82" r={radius} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="6" className="hidden sm:block" />
           <motion.circle
             cx="82"
             cy="82"
@@ -527,6 +542,7 @@ export function FocusMode() {
             initial={{ strokeDashoffset: circumference }}
             animate={{ strokeDashoffset: dashOffset }}
             transition={{ duration: 0.8, ease: 'easeOut' }}
+            className="hidden sm:block"
           />
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
@@ -534,21 +550,21 @@ export function FocusMode() {
             key={`${mm}:${ss}`}
             initial={{ opacity: 0.7, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="font-mono text-4xl font-bold tracking-wider text-white tabular-nums md:text-5xl"
+            className="font-mono text-3xl font-bold tracking-wider text-white tabular-nums sm:text-4xl md:text-5xl"
           >
             {mm}:{ss}
           </motion.span>
-          <span className="mt-1 text-xs text-white/40">
+          <span className="mt-1 text-[11px] text-white/40 sm:text-xs">
             {phase === 'work' ? `${workMin} دقيقة` : `${breakMin} دقائق`}
           </span>
         </div>
       </div>
 
       {/* Controls */}
-      <div className="mb-10 flex items-center gap-3">
+      <div className="mb-8 flex items-center gap-2 sm:mb-10 sm:gap-3">
         <button
           onClick={goPrev}
-          className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/10 text-white/70 transition-colors hover:bg-white/20 hover:text-white"
+          className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/10 text-white/70 transition-colors hover:bg-white/20 hover:text-white md:h-11 md:w-11"
         >
           <ChevronRight className="h-5 w-5" />
         </button>
@@ -556,7 +572,7 @@ export function FocusMode() {
           whileTap={{ scale: 0.95 }}
           onClick={() => setRunning(!running)}
           className={cn(
-            'flex h-14 w-14 items-center justify-center rounded-2xl transition-all',
+            'flex h-16 w-16 items-center justify-center rounded-2xl transition-all sm:h-14 sm:w-14',
             running
               ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/30'
               : 'bg-white/10 text-white hover:bg-white/20'
@@ -566,13 +582,13 @@ export function FocusMode() {
         </motion.button>
         <button
           onClick={resetTimer}
-          className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/10 text-white/70 transition-colors hover:bg-white/20 hover:text-white"
+          className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/10 text-white/70 transition-colors hover:bg-white/20 hover:text-white md:h-11 md:w-11"
         >
           <RotateCcw className="h-5 w-5" />
         </button>
         <button
           onClick={goNext}
-          className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/10 text-white/70 transition-colors hover:bg-white/20 hover:text-white"
+          className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/10 text-white/70 transition-colors hover:bg-white/20 hover:text-white md:h-11 md:w-11"
         >
           <ChevronLeft className="h-5 w-5" />
         </button>
@@ -604,7 +620,7 @@ export function FocusMode() {
               whileTap={{ scale: 0.9 }}
               onClick={handleComplete}
               className={cn(
-                'mb-4 flex h-12 w-12 items-center justify-center rounded-2xl border-2 transition-all',
+                'mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border-2 transition-all sm:h-12 sm:w-12',
                 task.completed
                   ? 'border-emerald-400 bg-emerald-400/20 text-emerald-400'
                   : 'border-white/20 text-white/30 hover:border-emerald-400/50 hover:text-emerald-400/60'
@@ -624,7 +640,7 @@ export function FocusMode() {
 
             <button
               onClick={() => task && toggleImportant(task.id)}
-              className="mt-4 text-xs text-white/30 transition-colors hover:text-amber-400"
+              className="mt-4 min-h-[44px] px-4 text-xs text-white/30 transition-colors hover:text-amber-400"
             >
               {task.important ? '★ مهمة مميزة' : '☆ تحديد كمهمة مميزة'}
             </button>

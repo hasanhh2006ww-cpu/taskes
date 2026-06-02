@@ -44,7 +44,7 @@ export default function Home() {
   return (
     <div
       className={cn(
-        'flex h-full overflow-hidden transition-colors duration-200',
+        'flex h-full overflow-hidden overscroll-none transition-colors duration-200',
         'bg-zinc-50 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100'
       )}
     >
@@ -69,7 +69,7 @@ export default function Home() {
       {/* Mobile hamburger button */}
       <button
         onClick={() => setSidebarOpen(!sidebarOpen)}
-        className="fixed start-3 top-3 z-50 flex h-10 w-10 items-center justify-center rounded-lg bg-white/80 text-zinc-600 shadow-sm backdrop-blur-sm transition-colors hover:bg-zinc-100 dark:bg-zinc-900/80 dark:text-zinc-400 dark:hover:bg-zinc-800 md:hidden"
+        className="fixed start-3 top-3 z-50 flex h-11 w-11 items-center justify-center rounded-lg bg-white/80 text-zinc-600 shadow-sm backdrop-blur-sm transition-colors hover:bg-zinc-100 dark:bg-zinc-900/80 dark:text-zinc-400 dark:hover:bg-zinc-800 md:hidden"
       >
         {sidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
       </button>

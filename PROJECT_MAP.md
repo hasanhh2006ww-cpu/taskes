@@ -40,7 +40,7 @@ my-taske/
 │   │   │   ├── TaskList.tsx       # DnD context, add task input, filter display
 │   │   │   └── TaskDetail.tsx     # Right panel: title, priority, date, etc.
 │   │   ├── ui/
-│   │   │   ├── Button.tsx         # ghost/primary/danger + sm/md/icon
+│   │   │   ├── Button.tsx         # ghost/primary/danger + sm/md/icon (44px touch on mobile)
 │   │   │   ├── Badge.tsx          # Priority badge
 │   │   │   └── Input.tsx          # Styled text input
 │   │   ├── dashboard/
@@ -54,7 +54,7 @@ my-taske/
 │   │   └── useUIStore.ts          # Dark mode, focus mode, sidebar, activeTaskId, focusSession, focusSettings
 │   │
 │   ├── hooks/
-│   │   └── useKeyboard.ts         # Global keyboard shortcuts (stale-closure safe)
+│   │   └── useKeyboard.ts         # Global keyboard shortcuts (desktop-only, disabled on touch)
 │   │
 │   └── lib/                       # Shared core
 │       ├── types.ts               # Task (pomodoroCount), Project, Priority, FilterType, FocusSession
@@ -143,6 +143,10 @@ User Input (keyboard/mouse/touch)
 | 32 | لا يمكن تخصيص وقت البومودورو | Presets (25/5, 50/10, 90/20) + إدخال يدوي + حفظ في localStorage | ✅ |
 | 33 | صوت مطر محلي فقط | استبدال بـ YouTube iframe — رابط خلفي + play/pause | ✅ |
 | 34 | لا توجد إعداداتFocus Mode | Settings panel: مدة العمل/الاستراحة + رابط YouTube | ✅ |
+| 35 | لا يوجد touch-action — double-tap zoom | `touch-action: manipulation` + `-webkit-tap-highlight-color` + `overscroll-behavior` | ✅ |
+| 36 | keyboard shortcuts تعمل على الموبايل | تعطيل تلقائي على الأجهزة اللمسية via `matchMedia` | ✅ |
+| 37 | أزرار صغيرة على الموبايل (< 44px) | تكبير جميع الأزرار لـ `min-h-[44px]` على الموبايل | ✅ |
+| 38 | Focus Mode لا يتكيّف مع الشاشات الصغيرة | Timer أصغر + أزرار أكبر + settings panel يُمرّر | ✅ |
 
 ## [ORPHANS & PENDING]
 
@@ -159,4 +163,5 @@ User Input (keyboard/mouse/touch)
 | `public/ph.png` | Deprecated | replaced by `public/logo.svg` (can be deleted) |
 | RTL animation direction | Done | TaskDetail slides from x:-20 (right in RTL) |
 | Responsive design | Done | Mobile sidebar overlay, full-screen detail, 44px touch targets |
+| Cross-platform responsive | Done | touch-action, 44px targets, disabled mobile shortcuts, responsive FocusMode, scroll settings |
 | SVG logo (Google-style) | Done | `public/logo.svg` — checkmark icon + "My Taske" text, scalable |

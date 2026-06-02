@@ -18,6 +18,12 @@
 
 body {
   font-family: var(--font-cairo), system-ui, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior: none;
+}
+
+button, a, input, select, textarea {
+  touch-action: manipulation;
 }
 
 ::selection {
