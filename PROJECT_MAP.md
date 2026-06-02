@@ -147,6 +147,7 @@ User Input (keyboard/mouse/touch)
 | 36 | keyboard shortcuts تعمل على الموبايل | تعطيل تلقائي على الأجهزة اللمسية via `matchMedia` | ✅ |
 | 37 | أزرار صغيرة على الموبايل (< 44px) | تكبير جميع الأزرار لـ `min-h-[44px]` على الموبايل | ✅ |
 | 38 | Focus Mode لا يتكيّف مع الشاشات الصغيرة | Timer أصغر + أزرار أكبر + settings panel يُمرّر | ✅ |
+| 39 | حقل الإدخال مقطوع على الموبايل | إضافة `min-w-0` لـ flex containers لمنع القص | ✅ |
 
 ## [ORPHANS & PENDING]
 

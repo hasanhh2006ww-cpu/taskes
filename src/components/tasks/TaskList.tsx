@@ -67,7 +67,7 @@ export function TaskList() {
           : 'المنجزة';
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="flex h-full min-w-0 flex-col">
       <div className="flex items-center justify-between px-4 pt-5 pb-3 md:px-6">
         <h1 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 md:text-xl">{headerTitle}</h1>
         <span className="text-xs text-zinc-400 dark:text-zinc-500 md:text-sm">
