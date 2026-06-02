@@ -14,6 +14,7 @@ import {
   CheckCircle2,
   Plus,
   FolderKanban,
+  Target,
 } from 'lucide-react';
 
 type View = 'app' | 'dashboard';
@@ -33,7 +34,7 @@ interface SidebarProps {
 export function Sidebar({ view, onViewChange }: SidebarProps) {
   const { filter, setFilter, setActiveProjectId, activeProjectId, tasks } = useTaskStore();
   const { projects, addProject, deleteProject } = useProjectStore();
-  const { darkMode, toggleDarkMode, setSidebarOpen } = useUIStore();
+  const { darkMode, toggleDarkMode, toggleFocusMode, setSidebarOpen } = useUIStore();
 
   const todayStr = getToday();
   const todayCount = tasks.filter((t) => t.dueDate === todayStr && !t.completed).length;
@@ -143,6 +144,14 @@ export function Sidebar({ view, onViewChange }: SidebarProps) {
       </nav>
 
       <div className="border-t border-zinc-200/60 px-2 py-3 dark:border-zinc-800/60">
+        <button
+          onClick={toggleFocusMode}
+          className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-zinc-500 transition-colors hover:bg-indigo-50 hover:text-indigo-600 dark:text-zinc-400 dark:hover:bg-indigo-950/40 dark:hover:text-indigo-400"
+        >
+          <Target className="h-4 w-4" />
+          <span>وضع التركيز</span>
+          <kbd className="me-auto rounded bg-zinc-100 px-1.5 py-0.5 text-[10px] text-zinc-400 dark:bg-zinc-800 dark:text-zinc-500">F</kbd>
+        </button>
         <button
           onClick={toggleDarkMode}
           className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-zinc-500 transition-colors hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800/60"

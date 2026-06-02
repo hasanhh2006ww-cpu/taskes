@@ -90,6 +90,7 @@ User Input (keyboard/mouse/touch)
     ├── Trash → deleteTask
     ├── Ctrl+K → CommandPalette (Arabic)
     ├── F → toggleFocusMode (full-screen overlay)
+    ├── Sidebar: "وضع التركيز" button → toggleFocusMode
     ├── FocusMode: Smart resume → restores last session from localStorage
     ├── FocusMode: Start/Pause → toggle timer
     ├── FocusMode: Reset → reset timer
@@ -138,6 +139,7 @@ User Input (keyboard/mouse/touch)
 | 28 | لا يوجد عداد جلسات Pomodoro | `pomodoroCount` لكل مهمة + عرض العدد في FocusMode | ✅ |
 | 29 | لا يوجد feedback عند الإنجاز | Trophy animation + صوت احتفال عند إكمال جلسة | ✅ |
 | 30 | لا يوجد smart task selection | اختيار تلقائي لأول مهمة غير مكتملة عند الدخول | ✅ |
+| 31 | Focus Mode لا يظهر — لا يوجد زر مرئي | زر "وضع التركيز" في Sidebar + اختصار F | ✅ |
 
 ## [ORPHANS & PENDING]
 
