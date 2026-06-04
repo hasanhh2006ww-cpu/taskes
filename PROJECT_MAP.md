@@ -34,7 +34,7 @@ my-taske/
 │   │   ├── layout/
 │   │   │   └── Sidebar.tsx        # Responsive: overlay mobile, fixed desktop + SVG logo
 │   │   ├── focus/
-│   │   │   └── FocusMode.tsx      # Focus mode: Pomodoro (time-based timer) + YouTube audio + settings + dark UI
+│   │   │   └── FocusMode.tsx      # Focus mode: Pomodoro (time-based) + smart suggestion (keyword → duration) + YouTube audio + end sound selector + settings
 │   │   ├── tasks/
 │   │   │   ├── TaskItem.tsx       # Draggable task card (React.memo)
 │   │   │   ├── TaskList.tsx       # DnD context, add task input, filter display
@@ -51,7 +51,7 @@ my-taske/
 │   ├── store/                     # Zustand — domain-split
 │   │   ├── useTaskStore.ts        # Tasks CRUD, filter, reorder
 │   │   ├── useProjectStore.ts     # Projects CRUD
-│   │   └── useUIStore.ts          # Dark mode, focus mode, sidebar, activeTaskId, focusSession, focusSettings
+│   │   └── useUIStore.ts          # Dark mode, focus mode, sidebar, activeTaskId, focusSession, focusSettings (incl. endSound/endSoundUrl)
 │   │
 │   ├── hooks/
 │   │   └── useKeyboard.ts         # Global keyboard shortcuts (desktop-only, disabled on touch)
@@ -59,6 +59,7 @@ my-taske/
 │   └── lib/                       # Shared core
 │       ├── types.ts               # Task (pomodoroCount), Project, Priority, FilterType, FocusSession
 │       ├── constants.ts           # PRIORITIES (Arabic), PROJECT_COLORS, STORAGE_KEYS (incl. FOCUS_SETTINGS), FOCUS_PRESETS, getToday()
+│       ├── focus-suggest.ts       # Smart focus suggestion engine + END_SOUNDS + playBell/playBeep/playEndSound
 │       ├── cn.ts                  # clsx + twMerge utility
 │       ├── logger.ts              # Async non-blocking logger
 │       └── storage.ts             # loadFromStorage / saveToStorage
@@ -94,7 +95,10 @@ User Input (keyboard/mouse/touch)
     ├── FocusMode: Smart resume → restores last session from localStorage
     ├── FocusMode: Start/Pause → toggle timer
     ├── FocusMode: Reset → reset timer
+    ├── FocusMode: Smart suggestion → keyword analysis of task title → banner with accept/dismiss
+    ├── FocusMode: Accept suggestion → update workMin + timer duration
     ├── FocusMode: Sound toggle → rain ambient on/off
+    ├── FocusMode: End sound → plays selected sound (chime/bell/beep/celebration/custom) on timer end
     ├── FocusMode: Prev/Next → navigate tasks
     ├── FocusMode: ✓ complete → incrementPomodoro + trophy animation + chime
     ├── FocusMode: X → save session + exit
@@ -149,6 +153,8 @@ User Input (keyboard/mouse/touch)
 | 38 | Focus Mode لا يتكيّف مع الشاشات الصغيرة | Timer أصغر + أزرار أكبر + settings panel يُمرّر | ✅ |
 | 39 | حقل الإدخال مقطوع على الموبايل | إضافة `min-w-0` لـ flex containers لمنع القص | ✅ |
 | 40 | Pomodoro timer يتجمد عند إخفاء التاب | وقت مطلق (`Date.now()`) بدلاً من التناقص | ✅ |
+| 41 | لا يوجد اقتراح ذكي لمدة التركيز | `suggestFocus()` يحلل عنوان المهمة ويقترح 25/50/90 دقيقة مع Banner قبول/تجاهل | ✅ |
+| 42 | لا يوجد اختيار صوت نهاية الجلسة | 5 خيارات (نغمة بسيطة، جرس، تنبيه رقمي، احتفال، رابط مخصص) + مشغل عند انتهاء التايمر | ✅ |
 
 ## [ORPHANS & PENDING]
 
@@ -158,6 +164,8 @@ User Input (keyboard/mouse/touch)
 | Focus Mode visual polish | Done | Full-screen overlay: Pomodoro timer, rain sound, dark gradient, task nav |
 | Focus Mode Pro | Done | Smart resume, pomodoro count, completion feedback (trophy + chime), session stats |
 | Focus Mode Settings | Done | Custom durations (presets 25/5, 50/10, 90/20 + manual), YouTube background audio, settings panel |
+| Smart Focus Suggestion | Done | `suggestFocus(title)` → keyword-based 25/50/90 min suggestion with accept/dismiss banner |
+| End Sound System | Done | 5 sounds (chime, bell, beep, celebration, custom URL), plays automatically on timer end |
 | Keyboard shortcut: N for new task | Done | focuses task input |
 | Undo toast on delete | Backlog | react-hot-toast installed, not wired |
 | `date-fns` dependency | Not used | installed but unused, kept for future |

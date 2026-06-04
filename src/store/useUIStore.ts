@@ -13,6 +13,8 @@ export interface FocusSettings {
   workMin: number;
   breakMin: number;
   youtubeUrl: string;
+  endSound: string;
+  endSoundUrl: string;
 }
 
 interface UIState {
@@ -35,7 +37,7 @@ const stored = loadFromStorage<{ darkMode: boolean }>(STORAGE_KEYS.UI, {
   darkMode: false,
 });
 
-const defaultSettings: FocusSettings = { workMin: 25, breakMin: 5, youtubeUrl: '' };
+const defaultSettings: FocusSettings = { workMin: 25, breakMin: 5, youtubeUrl: '', endSound: 'chime', endSoundUrl: '' };
 
 export const useUIStore = create<UIState>((set, get) => ({
   darkMode: stored.darkMode,

@@ -5,6 +5,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useUIStore } from '@/store/useUIStore';
 import { useTaskStore } from '@/store/useTaskStore';
 import { FOCUS_PRESETS } from '@/lib/constants';
+import { suggestFocus, END_SOUNDS, playEndSound } from '@/lib/focus-suggest';
+import type { EndSoundId } from '@/lib/focus-suggest';
 import { cn } from '@/lib/cn';
 import {
   Play,
@@ -22,6 +24,7 @@ import {
   Trophy,
   Settings,
   Link,
+  Lightbulb,
 } from 'lucide-react';
 
 function extractYoutubeId(url: string): string | null {
@@ -114,6 +117,9 @@ export function FocusMode() {
   const [settingsBreak, setSettingsBreak] = useState(focusSettings.breakMin);
   const [settingsUrl, setSettingsUrl] = useState(focusSettings.youtubeUrl);
 
+  const [suggestion, setSuggestion] = useState<{ duration: number; label: string } | null>(null);
+  const suggestedTasksRef = useRef<Set<string>>(new Set());
+
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const ctxRef = useRef<AudioContext | null>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -158,13 +164,18 @@ export function FocusMode() {
         clearInterval(intervalRef.current!);
         intervalRef.current = null;
         setRunning(false);
-        try { playChime(getCtx()); } catch { /* silent */ }
+        try {
+          const es = focusSettings.endSound;
+          if (es === 'chime') playChime(getCtx());
+          else if (es === 'celebration') playComplete(getCtx());
+          else playEndSound(getCtx(), es as EndSoundId, focusSettings.endSoundUrl);
+        } catch { /* silent */ }
       }
     }, 1000);
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
-  }, [running, getCtx]);
+  }, [running, getCtx, focusSettings.endSound, focusSettings.endSoundUrl]);
 
   const resetTimer = useCallback(() => {
     if (intervalRef.current) clearInterval(intervalRef.current);
@@ -197,6 +208,28 @@ export function FocusMode() {
       }
     }
   }, [secondsLeft, running, phase, switchPhase, currentTaskId, incrementPomodoro]);
+
+  useEffect(() => {
+    if (!task || suggestedTasksRef.current.has(task.id)) {
+      setSuggestion(null);
+      return;
+    }
+    const s = suggestFocus(task.title);
+    setSuggestion(s.duration === (phase === 'work' ? workMin : breakMin) ? null : { duration: s.duration, label: s.label });
+  }, [task, phase, workMin, breakMin]);
+
+  const applySuggestion = () => {
+    if (!suggestion) return;
+    updateFocusSettings({ workMin: suggestion.duration });
+    setSecondsLeft(suggestion.duration * 60);
+    if (currentTaskId) suggestedTasksRef.current.add(currentTaskId);
+    setSuggestion(null);
+  };
+
+  const dismissSuggestion = () => {
+    if (currentTaskId) suggestedTasksRef.current.add(currentTaskId);
+    setSuggestion(null);
+  };
 
   useEffect(() => {
     if (currentTaskId && (running || secondsLeft !== workMin * 60)) {
@@ -429,6 +462,39 @@ export function FocusMode() {
                 )}
               </div>
 
+              {/* End sound selector */}
+              <div className="mb-4">
+                <label className="mb-2 block text-xs text-white/40">صوت التنبيه</label>
+                <div className="flex flex-wrap gap-1.5">
+                  {END_SOUNDS.map((s) => (
+                    <button
+                      key={s.id}
+                      onClick={() => updateFocusSettings({ endSound: s.id, endSoundUrl: s.id === 'custom' ? focusSettings.endSoundUrl : '' })}
+                      className={cn(
+                        'rounded-lg border px-2.5 py-2 text-xs font-medium transition-all min-h-[36px]',
+                        focusSettings.endSound === s.id
+                          ? 'border-indigo-500/50 bg-indigo-500/20 text-indigo-300'
+                          : 'border-white/10 text-white/50 hover:border-white/20 hover:text-white/70'
+                      )}
+                    >
+                      {s.label}
+                    </button>
+                  ))}
+                </div>
+                {focusSettings.endSound === 'custom' && (
+                  <div className="relative mt-2">
+                    <Link className="absolute start-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-white/30" />
+                    <input
+                      type="url"
+                      value={focusSettings.endSoundUrl}
+                      onChange={(e) => updateFocusSettings({ endSoundUrl: e.target.value })}
+                      placeholder="رابط mp3 مخصص..."
+                      className="w-full rounded-lg border border-white/10 bg-white/5 py-2 pe-3 ps-8 text-sm text-white outline-none placeholder:text-white/20 min-h-[44px] focus:border-indigo-500/50 sm:min-h-0 sm:py-2"
+                    />
+                  </div>
+                )}
+              </div>
+
               <button
                 onClick={saveSettings}
                 className="w-full rounded-lg bg-indigo-500 py-3 text-sm font-medium text-white transition-colors min-h-[44px] hover:bg-indigo-600"
@@ -638,6 +704,31 @@ export function FocusMode() {
             >
               {task.title}
             </h2>
+
+            {suggestion && (
+              <motion.div
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mt-3 flex items-center gap-2 rounded-lg border border-indigo-500/30 bg-indigo-500/10 px-3 py-2"
+              >
+                <Lightbulb className="h-4 w-4 shrink-0 text-amber-400" />
+                <span className="flex-1 text-xs text-indigo-200">
+                  نقترح {suggestion.duration} دقيقة ({suggestion.label}) لهذه المهمة
+                </span>
+                <button
+                  onClick={applySuggestion}
+                  className="rounded-md bg-indigo-500 px-2.5 py-1 text-[11px] font-medium text-white transition-colors hover:bg-indigo-600"
+                >
+                  تطبيق
+                </button>
+                <button
+                  onClick={dismissSuggestion}
+                  className="rounded-md px-2 py-1 text-[11px] text-white/40 transition-colors hover:text-white/70"
+                >
+                  تجاهل
+                </button>
+              </motion.div>
+            )}
 
             <button
               onClick={() => task && toggleImportant(task.id)}
