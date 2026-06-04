@@ -147,19 +147,20 @@ export function FocusMode() {
   }, [running, soundOn, youtubeId, sendYTCommand]);
 
   useEffect(() => {
-    if (running) {
-      intervalRef.current = setInterval(() => {
-        setSecondsLeft((s) => {
-          if (s <= 1) {
-            clearInterval(intervalRef.current!);
-            setRunning(false);
-            try { playChime(getCtx()); } catch { /* silent */ }
-            return 0;
-          }
-          return s - 1;
-        });
-      }, 1000);
-    }
+    if (!running) return;
+    const initialSec = secondsLeft;
+    const startTime = Date.now();
+    intervalRef.current = setInterval(() => {
+      const elapsed = Math.floor((Date.now() - startTime) / 1000);
+      const newSecs = Math.max(0, initialSec - elapsed);
+      setSecondsLeft(newSecs);
+      if (newSecs <= 0) {
+        clearInterval(intervalRef.current!);
+        intervalRef.current = null;
+        setRunning(false);
+        try { playChime(getCtx()); } catch { /* silent */ }
+      }
+    }, 1000);
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
     };

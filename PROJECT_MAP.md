@@ -34,7 +34,7 @@ my-taske/
 │   │   ├── layout/
 │   │   │   └── Sidebar.tsx        # Responsive: overlay mobile, fixed desktop + SVG logo
 │   │   ├── focus/
-│   │   │   └── FocusMode.tsx      # Focus mode: Pomodoro + rain sound + dark UI
+│   │   │   └── FocusMode.tsx      # Focus mode: Pomodoro (time-based timer) + YouTube audio + settings + dark UI
 │   │   ├── tasks/
 │   │   │   ├── TaskItem.tsx       # Draggable task card (React.memo)
 │   │   │   ├── TaskList.tsx       # DnD context, add task input, filter display
@@ -148,6 +148,7 @@ User Input (keyboard/mouse/touch)
 | 37 | أزرار صغيرة على الموبايل (< 44px) | تكبير جميع الأزرار لـ `min-h-[44px]` على الموبايل | ✅ |
 | 38 | Focus Mode لا يتكيّف مع الشاشات الصغيرة | Timer أصغر + أزرار أكبر + settings panel يُمرّر | ✅ |
 | 39 | حقل الإدخال مقطوع على الموبايل | إضافة `min-w-0` لـ flex containers لمنع القص | ✅ |
+| 40 | Pomodoro timer يتجمد عند إخفاء التاب | وقت مطلق (`Date.now()`) بدلاً من التناقص | ✅ |
 
 ## [ORPHANS & PENDING]
 
