@@ -61,7 +61,7 @@ my-taske/
 │   └── lib/                       # Shared core
 │       ├── types.ts               # Task (pomodoroCount), Project, Priority, FilterType, FocusSession
 │       ├── constants.ts           # PRIORITIES (Arabic), PROJECT_COLORS, STORAGE_KEYS (incl. FOCUS_SETTINGS), FOCUS_PRESETS, getToday()
-│       ├── ai-engine.ts           # AI goal planner: keyword-based → extract topic/days → generate AIPlan (days × tasks)
+│       ├── ai-engine.ts           # Adaptive planner: intent parser → 8 type classifers → 6 strategy generators → shuffled phased distribution + clarification flow
 │       ├── focus-suggest.ts       # Smart focus suggestion engine + END_SOUNDS + playBell/playBeep/playEndSound
 │       ├── cn.ts                  # clsx + twMerge utility
 │       ├── logger.ts              # Async non-blocking logger
@@ -109,7 +109,8 @@ User Input (keyboard/mouse/touch)
     ├── FocusMode: ✓ complete → incrementPomodoro + trophy animation + chime
     ├── FocusMode: X → save session + exit
     ├── Sidebar click (AI Assistant) → onViewChange('ai') + close sidebar
-    ├── AIAssistant: type goal + click "إنشاء خطة" → generatePlan() → daily plan with tasks
+    ├── AIAssistant: type goal + click "إنشاء خطة" → analyzeIntent() → (clarification ? show question : generatePlan())
+    ├── AIAssistant: clarification input → handleClarifyAnswer() → enrich goal → generatePlan()
     ├── AIAssistant: expand/collapse day → show tasks with priority + estimated duration
     ├── AIAssistant: click "إضافة N مهمة" → addMultipleTasks() + create/use project
     └── Theme button → toggleDarkMode
@@ -169,6 +170,7 @@ User Input (keyboard/mouse/touch)
 | 44 | لا يوجد تحكم بالإيماءات (Swipe) | TaskItem: pointer-event swipe → right=complete, left=delete + vibration + بهدوء | ✅ |
 | 45 | الثيمة الداكنة بسيطة جداً (مسطحة) | Modern SaaS dark theme: gradient bg (from-[#0A0E17] via-[#111827] to-[#020617]), refined borders, card hover lift, sidebar gradient, Linear-inspired | ✅ |
 | 46 | التحديثات لا تظهر في الموقع المباشر | @netlify/plugin-nextjs يمنع static export; إزالة الـ plugin + إضافة public/_redirects + public/_headers للتحكم بالتخزين المؤقت | ✅ |
+| 47 | AI Assistant يستخدم قوالب ثابتة (نفس الخطة لكل طلب) | Adaptive engine: intent parser (8 types, complexity, clarity) + strategy generators (6 أنواع) + shuffling + phased distribution + clarification flow للطلبات الغامضة | ✅ |
 
 ## [ORPHANS & PENDING]
 
@@ -181,9 +183,11 @@ User Input (keyboard/mouse/touch)
 | Smart Focus Suggestion | Done | `suggestFocus(title)` → keyword-based 25/50/90 min suggestion with accept/dismiss banner |
 | End Sound System | Done | 5 sounds (chime, bell, beep, celebration, custom URL), plays automatically on timer end |
 | AI Task Assistant | Done | `generatePlan(goal)` keyword-based engine + AIAssistant UI: input → daily breakdown → batch add to store |
+| AI Adaptive Engine | Done | Dynamic intent parser (8 types, complexity, clarity) + adaptive strategies + output diversity + clarification flow |
 | Gesture Controls (Swipe) | Done | TaskItem: pointer-event swipe → right=complete, left=delete + vibration + spring animation |
 | Theme Refresh (SaaS Dark) | Done | Gradient body/sidebar/cards, hover lift effects, refined borders, indigo glow |
 | Deployment Fix | Done | Removed @netlify/plugin-nextjs (conflicts with static export), added public/_redirects + public/_headers |
+| AI Adaptive Engine | Done | Dynamic intent parsing + 8 task types + 6 strategy generators + shuffled phase distribution + clarification flow for ambiguous goals |
 | Keyboard shortcut: N for new task | Done | focuses task input |
 | Undo toast on delete | Backlog | react-hot-toast installed, not wired |
 | `date-fns` dependency | Not used | installed but unused, kept for future |

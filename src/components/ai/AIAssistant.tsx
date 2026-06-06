@@ -2,11 +2,11 @@
 
 import { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { generatePlan } from '@/lib/ai-engine';
+import { generatePlan, analyzeIntent } from '@/lib/ai-engine';
 import { useTaskStore } from '@/store/useTaskStore';
 import { useProjectStore } from '@/store/useProjectStore';
 import { cn } from '@/lib/cn';
-import type { AIPlan, AIDayPlan } from '@/lib/ai-engine';
+import type { AIPlan, AIDayPlan, Clarification } from '@/lib/ai-engine';
 import {
   Sparkles,
   Loader2,
@@ -27,6 +27,8 @@ export function AIAssistant() {
   const [loading, setLoading] = useState(false);
   const [expandedDays, setExpandedDays] = useState<Set<number>>(new Set());
   const [added, setAdded] = useState(false);
+  const [clarification, setClarification] = useState<Clarification | null>(null);
+  const [clarificationAnswer, setClarificationAnswer] = useState('');
 
   const { addMultipleTasks } = useTaskStore();
   const { projects, addProject } = useProjectStore();
@@ -34,10 +36,17 @@ export function AIAssistant() {
   const handleGenerate = useCallback(() => {
     const trimmed = goal.trim();
     if (!trimmed) return;
+    const { clarification: clar } = analyzeIntent(trimmed);
+    if (clar) {
+      setClarification(clar);
+      setClarificationAnswer('');
+      return;
+    }
     setLoading(true);
     setPlan(null);
     setAdded(false);
     setExpandedDays(new Set());
+    setClarification(null);
     setTimeout(() => {
       try {
         const result = generatePlan(trimmed);
@@ -49,6 +58,28 @@ export function AIAssistant() {
       setLoading(false);
     }, 800);
   }, [goal]);
+
+  const handleClarifyAnswer = useCallback(() => {
+    if (!clarificationAnswer.trim() || !clarification) return;
+    const enrichedGoal = `${goal} ${clarificationAnswer.trim()}`;
+    setGoal(enrichedGoal);
+    setClarification(null);
+    setClarificationAnswer('');
+    setLoading(true);
+    setPlan(null);
+    setAdded(false);
+    setExpandedDays(new Set());
+    setTimeout(() => {
+      try {
+        const result = generatePlan(enrichedGoal);
+        setPlan(result);
+        setExpandedDays(new Set([1]));
+      } catch {
+        /* silent */
+      }
+      setLoading(false);
+    }, 800);
+  }, [goal, clarification, clarificationAnswer]);
 
   const handleAddAll = useCallback(() => {
     if (!plan) return;
@@ -148,6 +179,45 @@ export function AIAssistant() {
           </div>
         </div>
       </motion.div>
+
+      {/* Clarification */}
+      <AnimatePresence>
+        {clarification && (
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -12 }}
+            className="mb-6 rounded-xl border border-amber-200/60 bg-amber-50/80 p-4 dark:border-amber-800/40 dark:bg-amber-950/30"
+          >
+            <p className="mb-3 text-sm font-medium text-amber-800 dark:text-amber-300">
+              {clarification.question}
+            </p>
+            <div className="flex gap-2">
+              <input
+                value={clarificationAnswer}
+                onChange={(e) => setClarificationAnswer(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && clarificationAnswer.trim()) handleClarifyAnswer();
+                }}
+                placeholder="اكتب إجابتك هنا..."
+                className="flex-1 rounded-lg border border-amber-200 bg-white/80 px-3 py-2 text-sm text-zinc-800 outline-none placeholder:text-zinc-400 focus:border-amber-400 focus:ring-2 focus:ring-amber-500/20 dark:border-amber-800/40 dark:bg-zinc-900/60 dark:text-zinc-100 dark:placeholder:text-zinc-500"
+              />
+              <button
+                onClick={handleClarifyAnswer}
+                disabled={!clarificationAnswer.trim()}
+                className={cn(
+                  'flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all min-h-[44px]',
+                  clarificationAnswer.trim()
+                    ? 'bg-amber-600 text-white hover:bg-amber-700 active:scale-[0.98]'
+                    : 'bg-zinc-200 text-zinc-400 dark:bg-zinc-800 dark:text-zinc-600'
+                )}
+              >
+                متابعة
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Loading state */}
       <AnimatePresence>
