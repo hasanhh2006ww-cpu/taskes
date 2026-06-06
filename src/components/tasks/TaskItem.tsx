@@ -1,6 +1,10 @@
 'use client';
 
+<<<<<<< HEAD
 import { memo, useRef, useState, useCallback } from 'react';
+=======
+import { memo } from 'react';
+>>>>>>> aaba259eb43c2a33ef905f9dfe525f4f89bb0fce
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { motion } from 'framer-motion';
@@ -13,8 +17,11 @@ import { GripVertical, Trash2, Star, Circle, CheckCircle2 } from 'lucide-react';
 import { PRIORITIES } from '@/lib/constants';
 import type { Task } from '@/lib/types';
 
+<<<<<<< HEAD
 const SWIPE_THRESHOLD = 80;
 
+=======
+>>>>>>> aaba259eb43c2a33ef905f9dfe525f4f89bb0fce
 interface TaskItemProps {
   task: Task;
 }
@@ -40,6 +47,7 @@ export const TaskItem = memo(function TaskItem({ task }: TaskItemProps) {
   const priority = PRIORITIES.find((p) => p.value === task.priority);
   const isActive = activeTaskId === task.id;
 
+<<<<<<< HEAD
   const [swipeX, setSwipeX] = useState(0);
   const swipeStart = useRef<{ x: number; y: number } | null>(null);
   const swipingRef = useRef(false);
@@ -85,6 +93,10 @@ export const TaskItem = memo(function TaskItem({ task }: TaskItemProps) {
   const actionOpacity = Math.min(1, Math.abs(swipeX) / SWIPE_THRESHOLD);
   const isRightSwipe = swipeX > 0;
 
+=======
+  if (focusMode && !isActive && !task.completed) return null;
+
+>>>>>>> aaba259eb43c2a33ef905f9dfe525f4f89bb0fce
   return (
     <motion.div
       layout
@@ -95,6 +107,7 @@ export const TaskItem = memo(function TaskItem({ task }: TaskItemProps) {
       ref={setNodeRef}
       style={style}
       className={cn(
+<<<<<<< HEAD
         'group relative overflow-hidden rounded-xl border p-0 transition-all duration-200',
         'border-zinc-200/60 dark:border-zinc-800/40',
         'hover:shadow-md dark:hover:shadow-black/20 dark:hover:-translate-y-0.5',
@@ -196,6 +209,68 @@ export const TaskItem = memo(function TaskItem({ task }: TaskItemProps) {
           <Trash2 className="h-4 w-4 md:h-3.5 md:w-3.5" />
         </Button>
       </motion.div>
+=======
+        'group flex items-start gap-2 rounded-xl border p-2.5 sm:p-3',
+        'border-zinc-200/60 bg-white/70 hover:border-zinc-300/60 hover:shadow-sm',
+        'dark:border-zinc-800/60 dark:bg-zinc-900/70 dark:hover:border-zinc-700/60',
+        isDragging && 'z-50 scale-105 shadow-xl opacity-90',
+        task.completed && 'opacity-50',
+        isActive &&
+          'border-indigo-300/60 bg-indigo-50/50 shadow-sm dark:border-indigo-700/60 dark:bg-indigo-950/30'
+      )}
+    >
+      <button
+        {...attributes}
+        {...listeners}
+        className="mt-0.5 cursor-grab touch-none text-zinc-300 opacity-0 transition-opacity group-hover:opacity-100 dark:text-zinc-600"
+      >
+        <GripVertical className="h-4 w-4" />
+      </button>
+
+      <button
+        onClick={() => toggleComplete(task.id)}
+        className="mt-0.5 shrink-0 text-zinc-300 hover:text-indigo-500 dark:text-zinc-600 dark:hover:text-indigo-400"
+      >
+        {task.completed ? (
+          <CheckCircle2 className="h-4 w-4 text-indigo-500 dark:text-indigo-400" />
+        ) : (
+          <Circle className="h-4 w-4" />
+        )}
+      </button>
+
+      <div
+        className="min-w-0 flex-1 cursor-pointer py-0.5"
+        onClick={() => setActiveTaskId(task.id)}
+      >
+        <span
+          className={cn(
+            'text-sm font-medium text-zinc-800 dark:text-zinc-200',
+            task.completed && 'line-through text-zinc-400 dark:text-zinc-500'
+          )}
+        >
+          {task.title}
+        </span>
+        {task.dueDate && (
+          <span className="me-2 text-[11px] text-zinc-400 dark:text-zinc-500">
+            {new Date(task.dueDate).toLocaleDateString('ar-SA', { month: 'short', day: 'numeric' })}
+          </span>
+        )}
+      </div>
+
+      {priority && (
+        <Badge className={priority.color}>{priority.label}</Badge>
+      )}
+
+      <Button size="icon" onClick={() => toggleImportant(task.id)}>
+        <Star
+          className={cn('h-4 w-4 md:h-3.5 md:w-3.5', task.important && 'fill-amber-400 text-amber-400')}
+        />
+      </Button>
+
+      <Button size="icon" variant="danger" onClick={() => deleteTask(task.id)}>
+        <Trash2 className="h-4 w-4 md:h-3.5 md:w-3.5" />
+      </Button>
+>>>>>>> aaba259eb43c2a33ef905f9dfe525f4f89bb0fce
     </motion.div>
   );
 });

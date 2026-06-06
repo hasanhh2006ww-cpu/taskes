@@ -32,7 +32,11 @@ my-taske/
 │   │
 │   ├── components/
 │   │   ├── layout/
+<<<<<<< HEAD
 │   │   │   └── Sidebar.tsx        # Responsive: overlay mobile, fixed desktop + SVG logo + dark gradient bg
+=======
+│   │   │   └── Sidebar.tsx        # Responsive: overlay mobile, fixed desktop + SVG logo
+>>>>>>> aaba259eb43c2a33ef905f9dfe525f4f89bb0fce
 │   │   ├── focus/
 │   │   │   └── FocusMode.tsx      # Focus mode: Pomodoro (time-based) + smart suggestion (keyword → duration) + YouTube audio + end sound selector + settings
 │   │   ├── tasks/
@@ -45,13 +49,20 @@ my-taske/
 │   │   │   └── Input.tsx          # Styled text input
 │   │   ├── dashboard/
 │   │   │   └── Dashboard.tsx      # Stats cards + project progress + overdue
+<<<<<<< HEAD
 │   │   ├── ai/
 │   │   │   └── AIAssistant.tsx    # AI Assistant: goal input → daily plan → batch task creation
+=======
+>>>>>>> aaba259eb43c2a33ef905f9dfe525f4f89bb0fce
 │   │   └── command-palette/
 │   │       └── CommandPalette.tsx # Ctrl+K palette (Arabic)
 │   │
 │   ├── store/                     # Zustand — domain-split
+<<<<<<< HEAD
 │   │   ├── useTaskStore.ts        # Tasks CRUD, filter, reorder, addMultipleTasks (batch)
+=======
+│   │   ├── useTaskStore.ts        # Tasks CRUD, filter, reorder
+>>>>>>> aaba259eb43c2a33ef905f9dfe525f4f89bb0fce
 │   │   ├── useProjectStore.ts     # Projects CRUD
 │   │   └── useUIStore.ts          # Dark mode, focus mode, sidebar, activeTaskId, focusSession, focusSettings (incl. endSound/endSoundUrl)
 │   │
@@ -61,7 +72,10 @@ my-taske/
 │   └── lib/                       # Shared core
 │       ├── types.ts               # Task (pomodoroCount), Project, Priority, FilterType, FocusSession
 │       ├── constants.ts           # PRIORITIES (Arabic), PROJECT_COLORS, STORAGE_KEYS (incl. FOCUS_SETTINGS), FOCUS_PRESETS, getToday()
+<<<<<<< HEAD
 │       ├── ai-engine.ts           # AI goal planner: keyword-based → extract topic/days → generate AIPlan (days × tasks)
+=======
+>>>>>>> aaba259eb43c2a33ef905f9dfe525f4f89bb0fce
 │       ├── focus-suggest.ts       # Smart focus suggestion engine + END_SOUNDS + playBell/playBeep/playEndSound
 │       ├── cn.ts                  # clsx + twMerge utility
 │       ├── logger.ts              # Async non-blocking logger
@@ -105,10 +119,13 @@ User Input (keyboard/mouse/touch)
     ├── FocusMode: Prev/Next → navigate tasks
     ├── FocusMode: ✓ complete → incrementPomodoro + trophy animation + chime
     ├── FocusMode: X → save session + exit
+<<<<<<< HEAD
     ├── Sidebar click (AI Assistant) → onViewChange('ai') + close sidebar
     ├── AIAssistant: type goal + click "إنشاء خطة" → generatePlan() → daily plan with tasks
     ├── AIAssistant: expand/collapse day → show tasks with priority + estimated duration
     ├── AIAssistant: click "إضافة N مهمة" → addMultipleTasks() + create/use project
+=======
+>>>>>>> aaba259eb43c2a33ef905f9dfe525f4f89bb0fce
     └── Theme button → toggleDarkMode
             │
             ▼
@@ -162,9 +179,12 @@ User Input (keyboard/mouse/touch)
 | 40 | Pomodoro timer يتجمد عند إخفاء التاب | وقت مطلق (`Date.now()`) بدلاً من التناقص | ✅ |
 | 41 | لا يوجد اقتراح ذكي لمدة التركيز | `suggestFocus()` يحلل عنوان المهمة ويقترح 25/50/90 دقيقة مع Banner قبول/تجاهل | ✅ |
 | 42 | لا يوجد اختيار صوت نهاية الجلسة | 5 خيارات (نغمة بسيطة، جرس، تنبيه رقمي، احتفال، رابط مخصص) + مشغل عند انتهاء التايمر | ✅ |
+<<<<<<< HEAD
 | 43 | لا يوجد مساعد ذكي لتحويل الأهداف إلى مهام | AIAssistant: rules engine + واجهة إدخال الهدف ← خطة يومية ← إضافة مهام للـ store | ✅ |
 | 44 | لا يوجد تحكم بالإيماءات (Swipe) | TaskItem: pointer-event swipe → right=complete, left=delete + vibration + بهدوء | ✅ |
 | 45 | الثيمة الداكنة بسيطة جداً (مسطحة) | Modern SaaS dark theme: gradient bg (from-[#0A0E17] via-[#111827] to-[#020617]), refined borders, card hover lift, sidebar gradient, Linear-inspired | ✅ |
+=======
+>>>>>>> aaba259eb43c2a33ef905f9dfe525f4f89bb0fce
 
 ## [ORPHANS & PENDING]
 
@@ -176,9 +196,12 @@ User Input (keyboard/mouse/touch)
 | Focus Mode Settings | Done | Custom durations (presets 25/5, 50/10, 90/20 + manual), YouTube background audio, settings panel |
 | Smart Focus Suggestion | Done | `suggestFocus(title)` → keyword-based 25/50/90 min suggestion with accept/dismiss banner |
 | End Sound System | Done | 5 sounds (chime, bell, beep, celebration, custom URL), plays automatically on timer end |
+<<<<<<< HEAD
 | AI Task Assistant | Done | `generatePlan(goal)` keyword-based engine + AIAssistant UI: input → daily breakdown → batch add to store |
 | Gesture Controls (Swipe) | Done | TaskItem: pointer-event swipe → right=complete, left=delete + vibration + spring animation |
 | Theme Refresh (SaaS Dark) | Done | Gradient body/sidebar/cards, hover lift effects, refined borders, indigo glow |
+=======
+>>>>>>> aaba259eb43c2a33ef905f9dfe525f4f89bb0fce
 | Keyboard shortcut: N for new task | Done | focuses task input |
 | Undo toast on delete | Backlog | react-hot-toast installed, not wired |
 | `date-fns` dependency | Not used | installed but unused, kept for future |

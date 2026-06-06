@@ -5,6 +5,7 @@
 @theme inline {
   --font-sans: var(--font-cairo);
   --font-mono: var(--font-cairo);
+<<<<<<< HEAD
   --color-dark-50: #f8fafc;
   --color-dark-100: #f1f5f9;
   --color-dark-200: #e2e8f0;
@@ -12,6 +13,8 @@
   --color-dark-800: #1e293b;
   --color-dark-900: #0f172a;
   --color-dark-950: #020617;
+=======
+>>>>>>> aaba259eb43c2a33ef905f9dfe525f4f89bb0fce
 }
 
 * {
@@ -27,12 +30,15 @@ body {
   font-family: var(--font-cairo), system-ui, sans-serif;
   -webkit-tap-highlight-color: transparent;
   overscroll-behavior: none;
+<<<<<<< HEAD
   background: #f8fafc;
 }
 
 .dark body {
   background: linear-gradient(135deg, #0A0E17 0%, #111827 50%, #020617 100%);
   background-attachment: fixed;
+=======
+>>>>>>> aaba259eb43c2a33ef905f9dfe525f4f89bb0fce
 }
 
 button, a, input, select, textarea {

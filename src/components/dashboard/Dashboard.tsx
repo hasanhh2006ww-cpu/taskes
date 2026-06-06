@@ -35,7 +35,11 @@ export function Dashboard() {
           {stats.map((stat) => (
             <div
               key={stat.label}
+<<<<<<< HEAD
               className={`rounded-2xl border border-zinc-200/60 p-4 backdrop-blur-sm transition-all duration-200 dark:border-zinc-800/40 dark:hover:shadow-lg dark:hover:shadow-black/10 dark:hover:-translate-y-0.5 ${stat.bg}`}
+=======
+              className={`rounded-2xl border border-zinc-200/60 p-4 backdrop-blur-sm dark:border-zinc-800/60 ${stat.bg}`}
+>>>>>>> aaba259eb43c2a33ef905f9dfe525f4f89bb0fce
             >
               <div className="mb-2 flex items-center gap-2">
                 <stat.icon className={`h-4 w-4 ${stat.color}`} />
@@ -48,7 +52,11 @@ export function Dashboard() {
           ))}
         </div>
 
+<<<<<<< HEAD
         <div className="mt-4 rounded-2xl border border-zinc-200/60 p-4 dark:border-zinc-800/40 dark:bg-zinc-900/20">
+=======
+        <div className="mt-4 rounded-2xl border border-zinc-200/60 p-4 dark:border-zinc-800/60">
+>>>>>>> aaba259eb43c2a33ef905f9dfe525f4f89bb0fce
           <div className="mb-3 flex items-center gap-2">
             <FolderKanban className="h-4 w-4 text-zinc-400" />
             <span className="text-xs font-medium text-zinc-400 dark:text-zinc-500">المشاريع</span>
@@ -76,7 +84,11 @@ export function Dashboard() {
         </div>
 
         {overdue > 0 && (
+<<<<<<< HEAD
           <div className="mt-3 rounded-2xl border border-rose-200/60 bg-rose-50/50 p-3 dark:border-rose-900/30 dark:bg-rose-950/20 dark:shadow-lg dark:shadow-rose-950/10">
+=======
+          <div className="mt-3 rounded-2xl border border-rose-200/60 bg-rose-50/50 p-3 dark:border-rose-900/30 dark:bg-rose-950/20">
+>>>>>>> aaba259eb43c2a33ef905f9dfe525f4f89bb0fce
             <p className="text-sm font-medium text-rose-600 dark:text-rose-400">
               {overdue} {overdue === 1 ? 'مهمة متأخرة' : 'مهام متأخرة'}
             </p>

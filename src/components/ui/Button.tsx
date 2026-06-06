@@ -24,7 +24,11 @@ export function Button({
         variant === 'ghost' &&
           'text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800',
         variant === 'primary' &&
+<<<<<<< HEAD
           'bg-indigo-500 text-white hover:bg-indigo-600 shadow-sm dark:shadow-indigo-500/20',
+=======
+          'bg-indigo-500 text-white hover:bg-indigo-600 shadow-sm',
+>>>>>>> aaba259eb43c2a33ef905f9dfe525f4f89bb0fce
         variant === 'danger' &&
           'text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/30',
         size === 'sm' && 'h-10 px-2.5 text-xs gap-1 md:h-7 md:px-2',

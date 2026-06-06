@@ -76,7 +76,11 @@ export function TaskList() {
       </div>
 
       <div className="flex flex-col gap-2 px-4 pb-4 sm:flex-row sm:items-center sm:px-6">
+<<<<<<< HEAD
         <div className="flex flex-1 items-center gap-2 rounded-xl border border-zinc-200/60 bg-white/50 px-3 py-2.5 backdrop-blur-sm transition-colors dark:border-zinc-800/40 dark:bg-zinc-900/40 dark:focus-within:border-zinc-700/60">
+=======
+        <div className="flex flex-1 items-center gap-2 rounded-xl border border-zinc-200/60 bg-white/50 px-3 py-2.5 backdrop-blur-sm dark:border-zinc-800/60 dark:bg-zinc-900/50">
+>>>>>>> aaba259eb43c2a33ef905f9dfe525f4f89bb0fce
           <Plus className="h-4 w-4 shrink-0 text-zinc-400" />
           <Input
             data-task-input
