@@ -1,0 +1,7 @@
+# Prevent browser caching of the shell to ensure fresh deploys are seen immediately
+/index.html
+  Cache-Control: no-cache, no-store, must-revalidate
+
+# Cache static assets aggressively (hash-based filenames from Next.js)
+/_next/static/*
+  Cache-Control: public, max-age=31536000, immutable

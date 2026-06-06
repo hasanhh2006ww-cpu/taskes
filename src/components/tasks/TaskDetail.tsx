@@ -53,11 +53,7 @@ export function TaskDetail() {
       initial={{ opacity: 0, x: -20 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.2 }}
-<<<<<<< HEAD
       className="flex h-full flex-col dark:bg-gradient-to-b dark:from-zinc-900/30 dark:to-zinc-950/30"
-=======
-      className="flex h-full flex-col"
->>>>>>> aaba259eb43c2a33ef905f9dfe525f4f89bb0fce
     >
       <div className="flex items-center justify-between px-4 pt-5 pb-3 md:px-6">
         <h2 className="text-sm font-medium text-zinc-400 dark:text-zinc-500">التفاصيل</h2>
@@ -71,11 +67,7 @@ export function TaskDetail() {
           value={editTitle}
           onChange={(e) => setEditTitle(e.target.value)}
           onBlur={handleBlur}
-<<<<<<< HEAD
           className="mb-4 w-full bg-transparent text-lg font-semibold text-zinc-900 outline-none placeholder-zinc-400 dark:text-zinc-100"
-=======
-          className="mb-4 w-full bg-transparent text-lg font-semibold text-zinc-900 outline-none dark:text-zinc-100"
->>>>>>> aaba259eb43c2a33ef905f9dfe525f4f89bb0fce
         />
 
         <div className="space-y-3">
@@ -121,11 +113,7 @@ export function TaskDetail() {
               type="date"
               value={t.dueDate || ''}
               onChange={(e) => updateTask(t.id, { dueDate: e.target.value || undefined })}
-<<<<<<< HEAD
               className="rounded-lg border border-zinc-200 bg-white/50 px-2 py-1 text-xs text-zinc-700 outline-none dark:border-zinc-700/50 dark:bg-zinc-900/60 dark:text-zinc-300"
-=======
-              className="rounded-lg border border-zinc-200 bg-white/50 px-2 py-1 text-xs text-zinc-700 outline-none dark:border-zinc-700 dark:bg-zinc-900/50 dark:text-zinc-300"
->>>>>>> aaba259eb43c2a33ef905f9dfe525f4f89bb0fce
             />
           </div>
 

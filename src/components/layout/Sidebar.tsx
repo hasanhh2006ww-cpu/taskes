@@ -15,16 +15,10 @@ import {
   Plus,
   FolderKanban,
   Target,
-<<<<<<< HEAD
   BrainCircuit,
 } from 'lucide-react';
 
 type View = 'app' | 'dashboard' | 'ai';
-=======
-} from 'lucide-react';
-
-type View = 'app' | 'dashboard';
->>>>>>> aaba259eb43c2a33ef905f9dfe525f4f89bb0fce
 
 const NAV_ITEMS = [
   { label: 'جميع المهام', icon: ListTodo, filter: 'all' as const },
@@ -34,13 +28,8 @@ const NAV_ITEMS = [
 ];
 
 interface SidebarProps {
-<<<<<<< HEAD
   view: 'app' | 'dashboard' | 'ai';
   onViewChange: (view: 'app' | 'dashboard' | 'ai') => void;
-=======
-  view: 'app' | 'dashboard';
-  onViewChange: (view: 'app' | 'dashboard') => void;
->>>>>>> aaba259eb43c2a33ef905f9dfe525f4f89bb0fce
 }
 
 export function Sidebar({ view, onViewChange }: SidebarProps) {
@@ -59,11 +48,7 @@ export function Sidebar({ view, onViewChange }: SidebarProps) {
   }
 
   return (
-<<<<<<< HEAD
     <aside className="flex h-full w-64 flex-col border-e border-zinc-200/60 bg-white/95 backdrop-blur-xl dark:border-zinc-800/40 dark:bg-gradient-to-b dark:from-[#0B0F1A] dark:to-[#0F1525]">
-=======
-    <aside className="flex h-full w-64 flex-col border-e border-zinc-200/60 bg-white/95 backdrop-blur-xl dark:border-zinc-800/60 dark:bg-zinc-950/95">
->>>>>>> aaba259eb43c2a33ef905f9dfe525f4f89bb0fce
       <div className="flex items-center gap-2 px-4 pt-5 pb-4">
         <img src="/logo.svg" alt="My Taske" className="h-8 w-auto" />
       </div>
@@ -109,7 +94,6 @@ export function Sidebar({ view, onViewChange }: SidebarProps) {
           </button>
         ))}
 
-<<<<<<< HEAD
         <button
           onClick={() => handleNavClick(() => onViewChange('ai'))}
           className={cn(
@@ -123,8 +107,6 @@ export function Sidebar({ view, onViewChange }: SidebarProps) {
           <span className="flex-1 text-start">المساعد الذكي</span>
         </button>
 
-=======
->>>>>>> aaba259eb43c2a33ef905f9dfe525f4f89bb0fce
         <div className="my-3 border-t border-zinc-200/50 dark:border-zinc-800/50" />
 
         <div className="mb-1 flex items-center justify-between px-3">
@@ -175,11 +157,7 @@ export function Sidebar({ view, onViewChange }: SidebarProps) {
         ))}
       </nav>
 
-<<<<<<< HEAD
       <div className="mx-2 mb-2 mt-auto rounded-xl border border-zinc-200/50 bg-zinc-50/50 p-2 dark:border-zinc-800/40 dark:bg-zinc-900/40">
-=======
-      <div className="border-t border-zinc-200/60 px-2 py-3 dark:border-zinc-800/60">
->>>>>>> aaba259eb43c2a33ef905f9dfe525f4f89bb0fce
         <button
           onClick={toggleFocusMode}
           className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-zinc-500 transition-colors min-h-[44px] hover:bg-indigo-50 hover:text-indigo-600 dark:text-zinc-400 dark:hover:bg-indigo-950/40 dark:hover:text-indigo-400"
