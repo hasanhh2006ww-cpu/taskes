@@ -13,7 +13,6 @@ interface TaskState {
   setActiveProjectId: (id: string | null) => void;
   setActiveTaskId: (id: string | null) => void;
   addTask: (task: { title: string; priority?: Priority; projectId?: string; dueDate?: string }) => void;
-  addMultipleTasks: (tasks: { title: string; priority?: Priority; projectId?: string; dueDate?: string }[]) => void;
   updateTask: (id: string, updates: Partial<Task>) => void;
   deleteTask: (id: string) => void;
   toggleComplete: (id: string) => void;
@@ -53,25 +52,6 @@ export const useTaskStore = create<TaskState>((set, get) => ({
     };
     const updated = [...tasks, newTask];
     set({ tasks: updated, activeTaskId: newTask.id });
-    saveToStorage(STORAGE_KEYS.TASKS, updated);
-  },
-
-  addMultipleTasks: (newTasks) => {
-    const { tasks, activeProjectId } = get();
-    const created: Task[] = newTasks.map((t, i) => ({
-      id: uuid(),
-      title: t.title,
-      priority: t.priority ?? 'medium',
-      projectId: t.projectId ?? activeProjectId ?? undefined,
-      dueDate: t.dueDate,
-      completed: false,
-      important: false,
-      createdAt: Date.now(),
-      order: tasks.length + i,
-      pomodoroCount: 0,
-    }));
-    const updated = [...tasks, ...created];
-    set({ tasks: updated });
     saveToStorage(STORAGE_KEYS.TASKS, updated);
   },
 

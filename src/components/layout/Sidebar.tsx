@@ -15,10 +15,9 @@ import {
   Plus,
   FolderKanban,
   Target,
-  BrainCircuit,
 } from 'lucide-react';
 
-type View = 'app' | 'dashboard' | 'ai';
+type View = 'app' | 'dashboard';
 
 const NAV_ITEMS = [
   { label: 'جميع المهام', icon: ListTodo, filter: 'all' as const },
@@ -28,8 +27,8 @@ const NAV_ITEMS = [
 ];
 
 interface SidebarProps {
-  view: 'app' | 'dashboard' | 'ai';
-  onViewChange: (view: 'app' | 'dashboard' | 'ai') => void;
+  view: 'app' | 'dashboard';
+  onViewChange: (view: 'app' | 'dashboard') => void;
 }
 
 export function Sidebar({ view, onViewChange }: SidebarProps) {
@@ -93,19 +92,6 @@ export function Sidebar({ view, onViewChange }: SidebarProps) {
             )}
           </button>
         ))}
-
-        <button
-          onClick={() => handleNavClick(() => onViewChange('ai'))}
-          className={cn(
-            'flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors min-h-[44px]',
-            view === 'ai'
-              ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400'
-              : 'text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800/60'
-          )}
-        >
-          <BrainCircuit className="h-4 w-4" />
-          <span className="flex-1 text-start">المساعد الذكي</span>
-        </button>
 
         <div className="my-3 border-t border-zinc-200/50 dark:border-zinc-800/50" />
 
