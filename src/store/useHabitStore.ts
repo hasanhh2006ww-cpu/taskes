@@ -47,6 +47,7 @@ export const useHabitStore = create<HabitState>((set, get) => ({
       order: habits.length,
       completions: {},
       streak: 0,
+      bestStreak: 0,
       lastCompletedDate: null,
     };
     const updated = [...habits, newHabit];
@@ -75,7 +76,7 @@ export const useHabitStore = create<HabitState>((set, get) => ({
     saveToStorage(STORAGE_KEYS.HABITS, reordered);
   },
 
-  toggleCompletion: (id, date = getToday()) => {
+      toggleCompletion: (id, date = getToday()) => {
     const { habits } = get();
     const habit = habits.find((h) => h.id === id);
     if (!habit) return;
@@ -90,13 +91,16 @@ export const useHabitStore = create<HabitState>((set, get) => ({
 
     let newStreak = habit.streak;
     let newLastCompletedDate = habit.lastCompletedDate;
+    let newBestStreak = habit.bestStreak;
 
     if (!wasCompleted) {
       if (date === getToday()) {
         if (completedYesterday || habit.lastCompletedDate === yesterday) {
           newStreak = habit.streak + 1;
+          newBestStreak = Math.max(newStreak, habit.bestStreak);
         } else {
           newStreak = 1;
+          newBestStreak = Math.max(newStreak, habit.bestStreak);
         }
         newLastCompletedDate = getToday();
       }
@@ -114,7 +118,7 @@ export const useHabitStore = create<HabitState>((set, get) => ({
     }
 
     const updated = habits.map((h) =>
-      h.id === id ? { ...h, completions, streak: newStreak, lastCompletedDate: newLastCompletedDate } : h
+      h.id === id ? { ...h, completions, streak: newStreak, bestStreak: newBestStreak, lastCompletedDate: newLastCompletedDate } : h
     );
     set({ habits: updated });
     saveToStorage(STORAGE_KEYS.HABITS, updated);

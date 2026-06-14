@@ -40,7 +40,7 @@ my-taske/
 │   │   │   ├── TaskList.tsx       # DnD context, add task input, filter display
 │   │   │   └── TaskDetail.tsx     # Right panel: title, priority, date, etc.
 │   │   ├── habits/
-│   │   │   └── HabitTracker.tsx   # Daily habits: checkbox, streak (🔥), add/edit/delete/reorder
+│   │   │   └── HabitTracker.tsx   # Daily habits: checkbox, streak (🔥), add/edit/delete/reorder + mini calendar + 7-day status + current/best streak + broken streak alerts
 │   │   ├── ui/
 │   │   │   ├── Button.tsx         # ghost/primary/danger + sm/md/icon (44px touch on mobile)
 │   │   │   ├── Badge.tsx          # Priority badge
@@ -111,9 +111,11 @@ User Input (keyboard/mouse/touch)
     ├── FocusMode: X → save session + exit
     ├── HabitTracker: Input + Enter → addHabit
     ├── HabitTracker: Checkbox → toggleCompletion (today)
+    ├── HabitTracker: Calendar circle click → toggleCompletion (any day)
     ├── HabitTracker: Double-click / Edit icon → inline edit title
     ├── HabitTracker: Drag handle → reorderHabits
     ├── HabitTracker: Trash → deleteHabit
+    ├── HabitTracker: Display streaks → current/best + broken alerts
     └── Theme button → toggleDarkMode
             │
             ▼
@@ -173,12 +175,14 @@ User Input (keyboard/mouse/touch)
 | 46 | التحديثات لا تظهر في الموقع المباشر | @netlify/plugin-nextjs يمنع static export; إزالة الـ plugin + إضافة public/_redirects + public/_headers للتحكم بالتخزين المؤقت | ✅ |
 | 47 | المساعد الذكي (AI) تمت إزالته بالكامل | حذف AIAssistant.tsx + ai-engine.ts + 'ai' view + إزالة addMultipleTasks orphan + update PROJECT_MAP | ❌ |
 | 48 | لا يوجد متتبع عادات (Habit Tracker) | HabitTracker: daily habits + checkbox + streak (🔥) + CRUD + reorder + sidebar nav + localStorage | ✅ |
+| 49 | متتبع العادات المعزز | HabitTracker: mini calendar (last 7 days) + colored status + current/best streak + streak broken alerts + interactive day clicks | ✅ |
 
 ## [ORPHANS & PENDING]
 
 | Item | Status | Notes |
 |------|--------|-------|
 | Framer Motion animations | Done | enter/exit, layoutId (TaskItem), slide (TaskDetail), scale (CommandPalette) |
+| Enhanced Habit Tracker UI | Done | mini calendar, 7-day status, current/best streak, broken streak alerts |
 | Focus Mode visual polish | Done | Full-screen overlay: Pomodoro timer, rain sound, dark gradient, task nav |
 | Focus Mode Pro | Done | Smart resume, pomodoro count, completion feedback (trophy + chime), session stats |
 | Focus Mode Settings | Done | Custom durations (presets 25/5, 50/10, 90/20 + manual), YouTube background audio, settings panel |
@@ -193,6 +197,7 @@ User Input (keyboard/mouse/touch)
 | Static build warning: localStorage | Known | harmless, occurs during SSR |
 | `public/ph.png` | Deprecated | replaced by `public/logo.svg` (can be deleted) |
 | RTL animation direction | Done | TaskDetail slides from x:-20 (right in RTL) |
+| Daily habit completion with calendar selection | Done | HabitTracker now allows clicking any day in the 7-day calendar to toggle completion |
 | Responsive design | Done | Mobile sidebar overlay, full-screen detail, 44px touch targets |
 | Cross-platform responsive | Done | touch-action, 44px targets, disabled mobile shortcuts, responsive FocusMode, scroll settings |
 | SVG logo (Google-style) | Done | `public/logo.svg` — checkmark icon + "My Taske" text, scalable |

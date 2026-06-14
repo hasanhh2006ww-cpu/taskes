@@ -30,5 +30,6 @@ export interface Habit {
   order: number;
   completions: Record<string, boolean>;
   streak: number;
+  bestStreak: number;
   lastCompletedDate: string | null;
 }
