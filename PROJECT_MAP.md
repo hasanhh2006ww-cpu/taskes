@@ -40,7 +40,7 @@ my-taske/
 │   │   │   ├── TaskList.tsx       # DnD context, add task input, filter display
 │   │   │   └── TaskDetail.tsx     # Right panel: title, priority, date, etc.
 │   │   ├── habits/
-│   │   │   └── HabitTracker.tsx   # Daily habits: checkbox, streak (🔥), add/edit/delete/reorder + mini calendar + 7-day status + current/best streak + broken streak alerts
+│   │   │   └── HabitTrackerPro.tsx # Professional: daily/weekly/monthly + tabs + timezone-aware + streak stats + config panels
 │   │   ├── ui/
 │   │   │   ├── Button.tsx         # ghost/primary/danger + sm/md/icon (44px touch on mobile)
 │   │   │   ├── Badge.tsx          # Priority badge
@@ -116,6 +116,7 @@ User Input (keyboard/mouse/touch)
     ├── HabitTracker: Drag handle → reorderHabits
     ├── HabitTracker: Trash → deleteHabit
     ├── HabitTracker: Display streaks → current/best + broken alerts
+    └── HabitTrackerPro: Add habit (config: daily/weekly/monthly) + tab filters + timezone toggle + streak stats + past-day editor
     └── Theme button → toggleDarkMode
             │
             ▼
@@ -175,7 +176,8 @@ User Input (keyboard/mouse/touch)
 | 46 | التحديثات لا تظهر في الموقع المباشر | @netlify/plugin-nextjs يمنع static export; إزالة الـ plugin + إضافة public/_redirects + public/_headers للتحكم بالتخزين المؤقت | ✅ |
 | 47 | المساعد الذكي (AI) تمت إزالته بالكامل | حذف AIAssistant.tsx + ai-engine.ts + 'ai' view + إزالة addMultipleTasks orphan + update PROJECT_MAP | ❌ |
 | 48 | لا يوجد متتبع عادات (Habit Tracker) | HabitTracker: daily habits + checkbox + streak (🔥) + CRUD + reorder + sidebar nav + localStorage | ✅ |
-| 49 | متتبع العادات المعزز | HabitTracker: mini calendar (last 7 days) + colored status + current/best streak + streak broken alerts + interactive day clicks | ✅ |
+| 49 | متتبع العادات المعزز | HabitTracker: mini calendar + 7-day status + current/best streak + streak broken alerts + interactive day clicks | ✅ |
+| 50 | متتبع العادات الاحترافي | HabitTrackerPro: daily/weekly/monthly habit types + tab filters + timezone-aware + advanced streak logic + CRUD + config panels + streaks stats | ✅ |
 
 ## [ORPHANS & PENDING]
 
@@ -184,6 +186,8 @@ User Input (keyboard/mouse/touch)
 | Framer Motion animations | Done | enter/exit, layoutId (TaskItem), slide (TaskDetail), scale (CommandPalette) |
 | Enhanced Habit Tracker UI | Done | mini calendar, 7-day status, current/best streak, broken streak alerts |
 | Focus Mode visual polish | Done | Full-screen overlay: Pomodoro timer, rain sound, dark gradient, task nav |
+| Enhanced Habit Tracker UI | Done | mini calendar, 7-day status, current/best streak, broken streak alerts |
+| Professional Habit Tracker | Done | daily/weekly/monthly types, tab filters, timezone-aware, advanced streak logic, config panels |
 | Focus Mode Pro | Done | Smart resume, pomodoro count, completion feedback (trophy + chime), session stats |
 | Focus Mode Settings | Done | Custom durations (presets 25/5, 50/10, 90/20 + manual), YouTube background audio, settings panel |
 | Smart Focus Suggestion | Done | `suggestFocus(title)` → keyword-based 25/50/90 min suggestion with accept/dismiss banner |
@@ -201,4 +205,5 @@ User Input (keyboard/mouse/touch)
 | Responsive design | Done | Mobile sidebar overlay, full-screen detail, 44px touch targets |
 | Cross-platform responsive | Done | touch-action, 44px targets, disabled mobile shortcuts, responsive FocusMode, scroll settings |
 | SVG logo (Google-style) | Done | `public/logo.svg` — checkmark icon + "My Taske" text, scalable |
-| Habit Tracker (Daily) | Done | `useHabitStore`, `HabitTracker`, sidebar nav, streak logic, localStorage persistence |
+| Enhanced Habit Tracker UI | Done | mini calendar, 7-day status, current/best streak, broken streak alerts |
+| Professional Habit Tracker | Done | daily/weekly/monthly types, tab filters, timezone-aware, advanced streak logic, config panels |
