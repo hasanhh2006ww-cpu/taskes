@@ -10,12 +10,13 @@ import { TaskDetail } from '@/components/tasks/TaskDetail';
 import { Dashboard } from '@/components/dashboard/Dashboard';
 import { CommandPalette } from '@/components/command-palette/CommandPalette';
 import { FocusMode } from '@/components/focus/FocusMode';
+import { HabitTracker } from '@/components/habits/HabitTracker';
 import { cn } from '@/lib/cn';
 import { loadFromStorage } from '@/lib/storage';
 import { STORAGE_KEYS } from '@/lib/constants';
 import { Menu, X } from 'lucide-react';
 
-type View = 'app' | 'dashboard';
+type View = 'app' | 'dashboard' | 'habits';
 
 export default function Home() {
   const [view, setView] = useState<View>('app');
@@ -74,6 +75,10 @@ export default function Home() {
       {view === 'dashboard' ? (
         <main className="flex flex-1 overflow-hidden pt-14 md:pt-0">
           <Dashboard />
+        </main>
+      ) : view === 'habits' ? (
+        <main className="flex flex-1 overflow-hidden pt-14 md:pt-0">
+          <HabitTracker />
         </main>
       ) : (
         <main className="flex flex-1 flex-col overflow-hidden pt-14 md:pt-0">

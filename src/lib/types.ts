@@ -22,3 +22,13 @@ export interface Project {
   color: string;
   createdAt: number;
 }
+
+export interface Habit {
+  id: string;
+  title: string;
+  createdAt: number;
+  order: number;
+  completions: Record<string, boolean>;
+  streak: number;
+  lastCompletedDate: string | null;
+}

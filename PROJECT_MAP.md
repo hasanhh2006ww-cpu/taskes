@@ -39,6 +39,8 @@ my-taske/
 │   │   │   ├── TaskItem.tsx       # Draggable task card (React.memo)
 │   │   │   ├── TaskList.tsx       # DnD context, add task input, filter display
 │   │   │   └── TaskDetail.tsx     # Right panel: title, priority, date, etc.
+│   │   ├── habits/
+│   │   │   └── HabitTracker.tsx   # Daily habits: checkbox, streak (🔥), add/edit/delete/reorder
 │   │   ├── ui/
 │   │   │   ├── Button.tsx         # ghost/primary/danger + sm/md/icon (44px touch on mobile)
 │   │   │   ├── Badge.tsx          # Priority badge
@@ -51,14 +53,15 @@ my-taske/
 │   ├── store/                     # Zustand — domain-split
 │   │   ├── useTaskStore.ts        # Tasks CRUD, filter, reorder (batch)
 │   │   ├── useProjectStore.ts     # Projects CRUD
-│   │   └── useUIStore.ts          # Dark mode, focus mode, sidebar, activeTaskId, focusSession, focusSettings (incl. endSound/endSoundUrl)
+│   │   ├── useUIStore.ts          # Dark mode, focus mode, sidebar, activeTaskId, focusSession, focusSettings (incl. endSound/endSoundUrl)
+│   │   └── useHabitStore.ts       # Habits CRUD, daily completion, streak calculation
 │   │
 │   ├── hooks/
 │   │   └── useKeyboard.ts         # Global keyboard shortcuts (desktop-only, disabled on touch)
 │   │
 │   └── lib/                       # Shared core
-│       ├── types.ts               # Task (pomodoroCount), Project, Priority, FilterType, FocusSession
-│       ├── constants.ts           # PRIORITIES (Arabic), PROJECT_COLORS, STORAGE_KEYS (incl. FOCUS_SETTINGS), FOCUS_PRESETS, getToday()
+│       ├── types.ts               # Task (pomodoroCount), Project, Priority, FilterType, FocusSession, Habit
+│       ├── constants.ts           # PRIORITIES (Arabic), PROJECT_COLORS, STORAGE_KEYS (incl. FOCUS_SETTINGS, HABITS), FOCUS_PRESETS, getToday()
 │       ├── focus-suggest.ts       # Smart focus suggestion engine + END_SOUNDS + playBell/playBeep/playEndSound
 │       ├── cn.ts                  # clsx + twMerge utility
 │       ├── logger.ts              # Async non-blocking logger
@@ -84,6 +87,7 @@ User Input (keyboard/mouse/touch)
     ├── Sidebar click (Dashboard) → onViewChange('dashboard') + close sidebar
     ├── Sidebar click (nav item) → onViewChange('app') + setFilter + close sidebar
     ├── Sidebar click (project) → onViewChange('app') + setActiveProjectId + close sidebar
+    ├── Sidebar click (Habits) → onViewChange('habits') + close sidebar
     ├── Sidebar delete (×) → deleteProject + confirm
     ├── Input (N) → focus task input
     ├── Input + Enter → addTask
@@ -105,6 +109,11 @@ User Input (keyboard/mouse/touch)
     ├── FocusMode: Prev/Next → navigate tasks
     ├── FocusMode: ✓ complete → incrementPomodoro + trophy animation + chime
     ├── FocusMode: X → save session + exit
+    ├── HabitTracker: Input + Enter → addHabit
+    ├── HabitTracker: Checkbox → toggleCompletion (today)
+    ├── HabitTracker: Double-click / Edit icon → inline edit title
+    ├── HabitTracker: Drag handle → reorderHabits
+    ├── HabitTracker: Trash → deleteHabit
     └── Theme button → toggleDarkMode
             │
             ▼
@@ -163,6 +172,7 @@ User Input (keyboard/mouse/touch)
 | 45 | الثيمة الداكنة بسيطة جداً (مسطحة) | Modern SaaS dark theme: gradient bg (from-[#0A0E17] via-[#111827] to-[#020617]), refined borders, card hover lift, sidebar gradient, Linear-inspired | ✅ |
 | 46 | التحديثات لا تظهر في الموقع المباشر | @netlify/plugin-nextjs يمنع static export; إزالة الـ plugin + إضافة public/_redirects + public/_headers للتحكم بالتخزين المؤقت | ✅ |
 | 47 | المساعد الذكي (AI) تمت إزالته بالكامل | حذف AIAssistant.tsx + ai-engine.ts + 'ai' view + إزالة addMultipleTasks orphan + update PROJECT_MAP | ❌ |
+| 48 | لا يوجد متتبع عادات (Habit Tracker) | HabitTracker: daily habits + checkbox + streak (🔥) + CRUD + reorder + sidebar nav + localStorage | ✅ |
 
 ## [ORPHANS & PENDING]
 
@@ -186,3 +196,4 @@ User Input (keyboard/mouse/touch)
 | Responsive design | Done | Mobile sidebar overlay, full-screen detail, 44px touch targets |
 | Cross-platform responsive | Done | touch-action, 44px targets, disabled mobile shortcuts, responsive FocusMode, scroll settings |
 | SVG logo (Google-style) | Done | `public/logo.svg` — checkmark icon + "My Taske" text, scalable |
+| Habit Tracker (Daily) | Done | `useHabitStore`, `HabitTracker`, sidebar nav, streak logic, localStorage persistence |

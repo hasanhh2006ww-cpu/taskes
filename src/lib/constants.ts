@@ -18,6 +18,7 @@ export const STORAGE_KEYS = {
   UI: 'my-taske-ui',
   FOCUS_SESSION: 'my-taske-focus-session',
   FOCUS_SETTINGS: 'my-taske-focus-settings',
+  HABITS: 'my-taske-habits',
 } as const;
 
 export const FOCUS_PRESETS = [

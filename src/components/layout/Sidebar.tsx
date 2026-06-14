@@ -4,6 +4,7 @@ import { cn } from '@/lib/cn';
 import { useTaskStore } from '@/store/useTaskStore';
 import { useProjectStore } from '@/store/useProjectStore';
 import { useUIStore } from '@/store/useUIStore';
+import { useHabitStore } from '@/store/useHabitStore';
 import { Button } from '@/components/ui/Button';
 import { getToday } from '@/lib/constants';
 import {
@@ -15,9 +16,10 @@ import {
   Plus,
   FolderKanban,
   Target,
+  Flame,
 } from 'lucide-react';
 
-type View = 'app' | 'dashboard';
+type View = 'app' | 'dashboard' | 'habits';
 
 const NAV_ITEMS = [
   { label: 'جميع المهام', icon: ListTodo, filter: 'all' as const },
@@ -27,14 +29,15 @@ const NAV_ITEMS = [
 ];
 
 interface SidebarProps {
-  view: 'app' | 'dashboard';
-  onViewChange: (view: 'app' | 'dashboard') => void;
+  view: 'app' | 'dashboard' | 'habits';
+  onViewChange: (view: 'app' | 'dashboard' | 'habits') => void;
 }
 
 export function Sidebar({ view, onViewChange }: SidebarProps) {
   const { filter, setFilter, setActiveProjectId, activeProjectId, tasks } = useTaskStore();
   const { projects, addProject, deleteProject } = useProjectStore();
   const { darkMode, toggleDarkMode, toggleFocusMode, setSidebarOpen } = useUIStore();
+  const { habits } = useHabitStore();
 
   const todayStr = getToday();
   const todayCount = tasks.filter((t) => t.dueDate === todayStr && !t.completed).length;
@@ -141,6 +144,22 @@ export function Sidebar({ view, onViewChange }: SidebarProps) {
             </button>
           </div>
         ))}
+
+        <div className="my-3 border-t border-zinc-200/50 dark:border-zinc-800/50" />
+
+        <button
+          onClick={() => handleNavClick(() => onViewChange('habits'))}
+          className={cn(
+            'flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors min-h-[44px]',
+            view === 'habits'
+              ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400'
+              : 'text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800/60'
+          )}
+        >
+          <Flame className="h-4 w-4" />
+          <span className="flex-1 text-start">العادات</span>
+          {habits.length > 0 && <span className="text-[11px] text-zinc-400">{habits.length}</span>}
+        </button>
       </nav>
 
       <div className="mx-2 mb-2 mt-auto rounded-xl border border-zinc-200/50 bg-zinc-50/50 p-2 dark:border-zinc-800/40 dark:bg-zinc-900/40">
