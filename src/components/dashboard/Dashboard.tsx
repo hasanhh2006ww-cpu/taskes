@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useCallback } from 'react';
 import { motion, type Variants } from 'framer-motion';
 import { useTaskStore } from '@/store/useTaskStore';
 import { useProjectStore } from '@/store/useProjectStore';
@@ -8,17 +8,17 @@ import { getToday, PRIORITIES } from '@/lib/constants';
 import { cn } from '@/lib/cn';
 import {
   ListTodo, Calendar, CheckCircle2, Clock,
-  Search, Bell, Plus, Inbox, TrendingUp, BarChart3,
-  Circle, ArrowRight,
+  Search, Bell, Plus, Inbox, BarChart3,
+  ArrowRight, Leaf, Sprout,
 } from 'lucide-react';
-import type { Task } from '@/lib/types';
+import toast from 'react-hot-toast';
 
 const DAY_NAMES_SHORT = ['ح', 'ن', 'ث', 'ر', 'خ', 'ج', 'س'];
 const DAY_NAMES_LONG = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
 const MONTH_NAMES = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
 
 const priorityColor: Record<string, { dot: string; bg: string }> = {
-  low: { dot: 'bg-blue-500', bg: 'bg-blue-50 text-blue-600' },
+  low: { dot: 'bg-emerald-500', bg: 'bg-emerald-50 text-emerald-600' },
   medium: { dot: 'bg-amber-500', bg: 'bg-amber-50 text-amber-600' },
   high: { dot: 'bg-rose-500', bg: 'bg-rose-50 text-rose-600' },
 };
@@ -41,17 +41,17 @@ function WeekChart({ days }: { days: { label: string; total: number; done: numbe
               {day.total > 0 && (
                 <div className="absolute bottom-0 w-full flex flex-col-reverse items-center">
                   <div
-                    className="w-full rounded-t-md bg-gradient-to-t from-blue-400 to-blue-300 transition-all duration-500"
+                    className="w-full rounded-t-md bg-gradient-to-t from-emerald-300 to-emerald-200 transition-all duration-500"
                     style={{ height: `${totalH > 0 ? totalH : 0}%`, minHeight: day.total > 0 ? '4px' : '0' }}
                   />
                   <div
-                    className="absolute bottom-0 w-1/2 rounded-t-md bg-emerald-400 transition-all duration-500"
+                    className="absolute bottom-0 w-1/2 rounded-t-md bg-gradient-to-t from-green-500 to-emerald-400 transition-all duration-500"
                     style={{ height: `${doneH > 0 ? doneH : 0}%`, minHeight: day.done > 0 ? '4px' : '0' }}
                   />
                 </div>
               )}
             </div>
-            <span className="text-[10px] font-medium text-zinc-400 dark:text-zinc-500">{day.label}</span>
+            <span className="text-[10px] font-medium text-zinc-400">{day.label}</span>
           </div>
         );
       })}
@@ -72,9 +72,14 @@ const itemVariants: Variants = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.35, ease: 'easeOut' } },
 };
 
-export function Dashboard() {
+interface DashboardProps {
+  onViewChange?: (view: 'app' | 'dashboard' | 'habits') => void;
+}
+
+export function Dashboard({ onViewChange }: DashboardProps) {
   const tasks = useTaskStore((s) => s.tasks);
   const projects = useProjectStore((s) => s.projects);
+  const { setActiveProjectId } = useTaskStore();
 
   const today = getToday();
   const total = tasks.length;
@@ -105,21 +110,33 @@ export function Dashboard() {
     return days;
   }, [tasks]);
 
+  const goToTasks = useCallback(() => {
+    onViewChange?.('app');
+    setTimeout(() => {
+      document.querySelector<HTMLInputElement>('[data-task-input]')?.focus();
+    }, 100);
+  }, [onViewChange]);
+
+  const goToTasksWithProject = useCallback((projectId: string) => {
+    setActiveProjectId(projectId);
+    onViewChange?.('app');
+  }, [onViewChange, setActiveProjectId]);
+
   const statsCards = [
     {
       label: 'إجمالي المهام', value: total, icon: ListTodo,
-      gradient: 'from-blue-500/10 to-blue-50', iconBg: 'bg-blue-500', iconColor: 'text-white',
-      progress: total > 0 ? 100 : 0, progressColor: 'bg-blue-500',
+      gradient: 'from-emerald-500/10 to-emerald-50', iconBg: 'bg-emerald-500', iconColor: 'text-white',
+      progress: total > 0 ? 100 : 0, progressColor: 'bg-emerald-500',
     },
     {
       label: 'مهام اليوم', value: todayCount, icon: Calendar,
-      gradient: 'from-cyan-500/10 to-cyan-50', iconBg: 'bg-cyan-500', iconColor: 'text-white',
-      progress: total > 0 ? Math.round((todayCount / Math.max(total, 1)) * 100) : 0, progressColor: 'bg-cyan-500',
+      gradient: 'from-green-400/10 to-green-50', iconBg: 'bg-green-500', iconColor: 'text-white',
+      progress: total > 0 ? Math.round((todayCount / Math.max(total, 1)) * 100) : 0, progressColor: 'bg-green-500',
     },
     {
       label: 'مكتملة', value: completed, icon: CheckCircle2,
-      gradient: 'from-emerald-500/10 to-emerald-50', iconBg: 'bg-emerald-500', iconColor: 'text-white',
-      progress: completionRate, progressColor: 'bg-emerald-500',
+      gradient: 'from-emerald-600/10 to-emerald-50', iconBg: 'bg-emerald-600', iconColor: 'text-white',
+      progress: completionRate, progressColor: 'bg-emerald-600',
     },
     {
       label: 'معلقة', value: pending, icon: Clock,
@@ -143,18 +160,24 @@ export function Dashboard() {
             <Search className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
             <input
               placeholder="ابحث عن مهمة..."
-              className="w-full rounded-xl border border-zinc-200 bg-zinc-50 py-2 pe-4 ps-9 text-sm text-zinc-900 placeholder-zinc-400 outline-none transition-colors focus:border-blue-300 focus:bg-white focus:ring-2 focus:ring-blue-500/10"
+              className="w-full rounded-xl border border-zinc-200 bg-zinc-50 py-2 pe-4 ps-9 text-sm text-zinc-900 placeholder-zinc-400 outline-none transition-colors focus:border-emerald-300 focus:bg-white focus:ring-2 focus:ring-emerald-500/10"
             />
           </div>
           <div className="flex items-center gap-2">
-            <button className="relative flex h-9 w-9 items-center justify-center rounded-xl text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-600">
+            <button
+              onClick={() => toast.success('🔔 لا توجد إشعارات جديدة')}
+              className="relative flex h-9 w-9 items-center justify-center rounded-xl text-zinc-400 transition-colors hover:bg-emerald-50 hover:text-emerald-600"
+            >
               <Bell className="h-[18px] w-[18px]" />
-              <span className="absolute -top-0.5 -end-0.5 h-2 w-2 rounded-full bg-rose-500 ring-2 ring-white" />
+              <span className="absolute -top-0.5 -end-0.5 h-2 w-2 rounded-full bg-emerald-500 ring-2 ring-white" />
             </button>
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-purple-500 text-[13px] font-bold text-white shadow-sm">
-              JD
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-green-600 text-[13px] font-bold text-white shadow-sm">
+              <Leaf className="h-4 w-4" />
             </div>
-            <button className="flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 px-3 py-2 text-xs font-semibold text-white shadow-sm shadow-blue-500/20 transition-all hover:shadow-md hover:shadow-blue-500/30 active:scale-95">
+            <button
+              onClick={goToTasks}
+              className="flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-emerald-500 to-green-600 px-3 py-2 text-xs font-semibold text-white shadow-sm shadow-emerald-500/20 transition-all hover:shadow-md hover:shadow-emerald-500/30 active:scale-95"
+            >
               <Plus className="h-3.5 w-3.5" />
               <span className="hidden sm:inline">إضافة مهمة</span>
             </button>
@@ -171,20 +194,24 @@ export function Dashboard() {
               transition={{ duration: 0.4 }}
               className="flex flex-col items-center justify-center py-20 text-center"
             >
-              <div className="mb-6 flex h-24 w-24 items-center justify-center rounded-3xl bg-gradient-to-br from-blue-50 to-purple-50 shadow-sm">
-                <Inbox className="h-12 w-12 text-blue-400" />
+              <div className="mb-6 flex h-24 w-24 items-center justify-center rounded-3xl bg-gradient-to-br from-emerald-50 to-green-50 shadow-sm">
+                <Sprout className="h-12 w-12 text-emerald-400" />
               </div>
               <h2 className="mb-2 text-xl font-bold text-zinc-900">ابدأ رحلة الإنجاز</h2>
               <p className="mb-6 text-sm text-zinc-400">أنشئ أول مهمة لك وابدأ في تنظيم يومك</p>
-              <button className="rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-500/30 transition-all hover:shadow-xl hover:shadow-blue-500/40 active:scale-95">
+              <button
+                onClick={goToTasks}
+                className="rounded-xl bg-gradient-to-r from-emerald-500 to-green-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-500/30 transition-all hover:shadow-xl hover:shadow-emerald-500/40 active:scale-95"
+              >
                 إنشاء أول مهمة
               </button>
             </motion.div>
           ) : (
             <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-6">
               <motion.div variants={itemVariants}>
-                <div className="mb-1 text-2xl font-bold text-zinc-900">
-                  مرحباً بعودتك! <span className="inline-block animate-bounce">👋</span>
+                <div className="flex items-center gap-3 mb-1">
+                  <h1 className="text-2xl font-bold text-zinc-900">مرحباً بعودتك!</h1>
+                  <Sprout className="h-6 w-6 text-emerald-400" />
                 </div>
                 <p className="text-sm text-zinc-400">
                   {todayCount > 0
@@ -227,9 +254,12 @@ export function Dashboard() {
                 <div className="rounded-2xl border border-zinc-200/60 bg-white p-5 shadow-sm">
                   <div className="mb-4 flex items-center justify-between">
                     <h3 className="text-sm font-semibold text-zinc-900">المهام الأخيرة</h3>
-                    <span className="text-[10px] font-medium text-blue-500 hover:text-blue-600 cursor-pointer">
+                    <button
+                      onClick={goToTasks}
+                      className="text-[10px] font-medium text-emerald-600 hover:text-emerald-700 transition-colors cursor-pointer"
+                    >
                       عرض الكل <ArrowRight className="me-0.5 inline h-3 w-3" />
-                    </span>
+                    </button>
                   </div>
                   {recentTasks.length === 0 ? (
                     <p className="py-6 text-center text-xs text-zinc-400">لا توجد مهام بعد</p>
@@ -241,7 +271,7 @@ export function Dashboard() {
                           initial={{ opacity: 0, x: -10 }}
                           animate={{ opacity: 1, x: 0 }}
                           transition={{ delay: i * 0.05, duration: 0.25 }}
-                          className="flex items-center gap-3 rounded-xl px-3 py-2.5 transition-colors hover:bg-zinc-50"
+                          className="flex items-center gap-3 rounded-xl px-3 py-2.5 transition-colors hover:bg-emerald-50/50"
                         >
                           <div className={cn('h-2 w-2 shrink-0 rounded-full', priorityColor[task.priority]?.dot || 'bg-zinc-300')} />
                           <span className={cn(
@@ -257,7 +287,9 @@ export function Dashboard() {
                           )}
                           <span className={cn(
                             'shrink-0 rounded-md px-2 py-0.5 text-[10px] font-medium',
-                            priorityColor[task.priority]?.bg || 'bg-zinc-100 text-zinc-600'
+                            task.completed
+                              ? 'bg-emerald-50 text-emerald-600'
+                              : priorityColor[task.priority]?.bg || 'bg-zinc-100 text-zinc-600'
                           )}>
                             {task.completed ? 'تم' : PRIORITIES.find(p => p.value === task.priority)?.label || task.priority}
                           </span>
@@ -281,10 +313,11 @@ export function Dashboard() {
                         const done = tasks.filter((t) => t.projectId === p.id && t.completed).length;
                         const pct = count > 0 ? Math.round((done / count) * 100) : 0;
                         return (
-                          <motion.div
+                          <motion.button
                             key={p.id}
-                            whileHover={{ x: 2 }}
-                            className="rounded-xl border border-zinc-100 bg-zinc-50/50 p-3 transition-colors hover:bg-zinc-100/50"
+                            onClick={() => goToTasksWithProject(p.id)}
+                            whileHover={{ x: 3 }}
+                            className="w-full rounded-xl border border-zinc-100 bg-zinc-50/50 p-3 text-start transition-colors hover:bg-emerald-50/50"
                           >
                             <div className="mb-2 flex items-center justify-between">
                               <div className="flex items-center gap-2">
@@ -299,7 +332,7 @@ export function Dashboard() {
                                 style={{ width: `${pct}%`, backgroundColor: p.color }}
                               />
                             </div>
-                          </motion.div>
+                          </motion.button>
                         );
                       })}
                     </div>
@@ -328,17 +361,17 @@ export function Dashboard() {
               <motion.div variants={itemVariants}>
                 <div className="rounded-2xl border border-zinc-200/60 bg-white p-5 shadow-sm">
                   <div className="mb-4 flex items-center gap-2">
-                    <BarChart3 className="h-4 w-4 text-blue-500" />
+                    <BarChart3 className="h-4 w-4 text-emerald-500" />
                     <h3 className="text-sm font-semibold text-zinc-900">النشاط الأسبوعي</h3>
                   </div>
                   <WeekChart days={weekDays} />
                   <div className="mt-3 flex items-center justify-center gap-4 text-[10px] text-zinc-400">
                     <div className="flex items-center gap-1.5">
-                      <div className="h-2.5 w-2.5 rounded-sm bg-blue-400" />
+                      <div className="h-2.5 w-2.5 rounded-sm bg-emerald-300" />
                       <span>المهام المجدولة</span>
                     </div>
                     <div className="flex items-center gap-1.5">
-                      <div className="h-2.5 w-2.5 rounded-sm bg-emerald-400" />
+                      <div className="h-2.5 w-2.5 rounded-sm bg-green-500" />
                       <span>المكتملة</span>
                     </div>
                   </div>

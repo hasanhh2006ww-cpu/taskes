@@ -48,7 +48,7 @@ my-taske/
 │   │   │   ├── Badge.tsx          # Priority badge
 │   │   │   └── Input.tsx          # Styled text input
 │   │   ├── dashboard/
-│   │   │   └── Dashboard.tsx      # Ultra Modern Light SaaS: Top Nav, stats cards (gradient + progress), recent tasks, project progress, weekly chart (SVG bar), empty state, Framer Motion entrance/hover
+│   │   │   └── Dashboard.tsx      # Nature Inspired Green UI: Top Nav (باحث/🔔/🌿/➕→تنقل), 4 stats cards (emerald/green gradients + progress bars), recent tasks + project cards (قابلة للنقر→فلترة), weekly chart (SVG emerald bars), empty state (Sprout), Framer Motion, all buttons functional
 │   │   └── command-palette/
 │   │       └── CommandPalette.tsx # Ctrl+K palette (Arabic)
 │   │
@@ -191,6 +191,7 @@ User Input (keyboard/mouse/touch)
 | 57 | تصدير / استيراد البيانات (JSON) | تصدير كل الـ store إلى ملف JSON + استيراد مع تأكيد وtoast نجاح/فشل | ✅ |
 | 58 | تعديل الفرز من createdAt إلى order | تغيير ترتيب العرض من `b.createdAt - a.createdAt` إلى `a.order - b.order` ليدعم drag-reorder | ✅ |
 | 59 | إعادة تصميم Dashboard (Ultra Modern Light SaaS) | Top Nav (search, bell, avatar, +Add Task), 4 Stats Cards مع gradient/progress, Recent Tasks + Projects, نشاط أسبوعي (SVG bar chart), empty state, Framer Motion animations | ✅ |
+| 60 | إعادة تصميم Dashboard (Nature Inspired Green UI) | تحويل الألوان إلى درجات الأخضر الطبيعي: emerald/green/mint بدلاً من blue/cyan، أيقونات Leaf/Sprout، تفعيل جميع الأزرار (➕ Add Task → تنقل إلى المهام، 🔔 → toast, projects → فلترة حسب المشروع) | ✅ |
 
 ## [ORPHANS & PENDING]
 

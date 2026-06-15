@@ -84,7 +84,7 @@ export default function Home() {
 
       {view === 'dashboard' ? (
         <main className="flex flex-1 overflow-hidden pt-14 md:pt-0">
-          <Dashboard />
+          <Dashboard onViewChange={setView} />
         </main>
       ) : view === 'habits' ? (
         <main className="flex flex-1 overflow-hidden pt-14 md:pt-0">
