@@ -21,6 +21,7 @@ export const STORAGE_KEYS = {
   HABITS: 'my-taske-habits',
   USER_TIMEZONE: 'my-taske-user-timezone',
   NOTIFICATION_SETTINGS: 'my-taske-notification-settings',
+  FOCUS_DURATION: 'my-taske-focus-duration',
 } as const;
 
 export const FOCUS_PRESETS = [

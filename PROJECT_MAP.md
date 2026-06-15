@@ -219,5 +219,15 @@ User Input (keyboard/mouse/touch)
 | Responsive design | Done | Mobile sidebar overlay, full-screen detail, 44px touch targets |
 | Cross-platform responsive | Done | touch-action, 44px targets, disabled mobile shortcuts, responsive FocusMode, scroll settings |
 | SVG logo (Google-style) | Done | `public/logo.svg` — checkmark icon + "My Taske" text, scalable |
-| Enhanced Habit Tracker UI | Done | mini calendar, 7-day status, current/best streak, broken streak alerts |
-| Professional Habit Tracker | Done | daily/weekly/monthly types, tab filters, timezone-aware, advanced streak logic, config panels |
+| Edit Habit Modal (AddEditHabitModal) | Done | shared add/edit modal, type-change reconstruction, duplicate-name check |
+| Delete Confirm Dialog (ConfirmDialog) | Done | reusable confirmation modal with toast feedback |
+| Habit Drag-and-Drop Reorder | Done | DndContext + SortableContext + useSortable, GripVertical handle-only activation |
+| Habit Statistics Tab | Done | per-type completion counts, daily progress bar, best streak display, export/import buttons |
+| Habit Export/Import | Done | JSON Blob download, file reader upload + store replace, error handling |
+| Dashboard Redesign #1 (Blue SaaS) | Done | ultra-modern light SaaS: blue gradient stats, weekly chart, project cards |
+| Dashboard Redesign #2 (Green Nature) | Done | emerald-green nature palette, Leaf avatar, Sprout empty state, functional buttons |
+| Full Website UI Redesign – Part 1 | Done | collapsible sidebar (w-16/w-64), green theme, tooltips, Calendar/Settings nav items |
+| Full Website UI Redesign – Part 2 | Done | page.tsx: AnimatePresence transitions, sidebar-collapse-aware layout, CalendarView + SettingsView routing |
+| CalendarView | Done | month grid calendar with day numbers, task dots, emerald today indicator, task slices per day |
+| SettingsView | Done | dark mode toggle, focus duration presets, import/export all data, reset all with confirm dialog |
+| TaskItem Green Refresh | Done | emerald active border/ring, emerald hover states, emerald check icon |

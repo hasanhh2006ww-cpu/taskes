@@ -22,6 +22,7 @@ interface HabitState {
   getTodayStats: () => { completed: number; total: number; streakCount: number };
   getWeekStats: (weekKey: string) => { completed: number; total: number; streakCount: number };
   getMonthStats: (monthKey: string) => { completed: number; total: number; streakCount: number };
+  setHabits: (habits: Habit[]) => void;
   exportData: () => string;
   importData: (json: string) => void;
 }
@@ -434,6 +435,11 @@ export const useHabitStore = create<HabitState>((set, get) => ({
     });
 
     return { completed, total, streakCount };
+  },
+
+  setHabits: (habits) => {
+    set({ habits });
+    saveToStorage(STORAGE_KEYS.HABITS, habits);
   },
 
   exportData: () => {

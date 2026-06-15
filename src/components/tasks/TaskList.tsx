@@ -76,7 +76,7 @@ export function TaskList() {
       </div>
 
       <div className="flex flex-col gap-2 px-4 pb-4 sm:flex-row sm:items-center sm:px-6">
-        <div className="flex flex-1 items-center gap-2 rounded-xl border border-zinc-200/60 bg-white/50 px-3 py-2.5 backdrop-blur-sm transition-colors dark:border-zinc-800/40 dark:bg-zinc-900/40 dark:focus-within:border-zinc-700/60">
+        <div className="flex flex-1 items-center gap-2 rounded-xl border border-zinc-200/60 bg-white/50 px-3 py-2.5 backdrop-blur-sm transition-colors dark:border-zinc-800/40 dark:bg-zinc-900/40 focus-within:border-emerald-300/60 dark:focus-within:border-emerald-700/60">
           <Plus className="h-4 w-4 shrink-0 text-zinc-400" />
           <Input
             data-task-input
@@ -119,7 +119,10 @@ export function TaskList() {
 
         {filteredTasks.length === 0 && (
           <div className="mt-16 flex flex-col items-center gap-2 text-center">
-            <p className="text-sm text-zinc-400 dark:text-zinc-500">لا توجد مهام بعد</p>
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-400 dark:bg-emerald-500/10">
+              <Plus className="h-5 w-5" />
+            </div>
+            <p className="text-sm text-zinc-500 dark:text-zinc-400">لا توجد مهام بعد</p>
             <p className="text-xs text-zinc-300 dark:text-zinc-600">
               اكتب أعلاه واضغط Enter للإضافة
             </p>

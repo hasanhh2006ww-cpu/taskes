@@ -97,11 +97,11 @@ export const TaskItem = memo(function TaskItem({ task }: TaskItemProps) {
       className={cn(
         'group relative overflow-hidden rounded-xl border p-0 transition-all duration-200',
         'border-zinc-200/60 dark:border-zinc-800/40',
-        'hover:shadow-md dark:hover:shadow-black/20 dark:hover:-translate-y-0.5',
+        'hover:shadow-sm hover:border-emerald-200/40 dark:hover:border-emerald-800/30',
         isDragging && 'z-50 scale-105 shadow-xl opacity-90 dark:shadow-black/40',
         task.completed && 'opacity-60 hover:opacity-50',
         isActive &&
-          'border-indigo-300/60 dark:border-indigo-700/60'
+          'border-emerald-300/60 dark:border-emerald-700/60 ring-1 ring-emerald-500/10'
       )}
     >
       <div className="pointer-events-none absolute inset-0 flex">
@@ -151,10 +151,10 @@ export const TaskItem = memo(function TaskItem({ task }: TaskItemProps) {
         <button
           data-no-swipe
           onClick={() => toggleComplete(task.id)}
-          className="mt-0.5 shrink-0 text-zinc-300 hover:text-indigo-500 dark:text-zinc-600 dark:hover:text-indigo-400"
+          className="mt-0.5 shrink-0 text-zinc-300 hover:text-emerald-500 dark:text-zinc-600 dark:hover:text-emerald-400"
         >
           {task.completed ? (
-            <CheckCircle2 className="h-4 w-4 text-indigo-500 dark:text-indigo-400" />
+            <CheckCircle2 className="h-4 w-4 text-emerald-500 dark:text-emerald-400" />
           ) : (
             <Circle className="h-4 w-4" />
           )}

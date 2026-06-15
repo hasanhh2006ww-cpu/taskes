@@ -24,10 +24,12 @@ interface UIState {
   activeTaskId: string | null;
   focusSession: FocusSession | null;
   focusSettings: FocusSettings;
+  sidebarCollapsed: boolean;
   toggleDarkMode: () => void;
   toggleFocusMode: () => void;
   setSidebarOpen: (open: boolean) => void;
   setActiveTaskId: (id: string | null) => void;
+  toggleSidebarCollapsed: () => void;
   saveFocusSession: (session: FocusSession) => void;
   clearFocusSession: () => void;
   updateFocusSettings: (settings: Partial<FocusSettings>) => void;
@@ -43,6 +45,7 @@ export const useUIStore = create<UIState>((set, get) => ({
   darkMode: stored.darkMode,
   focusMode: false,
   sidebarOpen: true,
+  sidebarCollapsed: false,
   activeTaskId: null,
   focusSession: loadFromStorage<FocusSession | null>(STORAGE_KEYS.FOCUS_SESSION, null),
   focusSettings: loadFromStorage<FocusSettings>(STORAGE_KEYS.FOCUS_SETTINGS, defaultSettings),
@@ -59,6 +62,8 @@ export const useUIStore = create<UIState>((set, get) => ({
   setSidebarOpen: (open) => set({ sidebarOpen: open }),
 
   setActiveTaskId: (id) => set({ activeTaskId: id }),
+
+  toggleSidebarCollapsed: () => set((s) => ({ sidebarCollapsed: !s.sidebarCollapsed })),
 
   saveFocusSession: (session) => {
     set({ focusSession: session });
