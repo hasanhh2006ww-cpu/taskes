@@ -1,4 +1,4 @@
-import type { Priority, HabitType, WeeklyFrequency, MonthPeriod, UserTimezone, Habit } from './types';
+import type { Priority, HabitType, WeeklyFrequency, MonthPeriod, UserTimezone, Habit, WeeklyHabit, MonthlyHabit } from './types';
 
 export const PRIORITIES: { label: string; value: Priority; color: string }[] = [
   { label: 'منخفض', value: 'low', color: 'bg-blue-400/20 text-blue-400' },
@@ -20,6 +20,7 @@ export const STORAGE_KEYS = {
   FOCUS_SETTINGS: 'my-taske-focus-settings',
   HABITS: 'my-taske-habits',
   USER_TIMEZONE: 'my-taske-user-timezone',
+  NOTIFICATION_SETTINGS: 'my-taske-notification-settings',
 } as const;
 
 export const FOCUS_PRESETS = [
@@ -100,17 +101,15 @@ export function updateWeeklyHabitCompletion(habit: WeeklyHabit, date: string, co
 
 export function calculateWeeklyStreak(habit: WeeklyHabit, currentDate: string): number {
   const weekKey = getWeekKey(currentDate);
-  const weeks = Object.keys(habit.completedWeeks).sort().reverse();
-  if (weeks.length === 0) return 0;
   if (!habit.completedWeeks[weekKey]) return 0;
 
   let streak = 1;
-  let currentWeekKey = weekKey;
-  for (let i = 1; i < weeks.length; i++) {
-    const prevWeekKey = getWeekKey(new Date(new Date(currentDate).getTime() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]);
-    if (prevWeekKey === weeks[i]) {
+  let cursor = new Date(currentDate);
+  for (;;) {
+    cursor = new Date(cursor.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const prevWeekKey = getWeekKey(cursor.toISOString().split('T')[0]);
+    if (habit.completedWeeks[prevWeekKey]) {
       streak++;
-      currentWeekKey = prevWeekKey;
     } else {
       break;
     }
@@ -133,16 +132,15 @@ export function updateMonthlyHabitCompletion(habit: MonthlyHabit, date: string, 
 
 export function calculateMonthlyStreak(habit: MonthlyHabit, currentDate: string): number {
   const weekKey = getMonthWeekKey(currentDate);
-  const weeks = Object.keys(habit.completedDays).sort().reverse();
-  if (weeks.length === 0 || !habit.completedDays[weekKey] || habit.completedDays[weekKey] < 1) return 0;
+  if (!habit.completedDays[weekKey] || habit.completedDays[weekKey] < 1) return 0;
 
   let streak = 1;
-  let currentWeekKey = weekKey;
-  for (let i = 1; i < weeks.length; i++) {
-    const prevWeekKey = getMonthWeekKey(new Date(new Date(currentDate).getTime() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]);
-    if (prevWeekKey === weeks[i] && habit.completedDays[prevWeekKey] && habit.completedDays[prevWeekKey] >= 1) {
+  let cursor = new Date(currentDate);
+  for (;;) {
+    cursor = new Date(cursor.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const prevWeekKey = getMonthWeekKey(cursor.toISOString().split('T')[0]);
+    if (habit.completedDays[prevWeekKey] && habit.completedDays[prevWeekKey] >= 1) {
       streak++;
-      currentWeekKey = prevWeekKey;
     } else {
       break;
     }

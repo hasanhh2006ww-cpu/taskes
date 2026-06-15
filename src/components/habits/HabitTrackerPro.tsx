@@ -2,12 +2,13 @@
 
 import { useState } from 'react';
 import { useHabitStore } from '@/store/useHabitStore';
-import type { DailyHabit, WeeklyHabit, MonthlyHabit } from '@/lib/types';
+import type { DailyHabit, WeeklyHabit, MonthlyHabit, WeeklyFrequency } from '@/lib/types';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { cn } from '@/lib/cn';
 import { Plus, Trash2, GripVertical, Calendar, Target, Clock, ChevronDown } from 'lucide-react';
-import { WEEKLY_FREQUENCIES, MONTH_PERIODS, getWeekKey, getWeekNumber, getMonthWeekKey, getDayLabel, formatDate, isToday } from '@/lib/constants';
+import { WEEKLY_FREQUENCIES, MONTH_PERIODS, getWeekKey, getWeekNumber, getMonthWeekKey, getDayLabel, formatDate, isToday, getToday } from '@/lib/constants';
+const DAY_NAMES = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
 
 interface HabitConfigProps {
   habit: DailyHabit | WeeklyHabit | MonthlyHabit;
@@ -53,7 +54,7 @@ function HabitConfigPanel({ habit, onUpdate, onDelete, onToggleCompletion, onTog
                 Last: {habit.lastCompletedDate ? formatDate(habit.lastCompletedDate) : 'Never'}
               </div>
               <div className="text-xs text-zinc-400 dark:text-zinc-500">
-                Today: {isToday(getToday()) ? 'Yes' : 'No'}
+                Today: {habit.completions[getToday()] === true ? 'Yes' : 'No'}
               </div>
             </div>
           </div>
@@ -89,7 +90,7 @@ function HabitConfigPanel({ habit, onUpdate, onDelete, onToggleCompletion, onTog
                 Frequency: {WEEKLY_FREQUENCIES.find(f => f.value === weeklyHabit.frequency)?.label}
               </div>
               <div className="text-xs text-zinc-400 dark:text-zinc-500">
-                Days: {weeklyHabit.daysOfWeek.map(d => getDayLabel(d)).join(', ')}
+                Days: {weeklyHabit.daysOfWeek.map(d => DAY_NAMES[d]).join(', ')}
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <div className="text-xs text-zinc-400 dark:text-zinc-500">
@@ -262,38 +263,36 @@ export function HabitTrackerPro() {
   }
 
   function getStreakMessage(habit: DailyHabit | WeeklyHabit | MonthlyHabit): string | null {
-    const completedDays = Object.keys(habit.completions || {}).filter((date) => {
-      const habitType = habit.type;
-      if (habitType === 'daily') {
-        return (habit as DailyHabit).completions[date] === true;
-      } else if (habitType === 'weekly') {
-        return (habit as WeeklyHabit).completedWeeks[getWeekKey(date)] === true;
-      } else if (habitType === 'monthly') {
-        return (habit as MonthlyHabit).completedDays[getMonthWeekKey(date)] >= 1;
-      }
-      return false;
-    }).sort().reverse();
-
-    if (completedDays.length === 0) return 'ابدأ بالتسجيل اليوم!';
-
-    const currentDay = completedDays[0];
     const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+    const today = getToday();
 
     if (habit.type === 'daily') {
       const dailyHabit = habit as DailyHabit;
-      if (dailyHabit.lastCompletedDate === yesterday && currentDay !== yesterday) {
-        return 'لقد فاتك أمس!';
+      const completedDays = Object.keys(dailyHabit.completions).filter(d => dailyHabit.completions[d]).sort().reverse();
+      if (completedDays.length === 0) return 'ابدأ بالتسجيل اليوم!';
+      if (dailyHabit.completions[today] === true) {
+        if (dailyHabit.completions[yesterday] !== true) {
+          return 'لقد فاتك أمس!';
+        }
+        return null;
       }
-    } else if (habit.type === 'weekly') {
-      const weeklyHabit = habit as WeeklyHabit;
-      if (weeklyHabit.lastCompletedDate === yesterday && !isCompletedForDate(habit, getToday())) {
-        return 'لقد فاتك الأسبوع الماضي!';
+      return 'لا تنسى تسجيل عادات اليوم!';
+    }
+
+    if (habit.type === 'weekly') {
+      const weekKey = getWeekKey(today);
+      if (habit.completedWeeks[weekKey] !== true) {
+        return 'لم تكمل هدف هذا الأسبوع بعد!';
       }
-    } else if (habit.type === 'monthly') {
-      const monthlyHabit = habit as MonthlyHabit;
-      if (monthlyHabit.lastCompletedDate === yesterday && !isCompletedForDate(habit, getToday())) {
-        return 'لقد فاتك الأسبوع الماضي!';
+      return null;
+    }
+
+    if (habit.type === 'monthly') {
+      const weekKey = getMonthWeekKey(today);
+      if ((habit.completedDays[weekKey] || 0) < 1) {
+        return 'لم تكمل هدف هذا الشهر بعد!';
       }
+      return null;
     }
 
     return null;
@@ -541,7 +540,7 @@ export function HabitTrackerPro() {
                       <div className="flex items-center gap-3">
                         {habit.type === 'daily' && (
                           <div className="text-xs text-zinc-400 dark:text-zinc-500">
-                            اليوم: {isToday(getToday()) ? '✅' : '❌'}
+                            اليوم: {(habit as DailyHabit).completions[getToday()] === true ? '✅' : '❌'}
                           </div>
                         )}
 

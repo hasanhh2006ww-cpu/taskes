@@ -39,6 +39,7 @@ export interface DailyHabit {
   streak: number;
   bestStreak: number;
   lastCompletedDate: string | null;
+  lastStreakWarningSent?: string; // Date string for daily warning
 }
 
 export interface WeeklyHabit {
@@ -51,6 +52,7 @@ export interface WeeklyHabit {
   streak: number;
   bestStreak: number;
   lastCompletedDate: string | null;
+  lastWeeklyStreakWarningSent?: string; // Date string for weekly warning
 }
 
 export interface MonthlyHabit {
@@ -63,9 +65,11 @@ export interface MonthlyHabit {
   streak: number;
   bestStreak: number;
   lastCompletedDate: string | null;
+  lastMonthlyStreakWarningSent?: string; // Date string for monthly warning
 }
 
 export type Habit = DailyHabit | WeeklyHabit | MonthlyHabit;
+
 
 export interface UserTimezone {
   offset: number;

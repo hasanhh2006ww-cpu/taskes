@@ -14,6 +14,8 @@ import { HabitTrackerPro } from '@/components/habits/HabitTrackerPro';
 import { cn } from '@/lib/cn';
 import { loadFromStorage } from '@/lib/storage';
 import { STORAGE_KEYS } from '@/lib/constants';
+import { startNotificationChecker, stopNotificationChecker } from '@/lib/notificationManager';
+import { useHabitStore } from '@/store/useHabitStore';
 import { Menu, X } from 'lucide-react';
 
 type View = 'app' | 'dashboard' | 'habits';
@@ -38,6 +40,14 @@ export default function Home() {
     if (stored.darkMode) {
       document.documentElement.classList.add('dark');
     }
+  }, []);
+
+  useEffect(() => {
+    startNotificationChecker(
+      () => useHabitStore.getState().habits,
+      useHabitStore.getState().userTimezone.iso
+    );
+    return () => stopNotificationChecker();
   }, []);
 
   const showDetailPanel = !focusMode && activeTaskId;

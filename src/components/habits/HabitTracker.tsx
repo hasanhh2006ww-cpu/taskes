@@ -2,13 +2,14 @@
 
 import { useState } from 'react';
 import { useHabitStore } from '@/store/useHabitStore';
+import type { Habit } from '@/lib/types';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { cn } from '@/lib/cn';
 import { Plus, Trash2, GripVertical } from 'lucide-react';
 
 export function HabitTracker() {
-  const { habits, addHabit, deleteHabit, toggleCompletion, reorderHabits, updateHabit } = useHabitStore();
+  const { habits, addHabit, deleteHabit, toggleDailyCompletion, reorderHabits, updateHabit } = useHabitStore();
   const [newTitle, setNewTitle] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState('');
@@ -32,7 +33,7 @@ export function HabitTracker() {
 
   function handleAdd() {
     if (!newTitle.trim()) return;
-    addHabit(newTitle.trim());
+    addHabit(newTitle.trim(), 'daily');
     setNewTitle('');
   }
 
@@ -58,8 +59,9 @@ export function HabitTracker() {
     }
   }
 
-  function isCompletedForDate(habit: any, date: string) {
-    return habit.completions[date] === true;
+  function isCompletedForDate(habit: Habit, date: string) {
+    if (habit.type === 'daily') return habit.completions[date] === true;
+    return false;
   }
 
   function isCurrentStreakBroken(habit: any) {
@@ -109,7 +111,7 @@ export function HabitTracker() {
                 return (
                   <button
                     key={`${habit.id}-${day.date}`}
-                    onClick={() => toggleCompletion(habit.id, day.date)}
+                    onClick={() => toggleDailyCompletion(habit.id, day.date)}
                     className={cn(
                       'h-5 w-5 rounded-full border-2',
                       day.isToday
@@ -197,7 +199,7 @@ export function HabitTracker() {
         ) : (
           <div className="flex flex-col gap-2">
             {habits.map((habit) => {
-              const completedToday = habit.completions[today.toISOString().split('T')[0]] === true;
+              const completedToday = (habit as any).completions[today.toISOString().split('T')[0]] === true;
               return (
                 <div
                   key={habit.id}
@@ -226,7 +228,7 @@ export function HabitTracker() {
                         <input
                           type="checkbox"
                           checked={completedToday}
-                          onChange={() => toggleCompletion(habit.id)}
+                          onChange={() => toggleDailyCompletion(habit.id)}
                           className="h-5 w-5 rounded border-zinc-300 text-indigo-500 focus:ring-indigo-500 cursor-pointer"
                         />
                         <span

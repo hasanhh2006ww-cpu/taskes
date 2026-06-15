@@ -4,6 +4,7 @@ import type { Habit, DailyHabit, WeeklyHabit, MonthlyHabit, UserTimezone, Weekly
 import { loadFromStorage, saveToStorage } from '@/lib/storage';
 import { STORAGE_KEYS, getToday, getDayOfWeek, getWeekKey, getWeekNumber, getMonthWeekKey, isToday, updateWeeklyHabitCompletion, updateMonthlyHabitCompletion, calculateWeeklyStreak, calculateMonthlyStreak } from '@/lib/constants';
 
+
 interface HabitState {
   habits: Habit[];
   userTimezone: UserTimezone;
@@ -23,8 +24,11 @@ interface HabitState {
   getMonthStats: (monthKey: string) => { completed: number; total: number; streakCount: number };
 }
 
+
+
 const initialHabits = loadFromStorage<Habit[]>(STORAGE_KEYS.HABITS, []);
 const initialTimezone = loadFromStorage<UserTimezone>(STORAGE_KEYS.USER_TIMEZONE, { offset: 0, label: 'UTC', iso: 'UTC' });
+
 
 function calculateDailyStreak(habit: DailyHabit): number {
   const completedDays = Object.keys(habit.completions).filter((date) => habit.completions[date] === true).sort().reverse();
@@ -136,7 +140,7 @@ export const useHabitStore = create<HabitState>((set, get) => ({
   },
 
   updateHabit: (id, updates) => {
-    const habits = get().habits.map((h) => (h.id === id ? { ...h, ...updates } : h));
+    const habits = get().habits.map((h) => (h.id === id ? { ...h, ...updates } as Habit : h));
     set({ habits });
     saveToStorage(STORAGE_KEYS.HABITS, habits);
   },
@@ -341,23 +345,24 @@ export const useHabitStore = create<HabitState>((set, get) => ({
     let completed = 0;
     let total = 0;
     let streakCount = 0;
+    const today = getToday();
 
     habits.forEach((habit) => {
       if (habit.type === 'daily') {
         total++;
-        if (habit.completions[getToday()] === true) {
+        if (habit.completions[today] === true) {
           completed++;
         }
         streakCount += habit.streak;
       } else if (habit.type === 'weekly') {
         total++;
-        if (isToday) {
+        if (habit.completedWeeks[getWeekKey(today)] === true) {
           completed++;
         }
         streakCount += habit.streak;
       } else if (habit.type === 'monthly') {
         total++;
-        if (isToday) {
+        if ((habit.completedDays[getMonthWeekKey(today)] || 0) >= 1) {
           completed++;
         }
         streakCount += habit.streak;
@@ -402,13 +407,14 @@ export const useHabitStore = create<HabitState>((set, get) => ({
     let completed = 0;
     let total = 0;
     let streakCount = 0;
+    const [year, month] = monthKey.split('-');
 
     habits.forEach((habit) => {
       if (habit.type === 'daily') {
-        total++;
-        if (habit.completions[getToday()] === true) {
-          completed++;
-        }
+        const monthPrefix = `${year}-${month}`;
+        const daysThisMonth = Object.keys(habit.completions).filter(d => d.startsWith(monthPrefix));
+        total += daysThisMonth.length;
+        completed += daysThisMonth.filter(d => habit.completions[d] === true).length;
         streakCount += habit.streak;
       } else if (habit.type === 'weekly') {
         total++;
@@ -427,4 +433,4 @@ export const useHabitStore = create<HabitState>((set, get) => ({
 
     return { completed, total, streakCount };
   },
-})));
+}));
