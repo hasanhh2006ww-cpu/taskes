@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Cairo } from "next/font/google";
+import { Toaster } from "react-hot-toast";
 import "./globals.css";
 
 const cairo = Cairo({
@@ -25,7 +26,16 @@ export default function RootLayout({
       className={`${cairo.variable} h-full antialiased`}
       suppressHydrationWarning
     >
-      <body className="h-full">{children}</body>
+      <body className="h-full">
+        <Toaster
+          position="top-center"
+          toastOptions={{
+            duration: 3000,
+            style: { fontFamily: 'var(--font-cairo)', fontSize: '14px' },
+          }}
+        />
+        {children}
+      </body>
     </html>
   );
 }

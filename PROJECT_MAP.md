@@ -40,7 +40,9 @@ my-taske/
 │   │   │   ├── TaskList.tsx       # DnD context, add task input, filter display
 │   │   │   └── TaskDetail.tsx     # Right panel: title, priority, date, etc.
 │   │   ├── habits/
-│   │   │   └── HabitTrackerPro.tsx # Professional: daily/weekly/monthly + tabs + timezone-aware + streak stats + config panels
+│   │   │   ├── HabitTrackerPro.tsx  # Professional: daily/weekly/monthly + 5 tabs (الكل/يومي/أسبوعي/شهري/إحصائيات) + FAB + drag-reorder + inline edit
+│   │   │   ├── AddEditHabitModal.tsx # Modal مشترك للإضافة والتعديل: اسم، نوع، خيارات أسبوعية/شهرية، التحقق من التكرار
+│   │   │   └── ConfirmDialog.tsx     # نافذة تأكيد قابلة لإعادة الاستخدام: title + message + نعم/إلغاء
 │   │   ├── ui/
 │   │   │   ├── Button.tsx         # ghost/primary/danger + sm/md/icon (44px touch on mobile)
 │   │   │   ├── Badge.tsx          # Priority badge
@@ -109,14 +111,16 @@ User Input (keyboard/mouse/touch)
     ├── FocusMode: Prev/Next → navigate tasks
     ├── FocusMode: ✓ complete → incrementPomodoro + trophy animation + chime
     ├── FocusMode: X → save session + exit
-    ├── HabitTracker: Input + Enter → addHabit
-    ├── HabitTracker: Checkbox → toggleCompletion (today)
-    ├── HabitTracker: Calendar circle click → toggleCompletion (any day)
-    ├── HabitTracker: Double-click / Edit icon → inline edit title
-    ├── HabitTracker: Drag handle → reorderHabits
-    ├── HabitTracker: Trash → deleteHabit
-    ├── HabitTracker: Display streaks → current/best + broken alerts
-    └── HabitTrackerPro: Add habit (config: daily/weekly/monthly) + tab filters + timezone toggle + streak stats + past-day editor
+    ├── HabitTrackerPro: FAB → showAddModal(true) → AddEditHabitModal (add mode)
+    ├── HabitTrackerPro: Check circle → toggleDailyCompletion / toggleWeeklyCompletion / toggleMonthlyCompletion
+    ├── HabitTrackerPro: Double-click title → inline edit (title only)
+    ├── HabitTrackerPro: Edit icon (✏️) → setEditHabit(habit) → AddEditHabitModal (edit mode: name, type, frequency)
+    ├── HabitTrackerPro: Trash icon → setDeleteConfirmId → ConfirmDialog: "نعم" → deleteHabit
+    ├── HabitTrackerPro: GripVertical icon in header → toggle isReordering → DndContext + SortableContext → onDragEnd → reorderHabits
+    ├── HabitTrackerPro: Tab "إحصائيات" → computeStats: progress bar daily, per-type details, best streak, export/import buttons
+    ├── HabitTrackerPro: Export → exportData() → Blob → download JSON
+    ├── HabitTrackerPro: Import → file input → read JSON → importData() → toast success/error
+    ├── HabitTrackerPro: Display streaks → current (🔥) + best (🏆)
     └── Theme button → toggleDarkMode
             │
             ▼
@@ -180,6 +184,12 @@ User Input (keyboard/mouse/touch)
 | 50 | متتبع العادات الاحترافي (إعادة كتابة) | UI نظيف: شريط تبويبات 4 (الكل/يومي/أسبوعي/شهري)، بطاقات مبسطة (اسم + نوع + أيام التكرار + ستريك)، فرز حسب تاريخ الإضافة (الأحدث أولاً)، إزالة النموذج المدمج + إزالة النصوص الصلبة (HabitConfigPanel/getStreakMessage)، بقاء FAB والمودال | ✅ |
 | 51 | زر "+" دائري FAB + مودال الإضافة | زر أخضر دائري (أسفل اليمين) يفتح Modal لإضافة عادة: اسم، نوع (يومي/أسبوعي/شهري)، خيارات أسبوعية/شهرية، التحقق من عدم التكرار، حفظ فوري | ✅ |
 | 52 | WeeklyHabit/MonthlyHabit ناقصين `createdAt` و `order` | إضافة الحقلين إلى type definitions (كان المكون يضبطهما في store لكن TypeScript يمنع الوصول) | ✅ |
+| 53 | تعديل العادات (Edit Habit Modal) | مودال تعديل مشابه للإضافة لكن معبأ ببيانات العادة + يدعم تغيير النوع وإعادة ضبط الحقول | ✅ |
+| 54 | حذف عادة مع تأكيد (Delete Confirm) | ConfirmDialog: "هل أنت متأكد من حذف عادة X؟" مع خيارين "نعم"/"إلغاء" + toast نجاح | ✅ |
+| 55 | إعادة ترتيب العادات (Drag & Drop) | زر GripVertical في الهيدر → تفعيل DndContext + SortableContext + useSortable مع حفظ الترتيب في الـ store | ✅ |
+| 56 | إحصائيات العادات (Statistics Tab) | تبويب خامس "إحصائيات": شريط تقدم يومي، تفاصيل كل نوع، أفضل ستريك، زر تصدير/استيراد | ✅ |
+| 57 | تصدير / استيراد البيانات (JSON) | تصدير كل الـ store إلى ملف JSON + استيراد مع تأكيد وtoast نجاح/فشل | ✅ |
+| 58 | تعديل الفرز من createdAt إلى order | تغيير ترتيب العرض من `b.createdAt - a.createdAt` إلى `a.order - b.order` ليدعم drag-reorder | ✅ |
 
 ## [ORPHANS & PENDING]
 
@@ -198,7 +208,7 @@ User Input (keyboard/mouse/touch)
 | Theme Refresh (SaaS Dark) | Done | Gradient body/sidebar/cards, hover lift effects, refined borders, indigo glow |
 | Deployment Fix | Done | Removed @netlify/plugin-nextjs (conflicts with static export), added public/_redirects + public/_headers |
 | Keyboard shortcut: N for new task | Done | focuses task input |
-| Undo toast on delete | Backlog | react-hot-toast installed, not wired |
+| Undo toast on delete | Backlog | react-hot-toast used for delete/import/export success/error toasts, no undo yet |
 | `date-fns` dependency | Not used | installed but unused, kept for future |
 | Static build warning: localStorage | Known | harmless, occurs during SSR |
 | `public/ph.png` | Deprecated | replaced by `public/logo.svg` (can be deleted) |

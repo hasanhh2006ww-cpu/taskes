@@ -22,6 +22,8 @@ interface HabitState {
   getTodayStats: () => { completed: number; total: number; streakCount: number };
   getWeekStats: (weekKey: string) => { completed: number; total: number; streakCount: number };
   getMonthStats: (monthKey: string) => { completed: number; total: number; streakCount: number };
+  exportData: () => string;
+  importData: (json: string) => void;
 }
 
 
@@ -432,5 +434,27 @@ export const useHabitStore = create<HabitState>((set, get) => ({
     });
 
     return { completed, total, streakCount };
+  },
+
+  exportData: () => {
+    const { habits, userTimezone } = get();
+    return JSON.stringify({
+      habits,
+      userTimezone,
+      exportedAt: new Date().toISOString(),
+      version: 1,
+    });
+  },
+
+  importData: (json) => {
+    const data = JSON.parse(json);
+    if (!data.habits || !Array.isArray(data.habits)) {
+      throw new Error('بيانات غير صالحة');
+    }
+    const { userTimezone } = get();
+    const newTimezone = data.userTimezone || userTimezone;
+    set({ habits: data.habits, userTimezone: newTimezone });
+    saveToStorage(STORAGE_KEYS.HABITS, data.habits);
+    saveToStorage(STORAGE_KEYS.USER_TIMEZONE, newTimezone);
   },
 }));
