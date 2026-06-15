@@ -76,10 +76,14 @@ export default function Home() {
 
       <div
         className={cn(
-          'fixed inset-y-0 start-0 z-40 transition-all duration-300 ease-in-out md:relative',
+          'fixed inset-y-0 start-0 z-40 md:relative md:z-0 md:shrink-0',
           sidebarOpen ? 'translate-x-0' : '-translate-x-full',
-          sidebarCollapsed ? 'md:w-16' : 'md:w-64'
+          'md:translate-x-0'
         )}
+        style={{
+          width: sidebarCollapsed ? 70 : 260,
+          transition: 'width 300ms ease-in-out, transform 200ms ease-in-out',
+        }}
       >
         <Sidebar view={view} onViewChange={setView} />
       </div>

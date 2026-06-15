@@ -231,3 +231,4 @@ User Input (keyboard/mouse/touch)
 | CalendarView | Done | month grid calendar with day numbers, task dots, emerald today indicator, task slices per day |
 | SettingsView | Done | dark mode toggle, focus duration presets, import/export all data, reset all with confirm dialog |
 | TaskItem Green Refresh | Done | emerald active border/ring, emerald hover states, emerald check icon |
+| Sidebar Layout Fix | Done | inline style width (70/260px) for smooth animation, shrink-0, md:translate-x-0, md:relative, handleNavClick desktop-safe |

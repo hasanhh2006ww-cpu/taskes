@@ -60,7 +60,9 @@ export function Sidebar({ view, onViewChange }: SidebarProps) {
 
   function handleNavClick(fn: () => void) {
     fn();
-    setSidebarOpen(false);
+    if (window.innerWidth < 768) {
+      setSidebarOpen(false);
+    }
   }
 
   const isActive = (checkView: View, checkFilter?: string) =>
@@ -69,9 +71,8 @@ export function Sidebar({ view, onViewChange }: SidebarProps) {
   return (
     <aside
       className={cn(
-        'flex h-full flex-col border-e border-zinc-200/60 bg-white/95 backdrop-blur-xl transition-all duration-300 ease-in-out overflow-hidden',
-        'dark:border-zinc-800/40 dark:bg-gradient-to-b dark:from-[#0B0F1A] dark:to-[#0F1525]',
-        sidebarCollapsed ? 'w-16' : 'w-64'
+        'flex h-full w-full flex-col border-e border-zinc-200/60 bg-white/95 backdrop-blur-xl overflow-hidden',
+        'dark:border-zinc-800/40 dark:bg-gradient-to-b dark:from-[#0B0F1A] dark:to-[#0F1525]'
       )}
     >
       <div className={cn('flex items-center px-4 pt-5 pb-4', sidebarCollapsed ? 'justify-center' : 'justify-between')}>
