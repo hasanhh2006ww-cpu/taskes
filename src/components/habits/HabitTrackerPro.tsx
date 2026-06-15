@@ -6,7 +6,7 @@ import type { DailyHabit, WeeklyHabit, MonthlyHabit, WeeklyFrequency } from '@/l
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { cn } from '@/lib/cn';
-import { Plus, Trash2, GripVertical, Calendar, Target, Clock, ChevronDown } from 'lucide-react';
+import { Plus, Trash2, GripVertical, Calendar, Target, Clock, ChevronDown, X } from 'lucide-react';
 import { WEEKLY_FREQUENCIES, MONTH_PERIODS, getWeekKey, getWeekNumber, getMonthWeekKey, getDayLabel, formatDate, isToday, getToday } from '@/lib/constants';
 const DAY_NAMES = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
 
@@ -177,6 +177,14 @@ export function HabitTrackerPro() {
   const [monthlyTarget, setMonthlyTarget] = useState<number>(4);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState('');
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [modalTitle, setModalTitle] = useState('');
+  const [modalType, setModalType] = useState<'daily' | 'weekly' | 'monthly'>('daily');
+  const [modalWeeklyFreq, setModalWeeklyFreq] = useState<WeeklyFrequency>(3);
+  const [modalWeeklyDays, setModalWeeklyDays] = useState<number[]>([1, 3, 5]);
+  const [modalMonthlyPeriod, setModalMonthlyPeriod] = useState<'start' | 'middle' | 'end'>('middle');
+  const [modalMonthlyTarget, setModalMonthlyTarget] = useState<number>(4);
+  const [modalError, setModalError] = useState('');
 
   const today = new Date();
   const getLast7Days = () => {
@@ -209,6 +217,28 @@ export function HabitTrackerPro() {
     addHabit(newTitle.trim(), newHabitType, options);
     setNewTitle('');
     setWeeklyDays([1, 3, 5]);
+  }
+
+  function handleModalAdd() {
+    if (!modalTitle.trim()) return;
+    const exists = habits.some(
+      (h) => h.title.toLowerCase() === modalTitle.trim().toLowerCase() && h.type === modalType
+    );
+    if (exists) {
+      setModalError('يوجد عادة بنفس الاسم والنوع');
+      return;
+    }
+    let options;
+    if (modalType === 'weekly') {
+      options = { frequency: modalWeeklyFreq, daysOfWeek: modalWeeklyDays };
+    } else if (modalType === 'monthly') {
+      options = { period: modalMonthlyPeriod, targetCount: modalMonthlyTarget };
+    }
+    addHabit(modalTitle.trim(), modalType, options);
+    setModalTitle('');
+    setModalWeeklyDays([1, 3, 5]);
+    setModalError('');
+    setShowAddModal(false);
   }
 
   function handleEditStart(habit: { id: string; title: string }) {
@@ -614,6 +644,146 @@ export function HabitTrackerPro() {
           </div>
         )}
       </div>
+      <button
+        onClick={() => setShowAddModal(true)}
+        className="fixed bottom-6 end-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-emerald-500 to-green-600 text-white shadow-lg shadow-emerald-500/30 transition-all hover:scale-110 hover:shadow-xl hover:shadow-emerald-500/40 active:scale-95 md:h-16 md:w-16"
+        aria-label="إضافة عادة جديدة"
+      >
+        <Plus className="h-6 w-6 md:h-7 md:w-7" />
+      </button>
+
+      {showAddModal && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center">
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowAddModal(false)} />
+          <div className="relative w-full max-w-lg rounded-t-2xl bg-white p-6 shadow-2xl dark:bg-zinc-900 sm:rounded-2xl sm:mx-4">
+            <div className="mb-5 flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">إضافة عادة جديدة</h2>
+              <button
+                onClick={() => setShowAddModal(false)}
+                className="rounded-lg p-2 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-600 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            {modalError && (
+              <div className="mb-4 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-600 dark:border-rose-800/30 dark:bg-rose-950/30 dark:text-rose-400">
+                {modalError}
+              </div>
+            )}
+
+            <div className="mb-4 space-y-1.5">
+              <label className="text-xs font-medium text-zinc-500 dark:text-zinc-400">اسم العادة *</label>
+              <Input
+                placeholder="مثال: قراءة 30 دقيقة"
+                value={modalTitle}
+                onChange={(e) => { setModalTitle(e.target.value); setModalError(''); }}
+                onKeyDown={(e) => e.key === 'Enter' && handleModalAdd()}
+                autoFocus
+              />
+            </div>
+
+            <div className="mb-4 space-y-1.5">
+              <label className="text-xs font-medium text-zinc-500 dark:text-zinc-400">نوع العادة</label>
+              <div className="grid grid-cols-3 gap-2">
+                {(['daily', 'weekly', 'monthly'] as const).map((type) => (
+                  <button
+                    key={type}
+                    onClick={() => setModalType(type)}
+                    className={cn(
+                      'rounded-lg border px-3 py-2 text-xs font-medium transition-all',
+                      modalType === type
+                        ? 'border-emerald-500 bg-emerald-50 text-emerald-600 dark:border-emerald-500/30 dark:bg-emerald-950/30 dark:text-emerald-400'
+                        : 'border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-400'
+                    )}
+                  >
+                    {type === 'daily' ? 'يومي' : type === 'weekly' ? 'أسبوعي' : 'شهري'}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {modalType === 'weekly' && (
+              <div className="mb-4 space-y-3">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium text-zinc-500 dark:text-zinc-400">التكرار</label>
+                  <select
+                    value={modalWeeklyFreq}
+                    onChange={(e) => setModalWeeklyFreq(parseInt(e.target.value) as WeeklyFrequency)}
+                    className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-xs text-zinc-900 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100"
+                  >
+                    {WEEKLY_FREQUENCIES.map((f) => (
+                      <option key={f.value} value={f.value}>{f.label}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium text-zinc-500 dark:text-zinc-400">الأيام</label>
+                  <div className="grid grid-cols-7 gap-1">
+                    {DAY_NAMES.map((day, index) => {
+                      const isSelected = modalWeeklyDays.includes(index);
+                      return (
+                        <button
+                          key={day}
+                          onClick={() => {
+                            setModalWeeklyDays(isSelected ? modalWeeklyDays.filter(d => d !== index) : [...modalWeeklyDays, index]);
+                          }}
+                          className={cn(
+                            'rounded px-1 py-1 text-[10px] font-medium transition-all',
+                            isSelected
+                              ? 'bg-emerald-500 text-white'
+                              : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-700 dark:text-zinc-400 dark:hover:bg-zinc-600'
+                          )}
+                        >
+                          {day.slice(0, 1)}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {modalType === 'monthly' && (
+              <div className="mb-4 space-y-3">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium text-zinc-500 dark:text-zinc-400">الفترة</label>
+                  <select
+                    value={modalMonthlyPeriod}
+                    onChange={(e) => setModalMonthlyPeriod(e.target.value as 'start' | 'middle' | 'end')}
+                    className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-xs text-zinc-900 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100"
+                  >
+                    {MONTH_PERIODS.map((p) => (
+                      <option key={p.value} value={p.value}>{p.label}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium text-zinc-500 dark:text-zinc-400">الهدف (عدد الأسابيع في الشهر)</label>
+                  <select
+                    value={modalMonthlyTarget}
+                    onChange={(e) => setModalMonthlyTarget(parseInt(e.target.value))}
+                    className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-xs text-zinc-900 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100"
+                  >
+                    {[1, 2, 3, 4].map((n) => (
+                      <option key={n} value={n}>{n} أسابيع</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            )}
+
+            <div className="flex items-center gap-3">
+              <Button variant="ghost" onClick={() => setShowAddModal(false)} className="flex-1">
+                إلغاء
+              </Button>
+              <Button variant="primary" onClick={handleModalAdd} className="flex-1 bg-emerald-500 hover:bg-emerald-600 dark:bg-emerald-500 dark:hover:bg-emerald-600">
+                حفظ العادة
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

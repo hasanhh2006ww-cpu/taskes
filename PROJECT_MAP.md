@@ -178,6 +178,7 @@ User Input (keyboard/mouse/touch)
 | 48 | لا يوجد متتبع عادات (Habit Tracker) | HabitTracker: daily habits + checkbox + streak (🔥) + CRUD + reorder + sidebar nav + localStorage | ✅ |
 | 49 | متتبع العادات المعزز | HabitTracker: mini calendar + 7-day status + current/best streak + streak broken alerts + interactive day clicks | ✅ |
 | 50 | متتبع العادات الاحترافي | HabitTrackerPro: daily/weekly/monthly habit types + tab filters + timezone-aware + advanced streak logic + CRUD + config panels + streaks stats | ✅ |
+| 51 | زر "+" دائري لإضافة العادة (FAB) | زر أخضر دائري (أسفل اليمين) يفتح Modal لإضافة عادة: اسم، نوع (يومي/أسبوعي/شهري)، خيارات أسبوعية/شهرية، التحقق من عدم التكرار، حفظ فوري ← تحديث الواجهة | ✅ |
 
 ## [ORPHANS & PENDING]
 
