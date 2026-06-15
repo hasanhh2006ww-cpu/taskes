@@ -48,11 +48,13 @@ export interface WeeklyHabit {
   type: 'weekly';
   frequency: WeeklyFrequency;
   daysOfWeek: number[];
+  createdAt: number;
+  order: number;
   completedWeeks: Record<string, boolean>;
   streak: number;
   bestStreak: number;
   lastCompletedDate: string | null;
-  lastWeeklyStreakWarningSent?: string; // Date string for weekly warning
+  lastWeeklyStreakWarningSent?: string;
 }
 
 export interface MonthlyHabit {
@@ -61,11 +63,13 @@ export interface MonthlyHabit {
   type: 'monthly';
   period: MonthPeriod;
   targetCount: number;
+  createdAt: number;
+  order: number;
   completedDays: Record<string, number>;
   streak: number;
   bestStreak: number;
   lastCompletedDate: string | null;
-  lastMonthlyStreakWarningSent?: string; // Date string for monthly warning
+  lastMonthlyStreakWarningSent?: string;
 }
 
 export type Habit = DailyHabit | WeeklyHabit | MonthlyHabit;

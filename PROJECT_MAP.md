@@ -177,8 +177,9 @@ User Input (keyboard/mouse/touch)
 | 47 | المساعد الذكي (AI) تمت إزالته بالكامل | حذف AIAssistant.tsx + ai-engine.ts + 'ai' view + إزالة addMultipleTasks orphan + update PROJECT_MAP | ❌ |
 | 48 | لا يوجد متتبع عادات (Habit Tracker) | HabitTracker: daily habits + checkbox + streak (🔥) + CRUD + reorder + sidebar nav + localStorage | ✅ |
 | 49 | متتبع العادات المعزز | HabitTracker: mini calendar + 7-day status + current/best streak + streak broken alerts + interactive day clicks | ✅ |
-| 50 | متتبع العادات الاحترافي | HabitTrackerPro: daily/weekly/monthly habit types + tab filters + timezone-aware + advanced streak logic + CRUD + config panels + streaks stats | ✅ |
-| 51 | زر "+" دائري لإضافة العادة (FAB) | زر أخضر دائري (أسفل اليمين) يفتح Modal لإضافة عادة: اسم، نوع (يومي/أسبوعي/شهري)، خيارات أسبوعية/شهرية، التحقق من عدم التكرار، حفظ فوري ← تحديث الواجهة | ✅ |
+| 50 | متتبع العادات الاحترافي (إعادة كتابة) | UI نظيف: شريط تبويبات 4 (الكل/يومي/أسبوعي/شهري)، بطاقات مبسطة (اسم + نوع + أيام التكرار + ستريك)، فرز حسب تاريخ الإضافة (الأحدث أولاً)، إزالة النموذج المدمج + إزالة النصوص الصلبة (HabitConfigPanel/getStreakMessage)، بقاء FAB والمودال | ✅ |
+| 51 | زر "+" دائري FAB + مودال الإضافة | زر أخضر دائري (أسفل اليمين) يفتح Modal لإضافة عادة: اسم، نوع (يومي/أسبوعي/شهري)، خيارات أسبوعية/شهرية، التحقق من عدم التكرار، حفظ فوري | ✅ |
+| 52 | WeeklyHabit/MonthlyHabit ناقصين `createdAt` و `order` | إضافة الحقلين إلى type definitions (كان المكون يضبطهما في store لكن TypeScript يمنع الوصول) | ✅ |
 
 ## [ORPHANS & PENDING]
 
