@@ -4,18 +4,29 @@ import { useMemo, useCallback } from 'react';
 import { motion, type Variants } from 'framer-motion';
 import { useTaskStore } from '@/store/useTaskStore';
 import { useProjectStore } from '@/store/useProjectStore';
+import { useHabitStore } from '@/store/useHabitStore';
+import { useUIStore } from '@/store/useUIStore';
 import { getToday, PRIORITIES } from '@/lib/constants';
 import { cn } from '@/lib/cn';
 import {
   ListTodo, Calendar, CheckCircle2, Clock,
-  Search, Bell, Plus, Inbox, BarChart3,
-  ArrowRight, Leaf, Sprout,
+  Search, Bell, Plus, BarChart3,
+  ArrowRight, Sprout, Target,
+  Timer, Flame, TrendingUp,
+  FolderKanban, Sparkles, SunDim, Moon,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const DAY_NAMES_SHORT = ['ح', 'ن', 'ث', 'ر', 'خ', 'ج', 'س'];
 const DAY_NAMES_LONG = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
 const MONTH_NAMES = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
+const QUOTES = [
+  'النجاح ليس غياب الفشل، بل الاستمرار رغم الفشل',
+  'لا تؤجل عمل اليوم إلى الغد',
+  'الانضباط هو الجسر بين الأهداف والإنجاز',
+  'كل مهمة تنجزها هي خطوة نحو هدفك الأكبر',
+  'ابدأ حيث أنت، واستخدم ما لديك، وافعل ما تستطيع',
+];
 
 const priorityColor: Record<string, { dot: string; bg: string }> = {
   low: { dot: 'bg-emerald-500', bg: 'bg-emerald-50 text-emerald-600' },
@@ -28,10 +39,31 @@ function getDateLabel(dateStr: string): string {
   return `${DAY_NAMES_LONG[d.getDay()]}، ${d.getDate()} ${MONTH_NAMES[d.getMonth()]}`;
 }
 
+function getGreeting(): { text: string; icon: string } {
+  const hour = new Date().getHours();
+  if (hour < 12) return { text: 'صباح الخير', icon: '☀️' };
+  if (hour < 17) return { text: 'مساء الخير', icon: '🌤️' };
+  return { text: 'مساء الخير', icon: '🌙' };
+}
+
+function getArabicDate(): string {
+  const days = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+  const months = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
+  const d = new Date();
+  return `${days[d.getDay()]}، ${d.getDate()} ${months[d.getMonth()]}`;
+}
+
+function formatDuration(minutes: number): string {
+  if (minutes < 60) return `${minutes} د`;
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  return m > 0 ? `${h}س ${m}د` : `${h}س`;
+}
+
 function WeekChart({ days }: { days: { label: string; total: number; done: number }[] }) {
   const maxVal = Math.max(...days.map(d => d.total), 1);
   return (
-    <div className="flex items-end justify-between gap-1.5 h-28 pt-2">
+    <div className="flex items-end justify-between gap-1.5 h-24 pt-2">
       {days.map((day, i) => {
         const totalH = Math.max((day.total / maxVal) * 100, day.done > 0 ? 8 : 0);
         const doneH = day.done > 0 ? (day.done / day.total) * totalH : 0;
@@ -41,11 +73,11 @@ function WeekChart({ days }: { days: { label: string; total: number; done: numbe
               {day.total > 0 && (
                 <div className="absolute bottom-0 w-full flex flex-col-reverse items-center">
                   <div
-                    className="w-full rounded-t-md bg-gradient-to-t from-emerald-300 to-emerald-200 transition-all duration-500"
+                    className="w-full rounded-t-md bg-gradient-to-t from-emerald-200 to-emerald-100 transition-all duration-500"
                     style={{ height: `${totalH > 0 ? totalH : 0}%`, minHeight: day.total > 0 ? '4px' : '0' }}
                   />
                   <div
-                    className="absolute bottom-0 w-1/2 rounded-t-md bg-gradient-to-t from-green-500 to-emerald-400 transition-all duration-500"
+                    className="absolute bottom-0 w-1/2 rounded-t-md bg-gradient-to-t from-emerald-500 to-emerald-400 transition-all duration-500"
                     style={{ height: `${doneH > 0 ? doneH : 0}%`, minHeight: day.done > 0 ? '4px' : '0' }}
                   />
                 </div>
@@ -59,21 +91,45 @@ function WeekChart({ days }: { days: { label: string; total: number; done: numbe
   );
 }
 
+function ProgressRing({ percent, size = 96, strokeWidth = 6, color }: { percent: number; size?: number; strokeWidth?: number; color: string }) {
+  const radius = (size - strokeWidth) / 2;
+  const circumference = 2 * Math.PI * radius;
+  const dashOffset = circumference * (1 - Math.min(percent, 100) / 100);
+  return (
+    <svg width={size} height={size} className="-rotate-90 shrink-0">
+      <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="rgba(0,0,0,0.06)" strokeWidth={strokeWidth} />
+      <motion.circle
+        cx={size / 2}
+        cy={size / 2}
+        r={radius}
+        fill="none"
+        stroke={color}
+        strokeWidth={strokeWidth}
+        strokeLinecap="round"
+        strokeDasharray={circumference}
+        initial={{ strokeDashoffset: circumference }}
+        animate={{ strokeDashoffset: dashOffset }}
+        transition={{ duration: 1, ease: 'easeOut', delay: 0.3 }}
+      />
+    </svg>
+  );
+}
+
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    transition: { staggerChildren: 0.08 },
+    transition: { staggerChildren: 0.06 },
   },
 };
 
 const itemVariants: Variants = {
-  hidden: { opacity: 0, y: 20 },
+  hidden: { opacity: 0, y: 16 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.35, ease: 'easeOut' } },
 };
 
 interface DashboardProps {
-  onViewChange?: (view: 'app' | 'dashboard' | 'habits') => void;
+  onViewChange?: (view: 'app' | 'dashboard' | 'habits' | 'calendar' | 'settings') => void;
 }
 
 export function Dashboard({ onViewChange }: DashboardProps) {
@@ -81,13 +137,32 @@ export function Dashboard({ onViewChange }: DashboardProps) {
   const projects = useProjectStore((s) => s.projects);
   const { setActiveProjectId } = useTaskStore();
 
+  const habits = useHabitStore((s) => s.habits);
+  const { toggleFocusMode, darkMode, toggleDarkMode } = useUIStore();
+
   const today = getToday();
   const total = tasks.length;
   const completed = tasks.filter((t) => t.completed).length;
   const todayCount = tasks.filter((t) => t.dueDate === today).length;
+  const todayCompleted = tasks.filter((t) => t.dueDate === today && t.completed).length;
   const overdue = tasks.filter((t) => t.dueDate && t.dueDate < today && !t.completed).length;
   const pending = total - completed;
   const completionRate = total > 0 ? Math.round((completed / total) * 100) : 0;
+  const totalPomodoros = tasks.reduce((sum, t) => sum + t.pomodoroCount, 0);
+
+  const habitStreak = useMemo(() => {
+    if (habits.length === 0) return 0;
+    return Math.max(...habits.map((h) => h.streak || 0));
+  }, [habits]);
+
+  const habitCompletionRate = useMemo(() => {
+    if (habits.length === 0) return 0;
+    const completedHabits = habits.filter((h) => {
+      if (h.type === 'daily') return h.completions?.[today] === true;
+      return false;
+    });
+    return Math.round((completedHabits.length / Math.max(habits.length, 1)) * 100);
+  }, [habits]);
 
   const recentTasks = useMemo(() =>
     [...tasks].sort((a, b) => b.createdAt - a.createdAt).slice(0, 5),
@@ -110,6 +185,10 @@ export function Dashboard({ onViewChange }: DashboardProps) {
     return days;
   }, [tasks]);
 
+  const todayPomodoros = useMemo(() => {
+    return tasks.filter(t => t.dueDate === today).reduce((sum, t) => sum + t.pomodoroCount, 0);
+  }, [tasks, today]);
+
   const goToTasks = useCallback(() => {
     onViewChange?.('app');
     setTimeout(() => {
@@ -122,68 +201,49 @@ export function Dashboard({ onViewChange }: DashboardProps) {
     onViewChange?.('app');
   }, [onViewChange, setActiveProjectId]);
 
-  const statsCards = [
-    {
-      label: 'إجمالي المهام', value: total, icon: ListTodo,
-      gradient: 'from-emerald-500/10 to-emerald-50', iconBg: 'bg-emerald-500', iconColor: 'text-white',
-      progress: total > 0 ? 100 : 0, progressColor: 'bg-emerald-500',
-    },
-    {
-      label: 'مهام اليوم', value: todayCount, icon: Calendar,
-      gradient: 'from-green-400/10 to-green-50', iconBg: 'bg-green-500', iconColor: 'text-white',
-      progress: total > 0 ? Math.round((todayCount / Math.max(total, 1)) * 100) : 0, progressColor: 'bg-green-500',
-    },
-    {
-      label: 'مكتملة', value: completed, icon: CheckCircle2,
-      gradient: 'from-emerald-600/10 to-emerald-50', iconBg: 'bg-emerald-600', iconColor: 'text-white',
-      progress: completionRate, progressColor: 'bg-emerald-600',
-    },
-    {
-      label: 'معلقة', value: pending, icon: Clock,
-      gradient: 'from-amber-500/10 to-amber-50', iconBg: 'bg-amber-500', iconColor: 'text-white',
-      progress: pending > 0 ? Math.round((pending / Math.max(total, 1)) * 100) : 0, progressColor: 'bg-amber-500',
-    },
-  ];
-
   const isEmpty = total === 0;
+  const greeting = getGreeting();
+  const dailyQuote = QUOTES[new Date().getDate() % QUOTES.length];
 
   return (
-    <div className="flex h-full flex-col bg-zinc-50">
-      <motion.div
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
-        className="sticky top-0 z-10 border-b border-zinc-200/60 bg-white/80 backdrop-blur-md"
-      >
+    <div className="flex h-full flex-col bg-zinc-50 dark:bg-transparent">
+      <div className="sticky top-0 z-10 border-b border-zinc-200/60 bg-white/80 backdrop-blur-md dark:border-zinc-800/40 dark:bg-zinc-950/60">
         <div className="flex items-center gap-3 px-4 py-3 md:px-6">
           <div className="relative flex-1 max-w-md">
             <Search className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
             <input
               placeholder="ابحث عن مهمة..."
-              className="w-full rounded-xl border border-zinc-200 bg-zinc-50 py-2 pe-4 ps-9 text-sm text-zinc-900 placeholder-zinc-400 outline-none transition-colors focus:border-emerald-300 focus:bg-white focus:ring-2 focus:ring-emerald-500/10"
+              className="w-full rounded-xl border border-zinc-200 bg-zinc-50 py-2 pe-4 ps-9 text-sm text-zinc-900 placeholder-zinc-400 outline-none transition-colors focus:border-emerald-300 focus:bg-white focus:ring-2 focus:ring-emerald-500/10 dark:border-zinc-700 dark:bg-zinc-900/50 dark:text-zinc-100 dark:placeholder-zinc-500 dark:focus:border-emerald-600"
             />
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={toggleDarkMode}
+              className="flex h-9 w-9 items-center justify-center rounded-xl text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-600 dark:hover:bg-zinc-800"
+              aria-label={darkMode ? 'الوضع الفاتح' : 'الوضع الليلي'}
+            >
+              {darkMode ? <SunDim className="h-[18px] w-[18px]" /> : <Moon className="h-[18px] w-[18px]" />}
+            </button>
             <button
               onClick={() => toast.success('🔔 لا توجد إشعارات جديدة')}
-              className="relative flex h-9 w-9 items-center justify-center rounded-xl text-zinc-400 transition-colors hover:bg-emerald-50 hover:text-emerald-600"
+              className="relative flex h-9 w-9 items-center justify-center rounded-xl text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-600 dark:hover:bg-zinc-800"
             >
               <Bell className="h-[18px] w-[18px]" />
-              <span className="absolute -top-0.5 -end-0.5 h-2 w-2 rounded-full bg-emerald-500 ring-2 ring-white" />
+              <span className="absolute -top-0.5 -end-0.5 h-2 w-2 rounded-full bg-emerald-500 ring-2 ring-white dark:ring-zinc-900" />
             </button>
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-green-600 text-[13px] font-bold text-white shadow-sm">
-              <Leaf className="h-4 w-4" />
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 text-[13px] font-bold text-white shadow-sm">
+              <span>م</span>
             </div>
             <button
               onClick={goToTasks}
-              className="flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-emerald-500 to-green-600 px-3 py-2 text-xs font-semibold text-white shadow-sm shadow-emerald-500/20 transition-all hover:shadow-md hover:shadow-emerald-500/30 active:scale-95"
+              className="flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 px-3 py-2 text-xs font-semibold text-white shadow-sm shadow-emerald-500/20 transition-all hover:shadow-md hover:shadow-emerald-500/30 active:scale-95"
             >
               <Plus className="h-3.5 w-3.5" />
               <span className="hidden sm:inline">إضافة مهمة</span>
             </button>
           </div>
         </div>
-      </motion.div>
+      </div>
 
       <div className="flex-1 overflow-y-auto">
         <div className="mx-auto w-full max-w-6xl px-4 py-5 md:px-6 md:py-8">
@@ -192,122 +252,279 @@ export function Dashboard({ onViewChange }: DashboardProps) {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.4 }}
-              className="flex flex-col items-center justify-center py-20 text-center"
+              className="flex flex-col items-center justify-center py-16 text-center"
             >
-              <div className="mb-6 flex h-24 w-24 items-center justify-center rounded-3xl bg-gradient-to-br from-emerald-50 to-green-50 shadow-sm">
-                <Sprout className="h-12 w-12 text-emerald-400" />
-              </div>
-              <h2 className="mb-2 text-xl font-bold text-zinc-900">ابدأ رحلة الإنجاز</h2>
-              <p className="mb-6 text-sm text-zinc-400">أنشئ أول مهمة لك وابدأ في تنظيم يومك</p>
-              <button
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: 'spring', stiffness: 200, damping: 15, delay: 0.1 }}
+                className="mb-6 flex h-28 w-28 items-center justify-center rounded-3xl bg-gradient-to-br from-emerald-50 to-emerald-100 shadow-sm dark:from-emerald-900/20 dark:to-emerald-800/20"
+              >
+                <Sprout className="h-14 w-14 text-emerald-400" />
+              </motion.div>
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2, duration: 0.4 }}
+              >
+                <h2 className="mb-2 text-2xl font-bold text-zinc-900 dark:text-zinc-100">ابدأ رحلة الإنجاز</h2>
+                <p className="mb-8 text-sm text-zinc-400">أنشئ أول مهمة لك وابدأ في تنظيم يومك</p>
+              </motion.div>
+              <motion.button
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3, duration: 0.4 }}
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
                 onClick={goToTasks}
-                className="rounded-xl bg-gradient-to-r from-emerald-500 to-green-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-500/30 transition-all hover:shadow-xl hover:shadow-emerald-500/40 active:scale-95"
+                className="rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 px-8 py-3.5 text-sm font-semibold text-white shadow-lg shadow-emerald-500/30 transition-all hover:shadow-xl hover:shadow-emerald-500/40"
               >
                 إنشاء أول مهمة
-              </button>
+              </motion.button>
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4, duration: 0.4 }}
+                className="mt-10 grid grid-cols-2 gap-4 md:flex md:gap-6"
+              >
+                {[
+                  { icon: CheckCircle2, label: 'إدارة المهام', color: 'text-emerald-500', bg: 'bg-emerald-50 dark:bg-emerald-900/30' },
+                  { icon: FolderKanban, label: 'المشاريع', color: 'text-violet-500', bg: 'bg-violet-50 dark:bg-violet-900/30' },
+                  { icon: Timer, label: 'جلسات التركيز', color: 'text-amber-500', bg: 'bg-amber-50 dark:bg-amber-900/30' },
+                  { icon: Flame, label: 'العادات', color: 'text-rose-500', bg: 'bg-rose-50 dark:bg-rose-900/30' },
+                ].map((feature) => (
+                  <div key={feature.label} className="flex items-center gap-3 rounded-2xl border border-zinc-100 bg-white px-4 py-3 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/50">
+                    <div className={cn('flex h-9 w-9 items-center justify-center rounded-xl', feature.bg)}>
+                      <feature.icon className={cn('h-[18px] w-[18px]', feature.color)} />
+                    </div>
+                    <span className="text-sm font-medium text-zinc-600 dark:text-zinc-400">{feature.label}</span>
+                  </div>
+                ))}
+              </motion.div>
             </motion.div>
           ) : (
             <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-6">
+              {/* Greeting */}
               <motion.div variants={itemVariants}>
-                <div className="flex items-center gap-3 mb-1">
-                  <h1 className="text-2xl font-bold text-zinc-900">مرحباً بعودتك!</h1>
-                  <Sprout className="h-6 w-6 text-emerald-400" />
+                <div className="flex flex-col gap-0.5">
+                  <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">
+                    {greeting.text} <span className="inline-block">{greeting.icon}</span>
+                  </h1>
+                  <p className="text-sm text-zinc-400">{getArabicDate()}</p>
+                  <p className="mt-1.5 max-w-xl rounded-xl bg-emerald-50/50 px-3 py-2 text-xs italic text-zinc-500 dark:bg-emerald-900/10 dark:text-zinc-400">
+                    <Sparkles className="me-1 inline h-3 w-3 text-emerald-400" />
+                    {dailyQuote}
+                  </p>
                 </div>
-                <p className="text-sm text-zinc-400">
-                  {todayCount > 0
-                    ? `لديك ${todayCount} مهام اليوم، ${completed} مكتملة إجمالاً`
-                    : 'يوم هادئ، استغل الوقت لإنجاز المزيد'}
-                </p>
               </motion.div>
 
+              {/* 4 Stat Cards */}
               <motion.div variants={itemVariants} className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
-                {statsCards.map((stat) => (
+                {[
+                  {
+                    label: 'مهام اليوم',
+                    value: todayCount,
+                    icon: ListTodo,
+                    gradient: 'from-emerald-500 to-emerald-400',
+                    shadow: 'shadow-emerald-500/20',
+                    bgGlow: 'from-emerald-500/10 to-transparent',
+                    ringColor: 'ring-emerald-500/20',
+                  },
+                  {
+                    label: 'مكتملة اليوم',
+                    value: todayCompleted,
+                    icon: CheckCircle2,
+                    gradient: 'from-green-500 to-green-400',
+                    shadow: 'shadow-green-500/20',
+                    bgGlow: 'from-green-500/10 to-transparent',
+                    ringColor: 'ring-green-500/20',
+                  },
+                  {
+                    label: 'جلسات التركيز',
+                    value: totalPomodoros,
+                    icon: Timer,
+                    gradient: 'from-amber-500 to-amber-400',
+                    shadow: 'shadow-amber-500/20',
+                    bgGlow: 'from-amber-500/10 to-transparent',
+                    ringColor: 'ring-amber-500/20',
+                  },
+                  {
+                    label: 'أيام العادات',
+                    value: habitStreak,
+                    icon: Flame,
+                    gradient: 'from-rose-500 to-rose-400',
+                    shadow: 'shadow-rose-500/20',
+                    bgGlow: 'from-rose-500/10 to-transparent',
+                    ringColor: 'ring-rose-500/20',
+                  },
+                ].map((card) => (
                   <motion.div
-                    key={stat.label}
+                    key={card.label}
                     whileHover={{ scale: 1.02, y: -2, transition: { duration: 0.2 } }}
-                    className={cn(
-                      'relative overflow-hidden rounded-2xl border border-zinc-200/60 bg-white p-4 shadow-sm transition-shadow',
-                      'hover:shadow-md'
-                    )}
+                    className="group relative overflow-hidden rounded-2xl border border-zinc-200/60 bg-white p-4 shadow-sm transition-all duration-200 hover:shadow-lg hover:shadow-zinc-200/50 dark:border-zinc-800/40 dark:bg-zinc-900/60 dark:hover:shadow-zinc-900/50"
                   >
-                    <div className={cn('absolute inset-0 bg-gradient-to-br opacity-50', stat.gradient)} />
+                    <div className={cn('absolute inset-0 bg-gradient-to-br opacity-0 transition-opacity duration-300 group-hover:opacity-100', card.bgGlow)} />
                     <div className="relative">
                       <div className="mb-3 flex items-center justify-between">
-                        <div className={cn('flex h-9 w-9 items-center justify-center rounded-xl shadow-sm', stat.iconBg)}>
-                          <stat.icon className={cn('h-[18px] w-[18px]', stat.iconColor)} />
+                        <div className={cn('flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br shadow-sm', card.gradient, card.shadow)}>
+                          <card.icon className="h-5 w-5 text-white" />
                         </div>
-                        <span className="text-2xl font-bold text-zinc-900">{stat.value}</span>
+                        <motion.span
+                          key={card.value}
+                          initial={{ scale: 0.8, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          className="text-2xl font-bold text-zinc-900 dark:text-zinc-100"
+                        >
+                          {card.value}
+                        </motion.span>
                       </div>
-                      <span className="text-xs font-medium text-zinc-500">{stat.label}</span>
-                      <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-zinc-100">
-                        <div
-                          className={cn('h-full rounded-full transition-all duration-500', stat.progressColor)}
-                          style={{ width: `${stat.progress}%` }}
-                        />
-                      </div>
+                      <span className="text-xs font-medium text-zinc-500 dark:text-zinc-400">{card.label}</span>
                     </div>
                   </motion.div>
                 ))}
               </motion.div>
 
+              {/* Hero Section: Productivity Ring + Progress + Quick Actions */}
+              <motion.div variants={itemVariants} className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+                {/* Productivity Ring */}
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.4 }}
+                  className="relative overflow-hidden rounded-2xl border border-zinc-200/60 bg-white p-6 shadow-sm dark:border-zinc-800/40 dark:bg-zinc-900/60"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/[0.02] to-transparent" />
+                  <div className="relative flex flex-col items-center">
+                    <div className="relative mb-4">
+                      <ProgressRing percent={completionRate} size={100} strokeWidth={7} color="#10b981" />
+                      <div className="absolute inset-0 flex flex-col items-center justify-center">
+                        <motion.span
+                          key={completionRate}
+                          initial={{ opacity: 0, scale: 0.5 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          className="text-2xl font-bold text-zinc-900 dark:text-zinc-100"
+                        >
+                          {completionRate}%
+                        </motion.span>
+                      </div>
+                    </div>
+                    <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">إنتاجيتك اليوم</h3>
+                    <p className="mt-1 text-xs text-zinc-400">{completed} من {total} مهام</p>
+                    <div className="mt-4 w-full">
+                      <div className="mb-1 flex items-center justify-between text-xs">
+                        <span className="text-zinc-500">هدف اليوم</span>
+                        <span className={cn(
+                          'font-medium',
+                          completionRate >= 80 ? 'text-emerald-600' : completionRate >= 40 ? 'text-amber-600' : 'text-zinc-500'
+                        )}>
+                          {todayCount > 0 ? `${todayCompleted}/${todayCount}` : '—'}
+                        </span>
+                      </div>
+                      <div className="h-2 overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800">
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{ width: `${todayCount > 0 ? (todayCompleted / todayCount) * 100 : 0}%` }}
+                          transition={{ duration: 0.8, ease: 'easeOut' }}
+                          className="h-full rounded-full bg-gradient-to-r from-emerald-400 to-emerald-500"
+                        />
+                      </div>
+                    </div>
+                    <motion.p
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.5 }}
+                      className="mt-4 text-xs text-zinc-400"
+                    >
+                      {completionRate >= 80 ? '🎉 أداء رائع، استمر!' : pending <= 2 ? `💪 بقيت ${pending} ${pending === 1 ? 'مهمة' : 'مهام'} فقط` : '🌟 استمر في الإنجاز'}
+                    </motion.p>
+                  </div>
+                </motion.div>
+
+                {/* Quick Actions Grid */}
+                <div className="lg:col-span-2">
+                  <div className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-4">
+                    {[
+                      { icon: Plus, label: 'إضافة مهمة', onClick: goToTasks, color: 'from-emerald-500 to-emerald-600', shadow: 'shadow-emerald-500/20' },
+                      { icon: FolderKanban, label: 'مشروع جديد', onClick: () => onViewChange?.('app'), color: 'from-violet-500 to-violet-600', shadow: 'shadow-violet-500/20' },
+                      { icon: Timer, label: 'جلسة تركيز', onClick: () => toggleFocusMode(), color: 'from-amber-500 to-amber-600', shadow: 'shadow-amber-500/20' },
+                      { icon: Calendar, label: 'التقويم', onClick: () => onViewChange?.('calendar'), color: 'from-sky-500 to-sky-600', shadow: 'shadow-sky-500/20' },
+                      { icon: BarChart3, label: 'الإحصائيات', onClick: () => document.getElementById('stats-section')?.scrollIntoView({ behavior: 'smooth' }), color: 'from-indigo-500 to-indigo-600', shadow: 'shadow-indigo-500/20' },
+                      { icon: Flame, label: 'العادات', onClick: () => onViewChange?.('habits'), color: 'from-rose-500 to-rose-600', shadow: 'shadow-rose-500/20' },
+                    ].map((action) => (
+                      <motion.button
+                        key={action.label}
+                        whileHover={{ scale: 1.03, y: -2 }}
+                        whileTap={{ scale: 0.97 }}
+                        onClick={action.onClick}
+                        className="group relative overflow-hidden rounded-2xl border border-zinc-200/60 bg-white/80 p-4 text-start shadow-sm backdrop-blur-sm transition-all duration-200 hover:border-zinc-300/60 hover:shadow-lg dark:border-zinc-800/40 dark:bg-zinc-900/40 dark:hover:border-zinc-700/60"
+                      >
+                        <div className="absolute inset-0 bg-gradient-to-br from-white/50 to-transparent opacity-0 transition-opacity group-hover:opacity-100 dark:from-white/5" />
+                        <div className="relative">
+                          <div className={cn('mb-3 flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br shadow-sm transition-transform duration-200 group-hover:scale-110', action.color, action.shadow)}>
+                            <action.icon className="h-5 w-5 text-white" />
+                          </div>
+                          <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">{action.label}</span>
+                        </div>
+                      </motion.button>
+                    ))}
+                  </div>
+                </div>
+              </motion.div>
+
+              {/* Activity Timeline + Projects */}
               <motion.div variants={itemVariants} className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-                <div className="rounded-2xl border border-zinc-200/60 bg-white p-5 shadow-sm">
+                <div className="rounded-2xl border border-zinc-200/60 bg-white p-5 shadow-sm dark:border-zinc-800/40 dark:bg-zinc-900/60">
                   <div className="mb-4 flex items-center justify-between">
-                    <h3 className="text-sm font-semibold text-zinc-900">المهام الأخيرة</h3>
+                    <div className="flex items-center gap-2">
+                      <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-50 dark:bg-emerald-900/30">
+                        <Clock className="h-3.5 w-3.5 text-emerald-500" />
+                      </div>
+                      <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">النشاط الأخير</h3>
+                    </div>
                     <button
                       onClick={goToTasks}
-                      className="text-[10px] font-medium text-emerald-600 hover:text-emerald-700 transition-colors cursor-pointer"
+                      className="text-[10px] font-medium text-emerald-600 transition-colors hover:text-emerald-700 cursor-pointer"
                     >
                       عرض الكل <ArrowRight className="me-0.5 inline h-3 w-3" />
                     </button>
                   </div>
-                  {recentTasks.length === 0 ? (
-                    <p className="py-6 text-center text-xs text-zinc-400">لا توجد مهام بعد</p>
+                  {recentTasks.length === 0 && projects.length === 0 ? (
+                    <p className="py-6 text-center text-xs text-zinc-400">لا يوجد نشاط بعد</p>
                   ) : (
-                    <div className="space-y-1">
+                    <div className="space-y-0">
                       {recentTasks.map((task, i) => (
                         <motion.div
                           key={task.id}
                           initial={{ opacity: 0, x: -10 }}
                           animate={{ opacity: 1, x: 0 }}
                           transition={{ delay: i * 0.05, duration: 0.25 }}
-                          className="flex items-center gap-3 rounded-xl px-3 py-2.5 transition-colors hover:bg-emerald-50/50"
+                          className="relative flex items-start gap-3 pb-4"
                         >
-                          <div className={cn('h-2 w-2 shrink-0 rounded-full', priorityColor[task.priority]?.dot || 'bg-zinc-300')} />
-                          <span className={cn(
-                            'flex-1 truncate text-sm',
-                            task.completed ? 'text-zinc-400 line-through' : 'text-zinc-800'
-                          )}>
-                            {task.title}
-                          </span>
-                          {task.dueDate && (
-                            <span className="shrink-0 text-[10px] text-zinc-400">
-                              {getDateLabel(task.dueDate)}
-                            </span>
-                          )}
-                          <span className={cn(
-                            'shrink-0 rounded-md px-2 py-0.5 text-[10px] font-medium',
-                            task.completed
-                              ? 'bg-emerald-50 text-emerald-600'
-                              : priorityColor[task.priority]?.bg || 'bg-zinc-100 text-zinc-600'
-                          )}>
-                            {task.completed ? 'تم' : PRIORITIES.find(p => p.value === task.priority)?.label || task.priority}
-                          </span>
+                          <div className="flex flex-col items-center">
+                            <div className={cn(
+                              'h-2.5 w-2.5 rounded-full ring-2 ring-white dark:ring-zinc-900',
+                              task.completed ? 'bg-emerald-500' : priorityColor[task.priority]?.dot || 'bg-zinc-300'
+                            )} />
+                            {i < recentTasks.length - 1 && (
+                              <div className="mt-1 h-full w-px bg-zinc-100 dark:bg-zinc-800" />
+                            )}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className={cn(
+                              'text-sm leading-snug',
+                              task.completed ? 'text-zinc-400 line-through' : 'text-zinc-800 dark:text-zinc-200'
+                            )}>
+                              {task.title}
+                            </p>
+                            <div className="mt-0.5 flex items-center gap-2">
+                              <span className="text-[10px] text-zinc-400">{getDateLabel(task.dueDate || today)}</span>
+                              {task.completed && (
+                                <span className="rounded-md bg-emerald-50 px-1.5 py-0.5 text-[10px] font-medium text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400">تم</span>
+                              )}
+                            </div>
+                          </div>
                         </motion.div>
                       ))}
-                    </div>
-                  )}
-                </div>
-
-                <div className="rounded-2xl border border-zinc-200/60 bg-white p-5 shadow-sm">
-                  <div className="mb-4 flex items-center justify-between">
-                    <h3 className="text-sm font-semibold text-zinc-900">المشاريع</h3>
-                    <span className="text-[10px] font-medium text-zinc-400">{projects.length} مشروع</span>
-                  </div>
-                  {projects.length === 0 ? (
-                    <p className="py-6 text-center text-xs text-zinc-400">لا توجد مشاريع بعد</p>
-                  ) : (
-                    <div className="space-y-3">
                       {projects.map((p) => {
                         const count = tasks.filter((t) => t.projectId === p.id).length;
                         const done = tasks.filter((t) => t.projectId === p.id && t.completed).length;
@@ -316,21 +533,22 @@ export function Dashboard({ onViewChange }: DashboardProps) {
                           <motion.button
                             key={p.id}
                             onClick={() => goToTasksWithProject(p.id)}
-                            whileHover={{ x: 3 }}
-                            className="w-full rounded-xl border border-zinc-100 bg-zinc-50/50 p-3 text-start transition-colors hover:bg-emerald-50/50"
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            className="relative flex items-center gap-3 pb-3 w-full text-start"
                           >
-                            <div className="mb-2 flex items-center justify-between">
-                              <div className="flex items-center gap-2">
-                                <div className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: p.color }} />
-                                <span className="text-sm font-medium text-zinc-800">{p.name}</span>
-                              </div>
-                              <span className="text-[10px] font-medium text-zinc-400">{done}/{count}</span>
+                            <div className="flex flex-col items-center">
+                              <div className="h-2.5 w-2.5 rounded-full ring-2 ring-white dark:ring-zinc-900" style={{ backgroundColor: p.color }} />
+                              <div className="mt-1 h-full w-px bg-zinc-100 dark:bg-zinc-800" />
                             </div>
-                            <div className="h-1.5 overflow-hidden rounded-full bg-zinc-200">
-                              <div
-                                className="h-full rounded-full transition-all duration-500"
-                                style={{ width: `${pct}%`, backgroundColor: p.color }}
-                              />
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium text-zinc-800 dark:text-zinc-200">{p.name}</p>
+                              <div className="mt-1 flex items-center gap-2">
+                                <div className="flex-1 h-1.5 overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800">
+                                  <div className="h-full rounded-full transition-all duration-500" style={{ width: `${pct}%`, backgroundColor: p.color }} />
+                                </div>
+                                <span className="text-[10px] text-zinc-400 shrink-0">{done}/{count}</span>
+                              </div>
                             </div>
                           </motion.button>
                         );
@@ -338,17 +556,39 @@ export function Dashboard({ onViewChange }: DashboardProps) {
                     </div>
                   )}
                 </div>
+
+                {/* Weekly Chart */}
+                <div className="rounded-2xl border border-zinc-200/60 bg-white p-5 shadow-sm dark:border-zinc-800/40 dark:bg-zinc-900/60">
+                  <div className="mb-4 flex items-center gap-2">
+                    <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-50 dark:bg-emerald-900/30">
+                      <BarChart3 className="h-3.5 w-3.5 text-emerald-500" />
+                    </div>
+                    <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">النشاط الأسبوعي</h3>
+                  </div>
+                  <WeekChart days={weekDays} />
+                  <div className="mt-3 flex items-center justify-center gap-4 text-[10px] text-zinc-400">
+                    <div className="flex items-center gap-1.5">
+                      <div className="h-2.5 w-2.5 rounded-sm bg-emerald-200" />
+                      <span>المهام المجدولة</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <div className="h-2.5 w-2.5 rounded-sm bg-emerald-500" />
+                      <span>المكتملة</span>
+                    </div>
+                  </div>
+                </div>
               </motion.div>
 
+              {/* Overdue Alert */}
               {overdue > 0 && (
                 <motion.div variants={itemVariants}>
-                  <div className="rounded-2xl border border-rose-200/60 bg-gradient-to-r from-rose-50 to-rose-50/50 p-4 shadow-sm">
-                    <div className="flex items-center gap-2">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-rose-100">
+                  <div className="rounded-2xl border border-rose-200/60 bg-gradient-to-r from-rose-50 to-rose-50/50 p-4 shadow-sm dark:border-rose-900/30 dark:from-rose-950/20 dark:to-rose-950/10">
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-rose-100 dark:bg-rose-900/30">
                         <Clock className="h-4 w-4 text-rose-500" />
                       </div>
                       <div>
-                        <p className="text-sm font-semibold text-rose-700">
+                        <p className="text-sm font-semibold text-rose-700 dark:text-rose-300">
                           {overdue} {overdue === 1 ? 'مهمة متأخرة' : 'مهام متأخرة'}
                         </p>
                         <p className="text-xs text-rose-500">تحتاج إلى مراجعة فورية</p>
@@ -358,22 +598,30 @@ export function Dashboard({ onViewChange }: DashboardProps) {
                 </motion.div>
               )}
 
-              <motion.div variants={itemVariants}>
-                <div className="rounded-2xl border border-zinc-200/60 bg-white p-5 shadow-sm">
-                  <div className="mb-4 flex items-center gap-2">
-                    <BarChart3 className="h-4 w-4 text-emerald-500" />
-                    <h3 className="text-sm font-semibold text-zinc-900">النشاط الأسبوعي</h3>
+              {/* Statistics Section */}
+              <motion.div variants={itemVariants} id="stats-section">
+                <div className="rounded-2xl border border-zinc-200/60 bg-white p-5 shadow-sm dark:border-zinc-800/40 dark:bg-zinc-900/60">
+                  <div className="mb-5 flex items-center gap-2">
+                    <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-50 dark:bg-indigo-900/30">
+                      <TrendingUp className="h-3.5 w-3.5 text-indigo-500" />
+                    </div>
+                    <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">ملخص الإنتاجية</h3>
                   </div>
-                  <WeekChart days={weekDays} />
-                  <div className="mt-3 flex items-center justify-center gap-4 text-[10px] text-zinc-400">
-                    <div className="flex items-center gap-1.5">
-                      <div className="h-2.5 w-2.5 rounded-sm bg-emerald-300" />
-                      <span>المهام المجدولة</span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <div className="h-2.5 w-2.5 rounded-sm bg-green-500" />
-                      <span>المكتملة</span>
-                    </div>
+                  <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+                    {[
+                      { icon: CheckCircle2, value: `${completionRate}%`, label: 'معدل الإنجاز', color: 'text-emerald-500', bg: 'bg-emerald-50 dark:bg-emerald-900/20' },
+                      { icon: ListTodo, value: completed, label: 'مهام مكتملة', color: 'text-emerald-500', bg: 'bg-emerald-50 dark:bg-emerald-900/20' },
+                      { icon: Timer, value: totalPomodoros, label: 'جلسات تركيز', color: 'text-amber-500', bg: 'bg-amber-50 dark:bg-amber-900/20' },
+                      { icon: Flame, value: `${habitStreak} يوم`, label: 'أفضل ستريك', color: 'text-rose-500', bg: 'bg-rose-50 dark:bg-rose-900/20' },
+                    ].map((stat) => (
+                      <div key={stat.label} className="flex flex-col items-center gap-2 rounded-xl p-4 transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/30">
+                        <div className={cn('flex h-10 w-10 items-center justify-center rounded-xl', stat.bg)}>
+                          <stat.icon className={cn('h-5 w-5', stat.color)} />
+                        </div>
+                        <span className="text-xl font-bold text-zinc-900 dark:text-zinc-100">{stat.value}</span>
+                        <span className="text-[11px] text-zinc-500 dark:text-zinc-400">{stat.label}</span>
+                      </div>
+                    ))}
                   </div>
                 </div>
               </motion.div>

@@ -320,7 +320,7 @@ export function FocusMode() {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.3 }}
-      className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-gradient-to-br from-zinc-950 via-zinc-900 to-indigo-950 text-white"
+      className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-gradient-to-br from-[#0A0E17] via-zinc-950 to-[#0A0E17] text-white"
     >
       {/* Hidden YouTube iframe */}
       {youtubeId && (

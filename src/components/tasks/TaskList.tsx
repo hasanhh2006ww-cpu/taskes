@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import {
   DndContext,
   closestCenter,
@@ -21,7 +21,7 @@ import { useProjectStore } from '@/store/useProjectStore';
 import { TaskItem } from './TaskItem';
 import { Input } from '@/components/ui/Input';
 import { cn } from '@/lib/cn';
-import { Plus } from 'lucide-react';
+import { Plus, ListTodo } from 'lucide-react';
 import { PRIORITIES } from '@/lib/constants';
 import type { Priority } from '@/lib/types';
 
@@ -118,15 +118,37 @@ export function TaskList() {
         </DndContext>
 
         {filteredTasks.length === 0 && (
-          <div className="mt-16 flex flex-col items-center gap-2 text-center">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-400 dark:bg-emerald-500/10">
-              <Plus className="h-5 w-5" />
-            </div>
-            <p className="text-sm text-zinc-500 dark:text-zinc-400">لا توجد مهام بعد</p>
-            <p className="text-xs text-zinc-300 dark:text-zinc-600">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+            className="flex flex-col items-center justify-center py-16 text-center"
+          >
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: 'spring', stiffness: 200, damping: 15, delay: 0.1 }}
+              className="mb-5 flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-to-br from-emerald-50 to-emerald-100 shadow-sm dark:from-emerald-900/20 dark:to-emerald-800/20"
+            >
+              <ListTodo className="h-9 w-9 text-emerald-400" />
+            </motion.div>
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.2 }}
+              className="text-sm font-medium text-zinc-500 dark:text-zinc-400"
+            >
+              لا توجد مهام بعد
+            </motion.p>
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.3 }}
+              className="mt-1 text-xs text-zinc-300 dark:text-zinc-600"
+            >
               اكتب أعلاه واضغط Enter للإضافة
-            </p>
-          </div>
+            </motion.p>
+          </motion.div>
         )}
       </div>
     </div>

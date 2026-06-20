@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { motion } from 'framer-motion';
 import { cn } from '@/lib/cn';
 import { useTaskStore } from '@/store/useTaskStore';
 import { useProjectStore } from '@/store/useProjectStore';
@@ -71,18 +72,19 @@ export function Sidebar({ view, onViewChange }: SidebarProps) {
   return (
     <aside
       className={cn(
-        'flex h-full w-full flex-col border-e border-zinc-200/60 bg-white/95 backdrop-blur-xl overflow-hidden',
-        'dark:border-zinc-800/40 dark:bg-gradient-to-b dark:from-[#0B0F1A] dark:to-[#0F1525]'
+        'flex h-full w-full flex-col overflow-hidden floating rounded-2xl',
+        sidebarCollapsed ? 'items-center' : '',
+        'glass-card'
       )}
     >
-      <div className={cn('flex items-center px-4 pt-5 pb-4', sidebarCollapsed ? 'justify-center' : 'justify-between')}>
-        {!sidebarCollapsed && <img src="/logo.svg" alt="My Taske" className="h-8 w-auto" />}
+      <div className={cn('flex items-center pt-4 pb-3', sidebarCollapsed ? 'justify-center px-0' : 'justify-between px-4')}>
+        {!sidebarCollapsed && <img src="/logo.svg" alt="My Taske" className="h-7 w-auto" />}
         <button
           onClick={toggleSidebarCollapsed}
-          className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-600 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
+          className="flex h-7 w-7 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-600 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
           aria-label={sidebarCollapsed ? 'توسيع القائمة' : 'طي القائمة'}
         >
-          <ChevronLeft className={cn('h-4 w-4 transition-transform duration-300', sidebarCollapsed && 'rotate-180')} />
+          <ChevronLeft className={cn('h-3.5 w-3.5 transition-transform duration-300', sidebarCollapsed && 'rotate-180')} />
         </button>
       </div>
 
@@ -91,14 +93,14 @@ export function Sidebar({ view, onViewChange }: SidebarProps) {
           <button
             onClick={() => handleNavClick(() => onViewChange('dashboard'))}
             className={cn(
-              'flex w-full items-center gap-3 rounded-lg text-sm transition-colors',
+              'group flex w-full items-center gap-3 rounded-xl text-sm transition-all duration-200',
               sidebarCollapsed ? 'justify-center px-2 py-2.5' : 'px-3 py-2.5',
               isActive('dashboard')
-                ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400'
-                : 'text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800/60'
+                ? 'bg-emerald-50 text-emerald-600 shadow-sm dark:bg-emerald-950/40 dark:text-emerald-400'
+                : 'text-zinc-500 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800/60'
             )}
           >
-            <LayoutDashboard className="h-4 w-4 shrink-0" />
+            <LayoutDashboard className={cn('h-4 w-4 shrink-0 transition-transform duration-200', isActive('dashboard') && 'scale-110')} />
             {!sidebarCollapsed && <span className="flex-1 text-start">لوحة التحكم</span>}
           </button>
           <NavTooltip label="لوحة التحكم" show={sidebarCollapsed && hoveredItem === 'dashboard'} />
@@ -119,20 +121,20 @@ export function Sidebar({ view, onViewChange }: SidebarProps) {
                 setFilter(item.filter);
               })}
               className={cn(
-                'flex w-full items-center gap-3 rounded-lg text-sm transition-colors',
+                'group flex w-full items-center gap-3 rounded-xl text-sm transition-all duration-200',
                 sidebarCollapsed ? 'justify-center px-2 py-2.5' : 'px-3 py-2.5',
                 isActive('app', item.filter)
-                  ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400'
-                  : 'text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800/60'
+                  ? 'bg-emerald-50 text-emerald-600 shadow-sm dark:bg-emerald-950/40 dark:text-emerald-400'
+                  : 'text-zinc-500 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800/60'
               )}
             >
-              <item.icon className="h-4 w-4 shrink-0" />
+              <item.icon className={cn('h-4 w-4 shrink-0 transition-transform duration-200', isActive('app', item.filter) && 'scale-110')} />
               {!sidebarCollapsed && <span className="flex-1 text-start">{item.label}</span>}
               {!sidebarCollapsed && item.filter === 'today' && todayCount > 0 && (
-                <span className="text-[11px] text-zinc-400">{todayCount}</span>
+                <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-emerald-100 px-1.5 text-[10px] font-medium text-emerald-600 dark:bg-emerald-900/50 dark:text-emerald-400">{todayCount}</span>
               )}
               {!sidebarCollapsed && item.filter === 'important' && importantCount > 0 && (
-                <span className="text-[11px] text-zinc-400">{importantCount}</span>
+                <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-amber-100 px-1.5 text-[10px] font-medium text-amber-600 dark:bg-amber-900/50 dark:text-amber-400">{importantCount}</span>
               )}
             </button>
             <NavTooltip label={item.label} show={sidebarCollapsed && hoveredItem === item.filter} />
@@ -172,16 +174,18 @@ export function Sidebar({ view, onViewChange }: SidebarProps) {
                   setActiveProjectId(project.id);
                 })}
                 className={cn(
-                  'flex items-center gap-3 rounded-lg text-sm transition-colors',
+                  'group flex items-center gap-3 rounded-xl text-sm transition-all duration-200',
                   sidebarCollapsed
                     ? 'justify-center px-2 py-2.5'
                     : 'flex-1 px-3 py-2.5',
                   activeProjectId === project.id
-                    ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400'
-                    : 'text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800/60'
+                    ? 'bg-emerald-50 text-emerald-600 shadow-sm dark:bg-emerald-950/40 dark:text-emerald-400'
+                    : 'text-zinc-500 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800/60'
                 )}
               >
-                <FolderKanban className="h-4 w-4 shrink-0" style={{ color: project.color }} />
+                <div className="relative">
+                  <div className={cn('h-2 w-2 rounded-full', activeProjectId === project.id ? 'bg-emerald-500' : '')} style={{ backgroundColor: activeProjectId === project.id ? undefined : project.color }} />
+                </div>
                 {!sidebarCollapsed && <span className="flex-1 text-start truncate">{project.name}</span>}
               </button>
               {!sidebarCollapsed && (
@@ -213,14 +217,14 @@ export function Sidebar({ view, onViewChange }: SidebarProps) {
           <button
             onClick={() => handleNavClick(() => onViewChange('calendar'))}
             className={cn(
-              'flex w-full items-center gap-3 rounded-lg text-sm transition-colors',
+              'group flex w-full items-center gap-3 rounded-xl text-sm transition-all duration-200',
               sidebarCollapsed ? 'justify-center px-2 py-2.5' : 'px-3 py-2.5',
               isActive('calendar')
-                ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400'
-                : 'text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800/60'
+                ? 'bg-emerald-50 text-emerald-600 shadow-sm dark:bg-emerald-950/40 dark:text-emerald-400'
+                : 'text-zinc-500 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800/60'
             )}
           >
-            <Calendar className="h-4 w-4 shrink-0" />
+            <Calendar className={cn('h-4 w-4 shrink-0 transition-transform duration-200', isActive('calendar') && 'scale-110')} />
             {!sidebarCollapsed && <span className="flex-1 text-start">التقويم</span>}
           </button>
           <NavTooltip label="التقويم" show={sidebarCollapsed && hoveredItem === 'calendar'} />
@@ -234,14 +238,14 @@ export function Sidebar({ view, onViewChange }: SidebarProps) {
           <button
             onClick={() => handleNavClick(() => onViewChange('settings'))}
             className={cn(
-              'flex w-full items-center gap-3 rounded-lg text-sm transition-colors',
+              'group flex w-full items-center gap-3 rounded-xl text-sm transition-all duration-200',
               sidebarCollapsed ? 'justify-center px-2 py-2.5' : 'px-3 py-2.5',
               isActive('settings')
-                ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400'
-                : 'text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800/60'
+                ? 'bg-emerald-50 text-emerald-600 shadow-sm dark:bg-emerald-950/40 dark:text-emerald-400'
+                : 'text-zinc-500 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800/60'
             )}
           >
-            <Settings className="h-4 w-4 shrink-0" />
+            <Settings className={cn('h-4 w-4 shrink-0 transition-transform duration-200', isActive('settings') && 'scale-110')} />
             {!sidebarCollapsed && <span className="flex-1 text-start">الإعدادات</span>}
           </button>
           <NavTooltip label="الإعدادات" show={sidebarCollapsed && hoveredItem === 'settings'} />
@@ -255,14 +259,14 @@ export function Sidebar({ view, onViewChange }: SidebarProps) {
           <button
             onClick={() => handleNavClick(() => onViewChange('habits'))}
             className={cn(
-              'flex w-full items-center gap-3 rounded-lg text-sm transition-colors',
+              'group flex w-full items-center gap-3 rounded-xl text-sm transition-all duration-200',
               sidebarCollapsed ? 'justify-center px-2 py-2.5' : 'px-3 py-2.5',
               isActive('habits')
-                ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400'
-                : 'text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800/60'
+                ? 'bg-emerald-50 text-emerald-600 shadow-sm dark:bg-emerald-950/40 dark:text-emerald-400'
+                : 'text-zinc-500 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800/60'
             )}
           >
-            <Flame className="h-4 w-4 shrink-0" />
+            <Flame className={cn('h-4 w-4 shrink-0 transition-transform duration-200', isActive('habits') && 'scale-110')} />
             {!sidebarCollapsed && <span className="flex-1 text-start">العادات</span>}
             {!sidebarCollapsed && habits.length > 0 && <span className="text-[11px] text-zinc-400">{habits.length}</span>}
           </button>
@@ -270,7 +274,7 @@ export function Sidebar({ view, onViewChange }: SidebarProps) {
         </div>
       </nav>
 
-      <div className={cn('mx-2 mb-2 mt-auto rounded-xl border border-zinc-200/50 p-2 dark:border-zinc-800/40', sidebarCollapsed ? 'bg-transparent' : 'bg-zinc-50/50 dark:bg-zinc-900/40')}>
+      <div className={cn('mx-2 mb-2 mt-auto', sidebarCollapsed ? '' : 'glass rounded-xl p-2')}>
         <div
           className="relative"
           onMouseEnter={() => setHoveredItem('focus')}
@@ -279,12 +283,12 @@ export function Sidebar({ view, onViewChange }: SidebarProps) {
           <button
             onClick={toggleFocusMode}
             className={cn(
-              'flex w-full items-center gap-3 rounded-lg text-sm transition-colors text-zinc-500 dark:text-zinc-400',
+              'group flex w-full items-center gap-3 rounded-xl text-sm transition-all duration-200',
               sidebarCollapsed ? 'justify-center px-2 py-2.5' : 'px-3 py-2.5',
-              'hover:bg-emerald-50 hover:text-emerald-600 dark:hover:bg-emerald-950/40 dark:hover:text-emerald-400'
+              'text-zinc-500 hover:bg-emerald-50 hover:text-emerald-600 dark:text-zinc-400 dark:hover:bg-emerald-950/40 dark:hover:text-emerald-400'
             )}
           >
-            <Target className="h-4 w-4 shrink-0" />
+            <Target className="h-4 w-4 shrink-0 transition-transform duration-200 group-hover:scale-110" />
             {!sidebarCollapsed && (
               <>
                 <span className="flex-1 text-start">وضع التركيز</span>
@@ -302,9 +306,9 @@ export function Sidebar({ view, onViewChange }: SidebarProps) {
           <button
             onClick={toggleDarkMode}
             className={cn(
-              'flex w-full items-center gap-3 rounded-lg text-sm transition-colors text-zinc-500 dark:text-zinc-400',
+              'group flex w-full items-center gap-3 rounded-xl text-sm transition-all duration-200',
               sidebarCollapsed ? 'justify-center px-2 py-2.5' : 'px-3 py-2.5',
-              'hover:bg-zinc-100 dark:hover:bg-zinc-800/60'
+              'text-zinc-500 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800/60'
             )}
           >
             {sidebarCollapsed ? (darkMode ? '☀️' : '🌙') : (darkMode ? '☀️ فاتح' : '🌙 ليلي')}

@@ -6,6 +6,7 @@ import { CSS } from '@dnd-kit/utilities';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/cn';
 import { useTaskStore } from '@/store/useTaskStore';
+import { useProjectStore } from '@/store/useProjectStore';
 import { useUIStore } from '@/store/useUIStore';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
@@ -21,7 +22,9 @@ interface TaskItemProps {
 
 export const TaskItem = memo(function TaskItem({ task }: TaskItemProps) {
   const { toggleComplete, toggleImportant, deleteTask, setActiveTaskId, activeTaskId } = useTaskStore();
+  const projects = useProjectStore((s) => s.projects);
   const { focusMode } = useUIStore();
+  const project = task.projectId ? projects.find((p) => p.id === task.projectId) : null;
 
   const {
     attributes,
@@ -95,13 +98,13 @@ export const TaskItem = memo(function TaskItem({ task }: TaskItemProps) {
       ref={setNodeRef}
       style={style}
       className={cn(
-        'group relative overflow-hidden rounded-xl border p-0 transition-all duration-200',
+        'group relative overflow-hidden rounded-xl border transition-all duration-200',
         'border-zinc-200/60 dark:border-zinc-800/40',
-        'hover:shadow-sm hover:border-emerald-200/40 dark:hover:border-emerald-800/30',
-        isDragging && 'z-50 scale-105 shadow-xl opacity-90 dark:shadow-black/40',
-        task.completed && 'opacity-60 hover:opacity-50',
+        'card-hover',
+        task.completed && 'opacity-60',
         isActive &&
-          'border-emerald-300/60 dark:border-emerald-700/60 ring-1 ring-emerald-500/10'
+          'border-emerald-300/60 dark:border-emerald-700/60 ring-1 ring-emerald-500/10',
+        isDragging && 'z-50 scale-105 shadow-xl opacity-90 dark:shadow-black/40'
       )}
     >
       <div className="pointer-events-none absolute inset-0 flex">
@@ -151,12 +154,18 @@ export const TaskItem = memo(function TaskItem({ task }: TaskItemProps) {
         <button
           data-no-swipe
           onClick={() => toggleComplete(task.id)}
-          className="mt-0.5 shrink-0 text-zinc-300 hover:text-emerald-500 dark:text-zinc-600 dark:hover:text-emerald-400"
+          className="mt-0.5 shrink-0 text-zinc-300 transition-all duration-200 hover:text-emerald-500 dark:text-zinc-600 dark:hover:text-emerald-400"
         >
           {task.completed ? (
-            <CheckCircle2 className="h-4 w-4 text-emerald-500 dark:text-emerald-400" />
+            <motion.span
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+            >
+              <CheckCircle2 className="h-5 w-5 text-emerald-500 dark:text-emerald-400" />
+            </motion.span>
           ) : (
-            <Circle className="h-4 w-4" />
+            <Circle className="h-5 w-5 transition-colors duration-200 hover:text-emerald-400" />
           )}
         </button>
 
@@ -167,17 +176,27 @@ export const TaskItem = memo(function TaskItem({ task }: TaskItemProps) {
         >
           <span
             className={cn(
-              'text-sm font-medium text-zinc-800 dark:text-zinc-200',
-              task.completed && 'line-through text-zinc-400 dark:text-zinc-500'
+              'text-sm font-medium transition-all duration-200',
+              task.completed
+                ? 'text-zinc-400 line-through dark:text-zinc-500'
+                : 'text-zinc-800 dark:text-zinc-200'
             )}
           >
             {task.title}
           </span>
-          {task.dueDate && (
-            <span className="me-2 text-[11px] text-zinc-400 dark:text-zinc-500">
-              {new Date(task.dueDate).toLocaleDateString('ar-SA', { month: 'short', day: 'numeric' })}
-            </span>
-          )}
+          <div className="mt-0.5 flex items-center gap-1.5">
+            {project && (
+              <span className="inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[10px] leading-none" style={{ backgroundColor: project.color + '20', color: project.color }}>
+                <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: project.color }} />
+                {project.name}
+              </span>
+            )}
+            {task.dueDate && (
+              <span className="text-[11px] text-zinc-400 dark:text-zinc-500">
+                {new Date(task.dueDate).toLocaleDateString('ar-SA', { month: 'short', day: 'numeric' })}
+              </span>
+            )}
+          </div>
         </div>
 
         {priority && (

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { motion } from 'framer-motion';
 import { useUIStore } from '@/store/useUIStore';
 import { useHabitStore } from '@/store/useHabitStore';
 import { useTaskStore } from '@/store/useTaskStore';
@@ -91,8 +92,8 @@ export function SettingsView() {
 
   const SettingCard = ({ children, className }: { children: React.ReactNode; className?: string }) => (
     <div className={cn(
-      'rounded-2xl border border-zinc-200/60 bg-white p-5 shadow-sm',
-      'dark:border-zinc-800 dark:bg-zinc-900/80',
+      'rounded-2xl border border-zinc-200/60 bg-white/80 p-5 shadow-sm backdrop-blur-sm card-hover',
+      'dark:border-zinc-800 dark:bg-zinc-900/60',
       className
     )}>
       {children}
@@ -197,8 +198,12 @@ export function SettingsView() {
       </div>
 
       {resetting && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-          <div className="mx-4 w-full max-w-sm rounded-2xl border border-zinc-200 bg-white p-6 shadow-lg dark:border-zinc-700 dark:bg-zinc-900">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-md">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="mx-4 w-full max-w-sm rounded-2xl border border-zinc-200 bg-white/95 p-6 shadow-xl backdrop-blur-sm dark:border-zinc-700 dark:bg-zinc-900/95"
+          >
             <h3 className="text-base font-semibold text-zinc-900 dark:text-zinc-100">تأكيد الحذف</h3>
             <p className="mt-2 text-sm text-zinc-500">سيتم حذف جميع المهام والعادات بشكل دائم. هل أنت متأكد؟</p>
             <div className="mt-5 flex justify-end gap-3">
@@ -210,12 +215,12 @@ export function SettingsView() {
               </button>
               <button
                 onClick={confirmReset}
-                className="rounded-lg bg-red-500 px-4 py-2 text-sm text-white transition-colors hover:bg-red-600"
+                className="rounded-lg bg-red-500 px-4 py-2 text-sm text-white shadow-sm transition-colors hover:bg-red-600"
               >
                 نعم، احذف الكل
               </button>
             </div>
-          </div>
+          </motion.div>
         </div>
       )}
     </div>

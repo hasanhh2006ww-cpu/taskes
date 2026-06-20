@@ -81,16 +81,19 @@ export default function Home() {
           'md:translate-x-0'
         )}
         style={{
-          width: sidebarCollapsed ? 70 : 260,
+          width: sidebarCollapsed ? 78 : 268,
           transition: 'width 300ms ease-in-out, transform 200ms ease-in-out',
         }}
       >
-        <Sidebar view={view} onViewChange={setView} />
+        <div className="p-1 h-full">
+          <Sidebar view={view} onViewChange={setView} />
+        </div>
       </div>
 
       <button
         onClick={() => setSidebarOpen(!sidebarOpen)}
-        className="fixed start-3 top-3 z-50 flex h-11 w-11 items-center justify-center rounded-lg bg-white/80 text-zinc-600 shadow-sm backdrop-blur-sm transition-colors hover:bg-zinc-100 dark:bg-zinc-900/90 dark:text-zinc-400 dark:hover:bg-zinc-800/80 md:hidden"
+        className="fixed start-3 top-3 z-50 flex h-11 w-11 items-center justify-center rounded-xl glass shadow-sm text-zinc-600 transition-colors hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800/80 md:hidden"
+        aria-label={sidebarOpen ? 'إغلاق القائمة' : 'فتح القائمة'}
       >
         {sidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
       </button>
