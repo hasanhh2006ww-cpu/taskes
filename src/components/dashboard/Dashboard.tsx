@@ -244,7 +244,7 @@ export function Dashboard() {
       </div>
 
       <div className="flex-1 overflow-y-auto">
-        <div className="mx-auto w-full max-w-6xl px-4 py-5 md:px-6 md:py-8">
+        <div className="w-full px-6 py-6">
           {isEmpty ? (
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
