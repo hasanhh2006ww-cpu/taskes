@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion, type Variants } from 'framer-motion';
 import { useTaskStore } from '@/store/useTaskStore';
 import { useProjectStore } from '@/store/useProjectStore';
@@ -128,11 +129,8 @@ const itemVariants: Variants = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.35, ease: 'easeOut' } },
 };
 
-interface DashboardProps {
-  onViewChange?: (view: 'app' | 'dashboard' | 'habits' | 'calendar' | 'settings') => void;
-}
-
-export function Dashboard({ onViewChange }: DashboardProps) {
+export function Dashboard() {
+  const router = useRouter();
   const tasks = useTaskStore((s) => s.tasks);
   const projects = useProjectStore((s) => s.projects);
   const { setActiveProjectId } = useTaskStore();
@@ -190,16 +188,16 @@ export function Dashboard({ onViewChange }: DashboardProps) {
   }, [tasks, today]);
 
   const goToTasks = useCallback(() => {
-    onViewChange?.('app');
+    router.push('/');
     setTimeout(() => {
       document.querySelector<HTMLInputElement>('[data-task-input]')?.focus();
     }, 100);
-  }, [onViewChange]);
+  }, [router]);
 
   const goToTasksWithProject = useCallback((projectId: string) => {
     setActiveProjectId(projectId);
-    onViewChange?.('app');
-  }, [onViewChange, setActiveProjectId]);
+    router.push('/');
+  }, [router, setActiveProjectId]);
 
   const isEmpty = total === 0;
   const greeting = getGreeting();
@@ -445,11 +443,11 @@ export function Dashboard({ onViewChange }: DashboardProps) {
                   <div className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-4">
                     {[
                       { icon: Plus, label: 'إضافة مهمة', onClick: goToTasks, color: 'from-emerald-500 to-emerald-600', shadow: 'shadow-emerald-500/20' },
-                      { icon: FolderKanban, label: 'مشروع جديد', onClick: () => onViewChange?.('app'), color: 'from-violet-500 to-violet-600', shadow: 'shadow-violet-500/20' },
+                      { icon: FolderKanban, label: 'مشروع جديد', onClick: () => router.push('/'), color: 'from-violet-500 to-violet-600', shadow: 'shadow-violet-500/20' },
                       { icon: Timer, label: 'جلسة تركيز', onClick: () => toggleFocusMode(), color: 'from-amber-500 to-amber-600', shadow: 'shadow-amber-500/20' },
-                      { icon: Calendar, label: 'التقويم', onClick: () => onViewChange?.('calendar'), color: 'from-sky-500 to-sky-600', shadow: 'shadow-sky-500/20' },
+                      { icon: Calendar, label: 'التقويم', onClick: () => router.push('/calendar'), color: 'from-sky-500 to-sky-600', shadow: 'shadow-sky-500/20' },
                       { icon: BarChart3, label: 'الإحصائيات', onClick: () => document.getElementById('stats-section')?.scrollIntoView({ behavior: 'smooth' }), color: 'from-indigo-500 to-indigo-600', shadow: 'shadow-indigo-500/20' },
-                      { icon: Flame, label: 'العادات', onClick: () => onViewChange?.('habits'), color: 'from-rose-500 to-rose-600', shadow: 'shadow-rose-500/20' },
+                      { icon: Flame, label: 'العادات', onClick: () => router.push('/habits'), color: 'from-rose-500 to-rose-600', shadow: 'shadow-rose-500/20' },
                     ].map((action) => (
                       <motion.button
                         key={action.label}

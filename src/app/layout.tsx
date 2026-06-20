@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Cairo, IBM_Plex_Sans_Arabic } from "next/font/google";
 import { Toaster } from "react-hot-toast";
+import ClientLayout from "./layout-client";
 import "./globals.css";
 
 const cairo = Cairo({
@@ -40,7 +41,7 @@ export default function RootLayout({
             style: { fontFamily: 'var(--font-ibm-plex), var(--font-cairo), sans-serif', fontSize: '14px' },
           }}
         />
-        {children}
+        <ClientLayout>{children}</ClientLayout>
       </body>
     </html>
   );

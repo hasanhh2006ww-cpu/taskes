@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { motion } from 'framer-motion';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/cn';
 import { useTaskStore } from '@/store/useTaskStore';
 import { useProjectStore } from '@/store/useProjectStore';
@@ -23,20 +24,6 @@ import {
   Settings,
 } from 'lucide-react';
 
-type View = 'app' | 'dashboard' | 'habits' | 'calendar' | 'settings';
-
-const NAV_ITEMS = [
-  { label: 'جميع المهام', icon: ListTodo, filter: 'all' as const },
-  { label: 'اليوم', icon: Calendar, filter: 'today' as const },
-  { label: 'المهمة', icon: Star, filter: 'important' as const },
-  { label: 'المنجزة', icon: CheckCircle2, filter: 'completed' as const },
-];
-
-interface SidebarProps {
-  view: View;
-  onViewChange: (view: View) => void;
-}
-
 function NavTooltip({ label, show }: { label: string; show: boolean }) {
   if (!show) return null;
   return (
@@ -47,7 +34,8 @@ function NavTooltip({ label, show }: { label: string; show: boolean }) {
   );
 }
 
-export function Sidebar({ view, onViewChange }: SidebarProps) {
+export function Sidebar() {
+  const pathname = usePathname();
   const { filter, setFilter, setActiveProjectId, activeProjectId, tasks } = useTaskStore();
   const { projects, addProject, deleteProject } = useProjectStore();
   const { darkMode, toggleDarkMode, toggleFocusMode, setSidebarOpen, sidebarCollapsed, toggleSidebarCollapsed } = useUIStore();
@@ -59,15 +47,29 @@ export function Sidebar({ view, onViewChange }: SidebarProps) {
 
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
 
-  function handleNavClick(fn: () => void) {
-    fn();
+  function closeSidebar() {
     if (window.innerWidth < 768) {
       setSidebarOpen(false);
     }
   }
 
-  const isActive = (checkView: View, checkFilter?: string) =>
-    checkFilter ? view === 'app' && filter === checkFilter && !activeProjectId : view === checkView;
+  function handleTaskNav(filterType: 'all' | 'today' | 'important' | 'completed') {
+    setFilter(filterType);
+    closeSidebar();
+  }
+
+  function handleProjectNav(projectId: string) {
+    setActiveProjectId(projectId);
+    closeSidebar();
+  }
+
+  const isTasksPage = pathname === '/' || pathname === '/tasks';
+  const isActivePath = (p: string) => {
+    if (p === '/') return pathname === '/';
+    return pathname.startsWith(p);
+  };
+
+  const isFilterActive = (f: string) => isTasksPage && filter === f && !activeProjectId;
 
   return (
     <aside
@@ -78,7 +80,11 @@ export function Sidebar({ view, onViewChange }: SidebarProps) {
       )}
     >
       <div className={cn('flex items-center pt-4 pb-3', sidebarCollapsed ? 'justify-center px-0' : 'justify-between px-4')}>
-        {!sidebarCollapsed && <img src="/logo.svg" alt="My Taske" className="h-7 w-auto" />}
+        {!sidebarCollapsed && (
+          <Link href="/dashboard" onClick={closeSidebar}>
+            <img src="/logo.svg" alt="My Taske" className="h-7 w-auto" />
+          </Link>
+        )}
         <button
           onClick={toggleSidebarCollapsed}
           className="flex h-7 w-7 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-600 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
@@ -90,19 +96,20 @@ export function Sidebar({ view, onViewChange }: SidebarProps) {
 
       <nav className="flex-1 space-y-0.5 px-2">
         <div className="relative" onMouseEnter={() => setHoveredItem('dashboard')} onMouseLeave={() => setHoveredItem(null)}>
-          <button
-            onClick={() => handleNavClick(() => onViewChange('dashboard'))}
+          <Link
+            href="/dashboard"
+            onClick={closeSidebar}
             className={cn(
               'group flex w-full items-center gap-3 rounded-xl text-sm transition-all duration-200',
               sidebarCollapsed ? 'justify-center px-2 py-2.5' : 'px-3 py-2.5',
-              isActive('dashboard')
+              isActivePath('/dashboard')
                 ? 'bg-emerald-50 text-emerald-600 shadow-sm dark:bg-emerald-950/40 dark:text-emerald-400'
                 : 'text-zinc-500 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800/60'
             )}
           >
-            <LayoutDashboard className={cn('h-4 w-4 shrink-0 transition-transform duration-200', isActive('dashboard') && 'scale-110')} />
+            <LayoutDashboard className={cn('h-4 w-4 shrink-0 transition-transform duration-200', isActivePath('/dashboard') && 'scale-110')} />
             {!sidebarCollapsed && <span className="flex-1 text-start">لوحة التحكم</span>}
-          </button>
+          </Link>
           <NavTooltip label="لوحة التحكم" show={sidebarCollapsed && hoveredItem === 'dashboard'} />
         </div>
 
@@ -115,20 +122,20 @@ export function Sidebar({ view, onViewChange }: SidebarProps) {
             onMouseEnter={() => setHoveredItem(item.filter)}
             onMouseLeave={() => setHoveredItem(null)}
           >
-            <button
-              onClick={() => handleNavClick(() => {
-                onViewChange('app');
-                setFilter(item.filter);
-              })}
+            <Link
+              href="/"
+              onClick={(e) => {
+                handleTaskNav(item.filter);
+              }}
               className={cn(
                 'group flex w-full items-center gap-3 rounded-xl text-sm transition-all duration-200',
                 sidebarCollapsed ? 'justify-center px-2 py-2.5' : 'px-3 py-2.5',
-                isActive('app', item.filter)
+                isFilterActive(item.filter)
                   ? 'bg-emerald-50 text-emerald-600 shadow-sm dark:bg-emerald-950/40 dark:text-emerald-400'
                   : 'text-zinc-500 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800/60'
               )}
             >
-              <item.icon className={cn('h-4 w-4 shrink-0 transition-transform duration-200', isActive('app', item.filter) && 'scale-110')} />
+              <item.icon className={cn('h-4 w-4 shrink-0 transition-transform duration-200', isFilterActive(item.filter) && 'scale-110')} />
               {!sidebarCollapsed && <span className="flex-1 text-start">{item.label}</span>}
               {!sidebarCollapsed && item.filter === 'today' && todayCount > 0 && (
                 <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-emerald-100 px-1.5 text-[10px] font-medium text-emerald-600 dark:bg-emerald-900/50 dark:text-emerald-400">{todayCount}</span>
@@ -136,7 +143,7 @@ export function Sidebar({ view, onViewChange }: SidebarProps) {
               {!sidebarCollapsed && item.filter === 'important' && importantCount > 0 && (
                 <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-amber-100 px-1.5 text-[10px] font-medium text-amber-600 dark:bg-amber-900/50 dark:text-amber-400">{importantCount}</span>
               )}
-            </button>
+            </Link>
             <NavTooltip label={item.label} show={sidebarCollapsed && hoveredItem === item.filter} />
           </div>
         ))}
@@ -168,11 +175,9 @@ export function Sidebar({ view, onViewChange }: SidebarProps) {
             onMouseLeave={() => setHoveredItem(null)}
           >
             <div className={cn('flex items-center', sidebarCollapsed && 'justify-center')}>
-              <button
-                onClick={() => handleNavClick(() => {
-                  onViewChange('app');
-                  setActiveProjectId(project.id);
-                })}
+              <Link
+                href="/"
+                onClick={() => handleProjectNav(project.id)}
                 className={cn(
                   'group flex items-center gap-3 rounded-xl text-sm transition-all duration-200',
                   sidebarCollapsed
@@ -187,7 +192,7 @@ export function Sidebar({ view, onViewChange }: SidebarProps) {
                   <div className={cn('h-2 w-2 rounded-full', activeProjectId === project.id ? 'bg-emerald-500' : '')} style={{ backgroundColor: activeProjectId === project.id ? undefined : project.color }} />
                 </div>
                 {!sidebarCollapsed && <span className="flex-1 text-start truncate">{project.name}</span>}
-              </button>
+              </Link>
               {!sidebarCollapsed && (
                 <button
                   onClick={() => {
@@ -214,19 +219,20 @@ export function Sidebar({ view, onViewChange }: SidebarProps) {
           onMouseEnter={() => setHoveredItem('calendar')}
           onMouseLeave={() => setHoveredItem(null)}
         >
-          <button
-            onClick={() => handleNavClick(() => onViewChange('calendar'))}
+          <Link
+            href="/calendar"
+            onClick={closeSidebar}
             className={cn(
               'group flex w-full items-center gap-3 rounded-xl text-sm transition-all duration-200',
               sidebarCollapsed ? 'justify-center px-2 py-2.5' : 'px-3 py-2.5',
-              isActive('calendar')
+              isActivePath('/calendar')
                 ? 'bg-emerald-50 text-emerald-600 shadow-sm dark:bg-emerald-950/40 dark:text-emerald-400'
                 : 'text-zinc-500 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800/60'
             )}
           >
-            <Calendar className={cn('h-4 w-4 shrink-0 transition-transform duration-200', isActive('calendar') && 'scale-110')} />
+            <Calendar className={cn('h-4 w-4 shrink-0 transition-transform duration-200', isActivePath('/calendar') && 'scale-110')} />
             {!sidebarCollapsed && <span className="flex-1 text-start">التقويم</span>}
-          </button>
+          </Link>
           <NavTooltip label="التقويم" show={sidebarCollapsed && hoveredItem === 'calendar'} />
         </div>
 
@@ -235,19 +241,20 @@ export function Sidebar({ view, onViewChange }: SidebarProps) {
           onMouseEnter={() => setHoveredItem('settings')}
           onMouseLeave={() => setHoveredItem(null)}
         >
-          <button
-            onClick={() => handleNavClick(() => onViewChange('settings'))}
+          <Link
+            href="/settings"
+            onClick={closeSidebar}
             className={cn(
               'group flex w-full items-center gap-3 rounded-xl text-sm transition-all duration-200',
               sidebarCollapsed ? 'justify-center px-2 py-2.5' : 'px-3 py-2.5',
-              isActive('settings')
+              isActivePath('/settings')
                 ? 'bg-emerald-50 text-emerald-600 shadow-sm dark:bg-emerald-950/40 dark:text-emerald-400'
                 : 'text-zinc-500 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800/60'
             )}
           >
-            <Settings className={cn('h-4 w-4 shrink-0 transition-transform duration-200', isActive('settings') && 'scale-110')} />
+            <Settings className={cn('h-4 w-4 shrink-0 transition-transform duration-200', isActivePath('/settings') && 'scale-110')} />
             {!sidebarCollapsed && <span className="flex-1 text-start">الإعدادات</span>}
-          </button>
+          </Link>
           <NavTooltip label="الإعدادات" show={sidebarCollapsed && hoveredItem === 'settings'} />
         </div>
 
@@ -256,20 +263,21 @@ export function Sidebar({ view, onViewChange }: SidebarProps) {
           onMouseEnter={() => setHoveredItem('habits')}
           onMouseLeave={() => setHoveredItem(null)}
         >
-          <button
-            onClick={() => handleNavClick(() => onViewChange('habits'))}
+          <Link
+            href="/habits"
+            onClick={closeSidebar}
             className={cn(
               'group flex w-full items-center gap-3 rounded-xl text-sm transition-all duration-200',
               sidebarCollapsed ? 'justify-center px-2 py-2.5' : 'px-3 py-2.5',
-              isActive('habits')
+              isActivePath('/habits')
                 ? 'bg-emerald-50 text-emerald-600 shadow-sm dark:bg-emerald-950/40 dark:text-emerald-400'
                 : 'text-zinc-500 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800/60'
             )}
           >
-            <Flame className={cn('h-4 w-4 shrink-0 transition-transform duration-200', isActive('habits') && 'scale-110')} />
+            <Flame className={cn('h-4 w-4 shrink-0 transition-transform duration-200', isActivePath('/habits') && 'scale-110')} />
             {!sidebarCollapsed && <span className="flex-1 text-start">العادات</span>}
             {!sidebarCollapsed && habits.length > 0 && <span className="text-[11px] text-zinc-400">{habits.length}</span>}
-          </button>
+          </Link>
           <NavTooltip label="العادات" show={sidebarCollapsed && hoveredItem === 'habits'} />
         </div>
       </nav>
@@ -319,3 +327,10 @@ export function Sidebar({ view, onViewChange }: SidebarProps) {
     </aside>
   );
 }
+
+const NAV_ITEMS = [
+  { label: 'جميع المهام', icon: ListTodo, filter: 'all' as const },
+  { label: 'اليوم', icon: Calendar, filter: 'today' as const },
+  { label: 'المهمة', icon: Star, filter: 'important' as const },
+  { label: 'المنجزة', icon: CheckCircle2, filter: 'completed' as const },
+];
