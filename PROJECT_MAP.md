@@ -1,4 +1,4 @@
-# My Taske — Project Map
+# Stilldo — Project Map
 
 ## [TECH_STACK]
 
@@ -21,7 +21,7 @@
 ```
 my-taske/
 ├── public/
-│   ├── logo.svg                   # SVG logo (checkmark + My Taske)
+│   ├── logo.svg                   # SVG logo (checkmark + Stilldo)
 ├── src/
 │   ├── app/                       # Next.js App Router
 │   │   ├── layout.tsx             # RootLayout (Cairo font, dir=rtl, lang=ar)
@@ -165,7 +165,7 @@ User Input (keyboard/mouse/touch)
 | 21 | padding كبير على الموبايل | تقليل `px-6` → `px-4 md:px-6` | ✅ |
 | 22 | أزرار الأولوية تفيض | `flex-col` على الموبايل + `sm:flex-row` | ✅ |
 | 23 | CommandPalette لا يتكيّف | `px-4` + `pt-[10vh] sm:pt-[15vh]` | ✅ |
-| 24 | الشعار نصي فقط (حرف "م") | SVG شعار متجهي: checkmark + "My Taske" (Google-style) | ✅ |
+| 24 | الشعار نصي فقط (حرف "م") | SVG شعار متجهي: checkmark + "Stilldo" (Google-style) | ✅ |
 | 25 | شعار PNG غير متجهي | استبدال `ph.png` بـ `logo.svg` متجهي + إزالة `next/image` | ✅ |
 | 26 | لا يوجد وضع تركيز | FocusMode: Pomodoro 25/5 + صوت مطر + Dark UI + تنقل بين المهام | ✅ |
 | 27 | Focus Mode لا يحفظ الحالة | Smart Resume: حفظ/استرجاع الجلسة من localStorage | ✅ |
@@ -205,6 +205,7 @@ User Input (keyboard/mouse/touch)
 | 61 | Dashboard 3-Column Grid Layout (SaaS Professional) | تحويل Dashboard إلى لوحة تحكم احترافية بـ 3 أعمدة: عمود أيسر (Productivity Score + Weekly Heatmap + Focus Summary + Recent Activity)، عمود أوسط (Greeting + 4 Stat Cards + Progress Ring + Quick Actions + Today's Tasks + Overdue Alert + Weekly Chart + Statistics)، وعمود أيمن (Sidebar من الـ Layout)، glass cards + card-hover + floating shadows + AnimatedProgressBar + smooth layout animations، Responsive: Desktop=3cols / Tablet=2cols / Mobile=1col | ✅ |
 | 62 | Main Goal Card | إضافة بطاقة "الهدف الرئيسي" في الصف الأول من Dashboard. تعرض الهدف المستنتج من أول مشروع غير فارغ (أو أكبر مشروع مهام)، مع نسبة الإنجاز، المهام المتبقية، الموعد النهائي. Glass card + Target icon + AnimatedProgressBar + Framer Motion. | ✅ |
 | 63 | Productivity Heatmap (30-day) | إضافة خريطة إنتاجية حرارية شبيهة بـ GitHub Contributions في الصف الأول من Dashboard. تعرض آخر 30 يوماً من إنجاز المهام بـ 4 مستويات ألوان (رمادي/أخضر فاتح/متوسط/قوي). Hover tooltip مع التاريخ وعدد المهام. Stagger animation للمربعات. | ✅ |
+| 64 | Rebrand: My Taske → Stilldo | إعادة تسمية التطبيق بالكامل من "My Taske" إلى "Stilldo" في جميع الواجهات: title/description في layout.tsx، alt في Sidebar.tsx، نص SVG في logo.svg، PROJECT_MAP.md. بدون تغيير الشعار أو التصميم. | ✅ |
 
 ## [ORPHANS & PENDING]
 
@@ -231,7 +232,7 @@ User Input (keyboard/mouse/touch)
 | Daily habit completion with calendar selection | Done | HabitTracker now allows clicking any day in the 7-day calendar to toggle completion |
 | Responsive design | Done | Mobile sidebar overlay, full-screen detail, 44px touch targets |
 | Cross-platform responsive | Done | touch-action, 44px targets, disabled mobile shortcuts, responsive FocusMode, scroll settings |
-| SVG logo (Google-style) | Done | `public/logo.svg` — checkmark icon + "My Taske" text, scalable |
+| SVG logo (Google-style) | Done | `public/logo.svg` — checkmark icon + "Stilldo" text, scalable |
 | Edit Habit Modal (AddEditHabitModal) | Done | shared add/edit modal, type-change reconstruction, duplicate-name check |
 | Delete Confirm Dialog (ConfirmDialog) | Done | reusable confirmation modal with toast feedback |
 | Habit Drag-and-Drop Reorder | Done | DndContext + SortableContext + useSortable, GripVertical handle-only activation |

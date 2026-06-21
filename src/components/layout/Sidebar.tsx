@@ -82,7 +82,7 @@ export function Sidebar() {
       <div className={cn('flex items-center pt-4 pb-3', sidebarCollapsed ? 'justify-center px-0' : 'justify-between px-4')}>
         {!sidebarCollapsed && (
           <Link href="/dashboard" onClick={closeSidebar}>
-            <img src="/logo.svg" alt="My Taske" className="h-7 w-auto" />
+            <img src="/logo.svg" alt="Stilldo" className="h-7 w-auto" />
           </Link>
         )}
         <button

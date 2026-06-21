@@ -17,8 +17,8 @@ const ibmPlex = IBM_Plex_Sans_Arabic({
 });
 
 export const metadata: Metadata = {
-  title: "My Taske — مدير المهام",
-  description: "تطبيق إدارة مهام بسيط وسريع للحاسوب",
+  title: "Stilldo — مدير المهام",
+  description: "A calm productivity app for managing tasks, habits and focus sessions.",
 };
 
 export default function RootLayout({
