@@ -24,12 +24,6 @@ const DAY_NAMES_SHORT = ['ح', 'ن', 'ث', 'ر', 'خ', 'ج', 'س'];
 const MONTH_NAMES = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
 const HOURS = Array.from({ length: 24 }, (_, i) => i);
 
-const PRIORITY_COLORS: Record<string, string> = {
-  low: 'bg-blue-400',
-  medium: 'bg-amber-400',
-  high: 'bg-rose-400',
-};
-
 const PRIORITY_LABELS: Record<string, string> = {
   low: 'منخفض',
   medium: 'متوسط',
@@ -50,10 +44,6 @@ function getWeekDays(date: Date): Date[] {
 
 function formatDateStr(year: number, month: number, day: number): string {
   return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-}
-
-function isSameDay(a: Date, b: Date): boolean {
-  return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
 }
 
 function formatTime(h: number): string {
@@ -408,10 +398,10 @@ function MonthView({
                       <div
                         key={t.id}
                         className={cn(
-                          'flex items-center gap-1 rounded px-1 py-0.5 text-[10px] leading-tight md:text-xs',
+                          'flex items-center gap-1 rounded-md border-r-4 px-1.5 py-0.5 text-[10px] font-medium leading-tight transition-all duration-200 md:text-xs',
                           t.completed
-                            ? 'bg-zinc-100 text-zinc-400 line-through dark:bg-zinc-800/50 dark:text-zinc-500'
-                            : `${PRIORITY_COLORS[t.priority] || 'bg-zinc-200'} text-white bg-opacity-80`
+                            ? 'border-zinc-300 bg-zinc-50 text-zinc-400 line-through dark:border-zinc-700 dark:bg-zinc-800/30 dark:text-zinc-500'
+                            : 'border-teal-500 bg-teal-50 text-teal-700 hover:brightness-95 dark:border-teal-400 dark:bg-teal-950/40 dark:text-teal-300 dark:hover:brightness-125'
                         )}
                       >
                         <span className="truncate">{t.title}</span>
@@ -499,10 +489,10 @@ function WeekView({
                     <div
                       key={t.id}
                       className={cn(
-                        'absolute start-1 end-1 overflow-hidden rounded px-1.5 py-0.5 text-xs leading-tight shadow-sm md:start-1.5 md:end-1.5',
+                        'absolute start-1 end-1 overflow-hidden rounded-md border-r-4 px-1.5 py-1 text-xs font-medium leading-tight shadow-sm transition-all duration-200 md:start-1.5 md:end-1.5',
                         t.completed
-                          ? 'bg-zinc-100 text-zinc-400 line-through dark:bg-zinc-800/50 dark:text-zinc-500'
-                          : `${PRIORITY_COLORS[t.priority] || 'bg-zinc-200'} bg-opacity-90 text-white`
+                          ? 'border-zinc-300 bg-zinc-50 text-zinc-400 line-through dark:border-zinc-700 dark:bg-zinc-800/30 dark:text-zinc-500'
+                          : 'border-teal-500 bg-teal-50 text-teal-700 hover:brightness-95 dark:border-teal-400 dark:bg-teal-950/40 dark:text-teal-300 dark:hover:brightness-125'
                       )}
                       style={{ top: `${topOffset}px`, height: '60px' }}
                     >
@@ -554,10 +544,10 @@ function DayView({
               <div
                 key={t.id}
                 className={cn(
-                  'absolute start-2 end-2 overflow-hidden rounded-lg px-3 py-2 shadow-sm transition-all hover:shadow-md',
+                  'absolute start-2 end-2 overflow-hidden rounded-md border-r-4 px-3 py-2 shadow-sm transition-all duration-200 hover:shadow-md',
                   t.completed
-                    ? 'bg-zinc-100 text-zinc-400 line-through dark:bg-zinc-800/50 dark:text-zinc-500'
-                    : `${PRIORITY_COLORS[t.priority] || 'bg-zinc-200'} bg-opacity-90 text-white`
+                    ? 'border-zinc-300 bg-zinc-50 text-zinc-400 line-through dark:border-zinc-700 dark:bg-zinc-800/30 dark:text-zinc-500'
+                    : 'border-teal-500 bg-teal-50 text-teal-700 hover:brightness-95 dark:border-teal-400 dark:bg-teal-950/40 dark:text-teal-300 dark:hover:brightness-125'
                 )}
                 style={{ top: `${topOffset}px`, minHeight: '56px' }}
               >
@@ -588,9 +578,16 @@ function DayView({
             <p className="text-xs text-zinc-400">لا توجد مهام في هذا اليوم</p>
           )}
           {dayTasks.map((t: any) => (
-            <div key={t.id} className="flex items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-zinc-50 dark:hover:bg-zinc-800/30">
-              <div className={cn('h-2 w-2 shrink-0 rounded-full', PRIORITY_COLORS[t.priority] || 'bg-zinc-300')} />
-              <span className={cn('flex-1 truncate text-xs', t.completed && 'text-zinc-400 line-through')}>{t.title}</span>
+            <div
+              key={t.id}
+              className={cn(
+                'flex items-center gap-2 rounded-md border-r-4 px-2 py-1.5 text-xs font-medium transition-all duration-200',
+                t.completed
+                  ? 'border-zinc-300 bg-zinc-50 text-zinc-400 line-through dark:border-zinc-700 dark:bg-zinc-800/30 dark:text-zinc-500'
+                  : 'border-teal-500 bg-teal-50 text-teal-700 hover:brightness-95 dark:border-teal-400 dark:bg-teal-950/40 dark:text-teal-300 dark:hover:brightness-125'
+              )}
+            >
+              <span className="flex-1 truncate">{t.title}</span>
             </div>
           ))}
         </div>
@@ -659,7 +656,12 @@ function AgendaView({
                   {dayTasks.map((t: any) => (
                     <div
                       key={t.id}
-                      className="flex items-center gap-3 rounded-xl border border-zinc-200/60 bg-white px-3 py-2.5 shadow-sm transition-colors hover:bg-zinc-50 dark:border-zinc-800/40 dark:bg-zinc-900/60 dark:hover:bg-zinc-800/30"
+                      className={cn(
+                        'flex items-center gap-3 rounded-xl border-r-4 px-3 py-2.5 shadow-sm transition-all duration-200',
+                        t.completed
+                          ? 'border-zinc-300 bg-zinc-50 text-zinc-400 line-through dark:border-zinc-700 dark:bg-zinc-800/30'
+                          : 'border-teal-500 bg-teal-50 text-teal-700 hover:brightness-95 dark:border-teal-400 dark:bg-teal-950/40 dark:text-teal-300 dark:hover:brightness-125'
+                      )}
                     >
                       <input
                         type="checkbox"
@@ -667,9 +669,8 @@ function AgendaView({
                         onChange={() => toggleComplete(t.id)}
                         className="h-4 w-4 cursor-pointer rounded border-zinc-300"
                       />
-                      <div className={cn('h-2 w-2 shrink-0 rounded-full', PRIORITY_COLORS[t.priority] || 'bg-zinc-300')} />
-                      <span className={cn('flex-1 text-sm', t.completed && 'text-zinc-400 line-through')}>{t.title}</span>
-                      <span className="rounded bg-zinc-100 px-1.5 py-0.5 text-[10px] text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400">
+                      <span className="flex-1 text-sm font-medium">{t.title}</span>
+                      <span className="rounded bg-teal-100/60 px-1.5 py-0.5 text-[10px] font-medium text-teal-600 dark:bg-teal-900/30 dark:text-teal-400">
                         {PRIORITY_LABELS[t.priority] || t.priority}
                       </span>
                     </div>
@@ -725,17 +726,24 @@ function DayDetails({
         {tasks.length === 0 && (
           <p className="py-6 text-center text-xs text-zinc-400">لا توجد مهام في هذا اليوم</p>
         )}
-        <div className="space-y-1.5">
+        <div className="space-y-1">
           {tasks.map((t: any) => (
-            <div key={t.id} className="flex items-center gap-2 rounded-lg px-2 py-1.5 transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/30">
+            <div
+              key={t.id}
+              className={cn(
+                'flex items-center gap-2 rounded-md border-r-4 px-2 py-1.5 text-xs font-medium transition-all duration-200',
+                t.completed
+                  ? 'border-zinc-300 bg-zinc-50 text-zinc-400 line-through dark:border-zinc-700 dark:bg-zinc-800/30 dark:text-zinc-500'
+                  : 'border-teal-500 bg-teal-50 text-teal-700 hover:brightness-95 dark:border-teal-400 dark:bg-teal-950/40 dark:text-teal-300 dark:hover:brightness-125'
+              )}
+            >
               <input
                 type="checkbox"
                 checked={t.completed}
                 onChange={() => toggleComplete(t.id)}
                 className="h-3.5 w-3.5 shrink-0 cursor-pointer rounded border-zinc-300"
               />
-              <div className={cn('h-2 w-2 shrink-0 rounded-full', PRIORITY_COLORS[t.priority] || 'bg-zinc-300')} />
-              <span className={cn('flex-1 truncate text-xs', t.completed && 'text-zinc-400 line-through')}>{t.title}</span>
+              <span className="flex-1 truncate">{t.title}</span>
             </div>
           ))}
         </div>

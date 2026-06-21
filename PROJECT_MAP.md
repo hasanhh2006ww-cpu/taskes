@@ -215,6 +215,7 @@ User Input (keyboard/mouse/touch)
 | 68 | Root route "/" shows Task page instead of Dashboard | تغيير / من عرض المهام إلى redirect إلى /dashboard عبر router.replace + إنشاء /tasks ونقل صفحة المهام إليها + تحديث Sidebar (روابط التصفية والمشاريع) من / إلى /tasks + إضافة تسجيل redirect عبر logger | ✅ |
 | 69 | "إنشاء أول مهمة" و"إضافة مهمة" في Dashboard لا تعمل بعد تغيير التوجيه | تغيير 3 occurrences من `router.push('/')` إلى `router.push('/tasks')` في Dashboard.tsx: goToTasks (سطر 567), goToTasksWithProject (سطر 575), ومشروع جديد (سطر 881) | ✅ |
 | 70 | إعادة تصميم التقويم (Google Calendar-like) | إعادة كتابة CalendarView.tsx بالكامل: 4 أوضاع عرض (شهر/أسبوع/يوم/جدول)، شريط علوي مع Today+تنقل+مغير عرض، خلايا أيام تعرض المهام والعادات، نافذة إنشاء مهمة بالضغط على يوم، لوحة جانبية لتفاصيل اليوم المحدد، تصميم Full-Screen، أنماط Google Calendar، تسجيل عبر logger | ✅ |
+| 71 | تحسين تباين وعرض المهام في التقويم (Calendar Events Styling) | توحيد نمط بطاقات المهام عبر جميع أوضاع العرض (Month/Week/Day/Agenda/Details): bg-teal-50 + border-r-4 border-teal-500 + text-teal-700 في الوضع المضيء، dark:bg-teal-950/40 + dark:border-teal-400 + dark:text-teal-300 في المظلم، rounded-md + font-medium + hover:brightness, إزالة PRIORITY_COLORS و isSameDay غير المستخدمين | ✅ |
 
 ## [ORPHANS & PENDING]
 
