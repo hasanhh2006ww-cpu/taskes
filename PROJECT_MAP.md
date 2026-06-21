@@ -206,6 +206,7 @@ User Input (keyboard/mouse/touch)
 | 62 | Main Goal Card | إضافة بطاقة "الهدف الرئيسي" في الصف الأول من Dashboard. تعرض الهدف المستنتج من أول مشروع غير فارغ (أو أكبر مشروع مهام)، مع نسبة الإنجاز، المهام المتبقية، الموعد النهائي. Glass card + Target icon + AnimatedProgressBar + Framer Motion. | ✅ |
 | 63 | Productivity Heatmap (30-day) | إضافة خريطة إنتاجية حرارية شبيهة بـ GitHub Contributions في الصف الأول من Dashboard. تعرض آخر 30 يوماً من إنجاز المهام بـ 4 مستويات ألوان (رمادي/أخضر فاتح/متوسط/قوي). Hover tooltip مع التاريخ وعدد المهام. Stagger animation للمربعات. | ✅ |
 | 64 | Rebrand: My Taske → Stilldo | إعادة تسمية التطبيق بالكامل من "My Taske" إلى "Stilldo" في جميع الواجهات: title/description في layout.tsx، alt في Sidebar.tsx، نص SVG في logo.svg، PROJECT_MAP.md. بدون تغيير الشعار أو التصميم. | ✅ |
+| 65 | Logo Redesign — Premium SaaS Brand Mark | إعادة تصميم logo.svg بالكامل: شكل "S" متدفق بـ teal-to-emerald gradient + ورقة في المنحنى السفلي + 3 نجوم لامعة (4-pointed stars) على خلفية داكنة م rounded. تصميم premium متجهي (SVG) قابل للتصغير لأيقونة المتصفح والشريط الجانبي والتطبيق. | ✅ |
 
 ## [ORPHANS & PENDING]
 
