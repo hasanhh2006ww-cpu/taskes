@@ -25,7 +25,7 @@ export default function Home() {
         className={cn(
           'w-full shrink-0 md:w-80',
           focusMode && 'hidden',
-          !showDetailPanel && 'hidden md:block'
+          !showDetailPanel && 'hidden'
         )}
       >
         <TaskDetail />
