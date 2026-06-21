@@ -142,7 +142,7 @@ export function Sidebar() {
             onMouseLeave={() => setHoveredItem(null)}
           >
             <Link
-              href="/"
+              href="/tasks"
               onClick={(e) => {
                 handleTaskNav(item.filter);
               }}
@@ -195,7 +195,7 @@ export function Sidebar() {
           >
             <div className={cn('flex items-center', sidebarCollapsed && 'justify-center')}>
               <Link
-                href="/"
+                href="/tasks"
                 onClick={() => handleProjectNav(project.id)}
                 className={cn(
                   'group flex items-center gap-3 rounded-xl text-sm transition-all duration-200',

@@ -25,7 +25,9 @@ my-taske/
 ├── src/
 │   ├── app/                       # Next.js App Router
 │   │   ├── layout.tsx             # RootLayout (Cairo font, dir=rtl, lang=ar)
-│   │   ├── page.tsx               # Main page (3-panel layout + view routing)
+│   │   ├── page.tsx               # Root → redirect to /dashboard
+│   │   ├── tasks/
+│   │   │   └── page.tsx           # Task list (3-panel layout + view routing)
 │   │   ├── globals.css            # Tailwind v4 + RTL + dark mode
 │   │   ├── not-found.tsx          # 404 page (Arabic)
 │   │   └── error.tsx              # Error page (Arabic)
@@ -208,6 +210,7 @@ User Input (keyboard/mouse/touch)
 | 64 | Rebrand: My Taske → Stilldo | إعادة تسمية التطبيق بالكامل من "My Taske" إلى "Stilldo" في جميع الواجهات: title/description في layout.tsx، alt في Sidebar.tsx، نص SVG في logo.svg، PROJECT_MAP.md. بدون تغيير الشعار أو التصميم. | ✅ |
 | 65 | Logo Redesign — Premium SaaS Brand Mark | إعادة تصميم logo.svg بالكامل: شكل "S" متدفق بـ teal-to-emerald gradient + ورقة في المنحنى السفلي + 3 نجوم لامعة (4-pointed stars) على خلفية داكنة م rounded. تصميم premium متجهي (SVG) قابل للتصغير لأيقونة المتصفح والشريط الجانبي والتطبيق. | ✅ |
 | 67 | Sidebar branding too small (logo h-7, no text) | استبدال logo.svg بـ v1.png (h-12 expanded / h-9 collapsed) + إضافة نص "Stilldo" بخط font-extrabold tracking-wide + ربط العلامة التجارية بالكامل كـ Link إلى /dashboard مع hover scale+shadow+transition + تسجيل تنقل عبر logger | ✅ |
+| 68 | Root route "/" shows Task page instead of Dashboard | تغيير / من عرض المهام إلى redirect إلى /dashboard عبر router.replace + إنشاء /tasks ونقل صفحة المهام إليها + تحديث Sidebar (روابط التصفية والمشاريع) من / إلى /tasks + إضافة تسجيل redirect عبر logger | ✅ |
 
 ## [ORPHANS & PENDING]
 
