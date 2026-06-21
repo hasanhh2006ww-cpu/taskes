@@ -10,6 +10,7 @@ import { useUIStore } from '@/store/useUIStore';
 import { useHabitStore } from '@/store/useHabitStore';
 import { Button } from '@/components/ui/Button';
 import { getToday } from '@/lib/constants';
+import { logger } from '@/lib/logger';
 import {
   LayoutDashboard,
   ListTodo,
@@ -79,18 +80,36 @@ export function Sidebar() {
         'glass-card'
       )}
     >
-      <div className={cn('flex items-center pt-4 pb-3', sidebarCollapsed ? 'justify-center px-0' : 'justify-between px-4')}>
-        {!sidebarCollapsed && (
-          <Link href="/dashboard" onClick={closeSidebar}>
-            <img src="/logo.svg" alt="Stilldo" className="h-7 w-auto" />
-          </Link>
-        )}
+      <div className={cn('flex items-center', sidebarCollapsed ? 'justify-center gap-1 px-1 py-3' : 'justify-between px-4 pt-4 pb-3')}>
+        <Link
+          href="/dashboard"
+          onClick={() => { logger.info('Sidebar brand clicked, navigating to /dashboard'); closeSidebar(); }}
+          className={cn(
+            'group flex items-center transition-all duration-200',
+            sidebarCollapsed ? '' : 'flex-1 gap-3'
+          )}
+          aria-label="الانتقال إلى لوحة التحكم"
+        >
+          <img
+            src="/v1.png"
+            alt="Stilldo"
+            className={cn(
+              'shrink-0 rounded-xl transition-all duration-200 group-hover:scale-105 group-hover:shadow-lg',
+              sidebarCollapsed ? 'h-9 w-9' : 'h-12 w-12'
+            )}
+          />
+          {!sidebarCollapsed && (
+            <span className="text-xl font-extrabold tracking-wide text-zinc-800 transition-colors duration-200 group-hover:text-emerald-600 dark:text-white dark:group-hover:text-emerald-400">
+              Stilldo
+            </span>
+          )}
+        </Link>
         <button
           onClick={toggleSidebarCollapsed}
-          className="flex h-7 w-7 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-600 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
+          className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-600 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
           aria-label={sidebarCollapsed ? 'توسيع القائمة' : 'طي القائمة'}
         >
-          <ChevronLeft className={cn('h-3.5 w-3.5 transition-transform duration-300', sidebarCollapsed && 'rotate-180')} />
+          <ChevronLeft className={cn('h-4 w-4 transition-transform duration-300', sidebarCollapsed && 'rotate-180')} />
         </button>
       </div>
 

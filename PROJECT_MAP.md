@@ -207,7 +207,7 @@ User Input (keyboard/mouse/touch)
 | 63 | Productivity Heatmap (30-day) | إضافة خريطة إنتاجية حرارية شبيهة بـ GitHub Contributions في الصف الأول من Dashboard. تعرض آخر 30 يوماً من إنجاز المهام بـ 4 مستويات ألوان (رمادي/أخضر فاتح/متوسط/قوي). Hover tooltip مع التاريخ وعدد المهام. Stagger animation للمربعات. | ✅ |
 | 64 | Rebrand: My Taske → Stilldo | إعادة تسمية التطبيق بالكامل من "My Taske" إلى "Stilldo" في جميع الواجهات: title/description في layout.tsx، alt في Sidebar.tsx، نص SVG في logo.svg، PROJECT_MAP.md. بدون تغيير الشعار أو التصميم. | ✅ |
 | 65 | Logo Redesign — Premium SaaS Brand Mark | إعادة تصميم logo.svg بالكامل: شكل "S" متدفق بـ teal-to-emerald gradient + ورقة في المنحنى السفلي + 3 نجوم لامعة (4-pointed stars) على خلفية داكنة م rounded. تصميم premium متجهي (SVG) قابل للتصغير لأيقونة المتصفح والشريط الجانبي والتطبيق. | ✅ |
-| 66 | Horizontal Logo Lockup — Icon + "Stilldo" Text | تحويل logo.svg من icon-only إلى horizontal lockup: الأيقونة (S-leaf-sparkle) على اليسار + نص "Stilldo" على اليمين. viewBox موسع إلى 1250×512، نص بـ Inter SemiBold 160px بنفس teal-to-emerald gradient. alignment رأسي متوازن مع الأيقونة. | ✅ |
+| 67 | Sidebar branding too small (logo h-7, no text) | استبدال logo.svg بـ v1.png (h-12 expanded / h-9 collapsed) + إضافة نص "Stilldo" بخط font-extrabold tracking-wide + ربط العلامة التجارية بالكامل كـ Link إلى /dashboard مع hover scale+shadow+transition + تسجيل تنقل عبر logger | ✅ |
 
 ## [ORPHANS & PENDING]
 
