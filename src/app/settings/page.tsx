@@ -10,7 +10,7 @@ const pageVariants = {
 
 export default function SettingsPage() {
   return (
-    <motion.div {...pageVariants} className="flex flex-1 overflow-hidden">
+    <motion.div {...pageVariants} className="flex w-full flex-1 overflow-hidden">
       <SettingsView />
     </motion.div>
   );

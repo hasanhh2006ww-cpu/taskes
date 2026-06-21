@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { useUIStore } from '@/store/useUIStore';
 import { TaskList } from '@/components/tasks/TaskList';
 import { TaskDetail } from '@/components/tasks/TaskDetail';
@@ -7,7 +8,26 @@ import { cn } from '@/lib/cn';
 
 export default function Home() {
   const { focusMode, activeTaskId } = useUIStore();
-  const showDetailPanel = !focusMode && activeTaskId;
+  const [isAdding, setIsAdding] = useState(false);
+
+  useEffect(() => {
+    const input = document.querySelector<HTMLInputElement>('[data-task-input]');
+    if (!input) return;
+    const onFocus = () => setIsAdding(true);
+    const onBlur = () => {
+      setTimeout(() => {
+        if (document.activeElement !== input) setIsAdding(false);
+      }, 120);
+    };
+    input.addEventListener('focus', onFocus);
+    input.addEventListener('blur', onBlur);
+    return () => {
+      input.removeEventListener('focus', onFocus);
+      input.removeEventListener('blur', onBlur);
+    };
+  }, []);
+
+  const showDetailPanel = !focusMode && (!!activeTaskId || isAdding);
 
   return (
     <div className="flex flex-1 min-w-0">

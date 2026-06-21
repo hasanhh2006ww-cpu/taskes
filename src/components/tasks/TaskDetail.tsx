@@ -25,14 +25,21 @@ export function TaskDetail() {
   }, [taskNotNull?.id]);
 
   if (!taskNotNull) {
+    const today = new Date();
     return (
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="flex h-full items-center justify-center px-6"
+        className="flex h-full flex-col items-center justify-center gap-1 px-6"
       >
-        <p className="text-center text-sm text-zinc-400 dark:text-zinc-500">
-          اختر مهمة لعرض التفاصيل
+        <p className="text-3xl font-bold text-zinc-200 dark:text-zinc-700">
+          {today.getDate()}
+        </p>
+        <p className="text-sm text-zinc-400 dark:text-zinc-500">
+          {today.toLocaleDateString('ar-SA', { weekday: 'long', month: 'long', year: 'numeric' })}
+        </p>
+        <p className="mt-4 text-xs text-zinc-400 dark:text-zinc-500">
+          ابدأ بإضافة مهمة جديدة
         </p>
       </motion.div>
     );
