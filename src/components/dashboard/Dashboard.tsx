@@ -7,7 +7,7 @@ import { useTaskStore } from '@/store/useTaskStore';
 import { useProjectStore } from '@/store/useProjectStore';
 import { useHabitStore } from '@/store/useHabitStore';
 import { useUIStore } from '@/store/useUIStore';
-import { getToday, PRIORITIES } from '@/lib/constants';
+import { getToday, getWeekKey, PRIORITIES } from '@/lib/constants';
 import { cn } from '@/lib/cn';
 import {
   ListTodo, Calendar, CheckCircle2, Clock,
@@ -15,6 +15,7 @@ import {
   ArrowRight, Sprout, Target,
   Timer, Flame, TrendingUp,
   FolderKanban, Sparkles, SunDim, Moon,
+  Brain, Activity,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -116,11 +117,25 @@ function ProgressRing({ percent, size = 96, strokeWidth = 6, color }: { percent:
   );
 }
 
+function AnimatedProgressBar({ value, max, color = 'emerald' }: { value: number; max: number; color?: string }) {
+  const pct = max > 0 ? Math.min((value / max) * 100, 100) : 0;
+  return (
+    <div className="h-2 overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800">
+      <motion.div
+        initial={{ width: 0 }}
+        animate={{ width: `${pct}%` }}
+        transition={{ duration: 0.8, ease: 'easeOut' }}
+        className={cn('h-full rounded-full', `bg-gradient-to-r from-${color}-400 to-${color}-500`)}
+      />
+    </div>
+  );
+}
+
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    transition: { staggerChildren: 0.06 },
+    transition: { staggerChildren: 0.05 },
   },
 };
 
@@ -129,11 +144,182 @@ const itemVariants: Variants = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.35, ease: 'easeOut' } },
 };
 
+function ProductivityScoreCard({ score, maxScore = 100 }: { score: number; maxScore?: number }) {
+  const ringColor = score >= 80 ? '#10b981' : score >= 50 ? '#f59e0b' : '#ef4444';
+  const label = score >= 80 ? 'ممتاز' : score >= 50 ? 'جيد' : 'بحاجة للتحسين';
+  return (
+    <motion.div variants={itemVariants} className="card-hover card-shadow relative overflow-hidden rounded-2xl border border-zinc-200/60 bg-white p-5 dark:border-zinc-800/40 dark:bg-zinc-900/60">
+      <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/[0.02] to-transparent" />
+      <div className="relative">
+        <div className="mb-3 flex items-center gap-2">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-500 to-emerald-600 shadow-sm shadow-emerald-500/20">
+            <Brain className="h-4 w-4 text-white" />
+          </div>
+          <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">معدل الإنتاجية</h3>
+        </div>
+        <div className="flex items-center gap-4">
+          <div className="relative">
+            <ProgressRing percent={score} size={72} strokeWidth={5} color={ringColor} />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <span className="text-lg font-bold text-zinc-900 dark:text-zinc-100">{score}</span>
+            </div>
+          </div>
+          <div className="flex-1">
+            <p className="text-sm font-medium text-zinc-800 dark:text-zinc-200">{label}</p>
+            <p className="mt-0.5 text-[11px] text-zinc-400">من أصل {maxScore} نقطة</p>
+            <AnimatedProgressBar value={score} max={maxScore} />
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+function WeeklyHeatmapView({ weeks }: { weeks: { label: string; days: { date: string; count: number; completed: number }[] }[] }) {
+  const maxCount = Math.max(...weeks.flatMap(w => w.days.map(d => d.count)), 1);
+  return (
+    <motion.div variants={itemVariants} className="card-hover card-shadow relative overflow-hidden rounded-2xl border border-zinc-200/60 bg-white p-5 dark:border-zinc-800/40 dark:bg-zinc-900/60">
+      <div className="relative">
+        <div className="mb-3 flex items-center gap-2">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-amber-500 to-amber-600 shadow-sm shadow-amber-500/20">
+            <Activity className="h-4 w-4 text-white" />
+          </div>
+          <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">خريطة النشاط الأسبوعي</h3>
+        </div>
+        <div className="flex gap-1.5">
+          {weeks.map((week) => (
+            <div key={week.label} className="flex flex-1 flex-col gap-1">
+              {week.days.map((day) => {
+                const intensity = maxCount > 0 ? day.count / maxCount : 0;
+                const bg = day.count === 0
+                  ? 'bg-zinc-100 dark:bg-zinc-800'
+                  : day.completed === day.count
+                    ? 'bg-emerald-500'
+                    : intensity > 0.66
+                      ? 'bg-emerald-400'
+                      : intensity > 0.33
+                        ? 'bg-emerald-300'
+                        : 'bg-emerald-200';
+                return (
+                  <div
+                    key={day.date}
+                    className={cn('h-3 w-full rounded-sm transition-colors', bg)}
+                    title={`${day.date}: ${day.completed}/${day.count}`}
+                  />
+                );
+              })}
+            </div>
+          ))}
+        </div>
+        <div className="mt-3 flex items-center justify-end gap-1.5 text-[10px] text-zinc-400">
+          <span>أقل</span>
+          <div className="h-2.5 w-2.5 rounded-sm bg-zinc-100 dark:bg-zinc-800" />
+          <div className="h-2.5 w-2.5 rounded-sm bg-emerald-200" />
+          <div className="h-2.5 w-2.5 rounded-sm bg-emerald-300" />
+          <div className="h-2.5 w-2.5 rounded-sm bg-emerald-400" />
+          <div className="h-2.5 w-2.5 rounded-sm bg-emerald-500" />
+          <span>أكثر</span>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+function FocusSummaryCard({ totalPomodoros, focusMinutes, todayPomodoros }: { totalPomodoros: number; focusMinutes: number; todayPomodoros: number }) {
+  return (
+    <motion.div variants={itemVariants} className="card-hover card-shadow relative overflow-hidden rounded-2xl border border-zinc-200/60 bg-white p-5 dark:border-zinc-800/40 dark:bg-zinc-900/60">
+      <div className="relative">
+        <div className="mb-3 flex items-center gap-2">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-violet-500 to-violet-600 shadow-sm shadow-violet-500/20">
+            <Timer className="h-4 w-4 text-white" />
+          </div>
+          <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">ملخص التركيز</h3>
+        </div>
+        <div className="grid grid-cols-3 gap-3">
+          <div className="rounded-xl bg-zinc-50 p-3 text-center dark:bg-zinc-800/50">
+            <p className="text-lg font-bold text-zinc-900 dark:text-zinc-100">{totalPomodoros}</p>
+            <p className="text-[10px] text-zinc-500 dark:text-zinc-400">إجمالي الجلسات</p>
+          </div>
+          <div className="rounded-xl bg-zinc-50 p-3 text-center dark:bg-zinc-800/50">
+            <p className="text-lg font-bold text-zinc-900 dark:text-zinc-100">{formatDuration(focusMinutes)}</p>
+            <p className="text-[10px] text-zinc-500 dark:text-zinc-400">إجمالي الوقت</p>
+          </div>
+          <div className="rounded-xl bg-zinc-50 p-3 text-center dark:bg-zinc-800/50">
+            <p className="text-lg font-bold text-zinc-900 dark:text-zinc-100">{todayPomodoros}</p>
+            <p className="text-[10px] text-zinc-500 dark:text-zinc-400">جلسات اليوم</p>
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+function TodayTasksCard({ tasks, onToggle, onNavigate }: { tasks: { id: string; title: string; priority: string; completed: boolean }[]; onToggle: (id: string) => void; onNavigate: () => void }) {
+  if (tasks.length === 0) {
+    return (
+      <motion.div variants={itemVariants} className="card-shadow relative overflow-hidden rounded-2xl border border-zinc-200/60 bg-white p-5 dark:border-zinc-800/40 dark:bg-zinc-900/60">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-zinc-100 dark:bg-zinc-800">
+              <ListTodo className="h-4 w-4 text-zinc-400" />
+            </div>
+            <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">مهام اليوم</h3>
+          </div>
+        </div>
+        <p className="mt-3 text-center text-xs text-zinc-400">لا توجد مهام لليوم</p>
+      </motion.div>
+    );
+  }
+  return (
+    <motion.div variants={itemVariants} className="card-hover card-shadow relative overflow-hidden rounded-2xl border border-zinc-200/60 bg-white p-5 dark:border-zinc-800/40 dark:bg-zinc-900/60">
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-sky-500 to-sky-600 shadow-sm shadow-sky-500/20">
+            <ListTodo className="h-4 w-4 text-white" />
+          </div>
+          <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">مهام اليوم</h3>
+          <span className="rounded-full bg-sky-100 px-2 py-0.5 text-[10px] font-medium text-sky-600 dark:bg-sky-900/30 dark:text-sky-400">{tasks.length}</span>
+        </div>
+        <button onClick={onNavigate} className="text-[10px] font-medium text-sky-600 transition-colors hover:text-sky-700 cursor-pointer">
+          عرض الكل <ArrowRight className="me-0.5 inline h-3 w-3" />
+        </button>
+      </div>
+      <div className="space-y-1.5">
+        {tasks.map((task) => (
+          <motion.button
+            key={task.id}
+            initial={{ opacity: 0, x: -8 }}
+            animate={{ opacity: 1, x: 0 }}
+            onClick={() => onToggle(task.id)}
+            className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-start transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/40"
+          >
+            <div className={cn(
+              'flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-all',
+              task.completed
+                ? 'border-emerald-500 bg-emerald-500'
+                : 'border-zinc-300 dark:border-zinc-600'
+            )}>
+              {task.completed && <CheckCircle2 className="h-3.5 w-3.5 text-white" />}
+            </div>
+            <span className={cn(
+              'flex-1 truncate text-sm',
+              task.completed ? 'text-zinc-400 line-through' : 'text-zinc-800 dark:text-zinc-200'
+            )}>
+              {task.title}
+            </span>
+            <div className={cn('h-2 w-2 rounded-full', priorityColor[task.priority]?.dot || 'bg-zinc-300')} />
+          </motion.button>
+        ))}
+      </div>
+    </motion.div>
+  );
+}
+
 export function Dashboard() {
   const router = useRouter();
   const tasks = useTaskStore((s) => s.tasks);
   const projects = useProjectStore((s) => s.projects);
-  const { setActiveProjectId } = useTaskStore();
+  const { setActiveProjectId, toggleComplete } = useTaskStore();
 
   const habits = useHabitStore((s) => s.habits);
   const { toggleFocusMode, darkMode, toggleDarkMode } = useUIStore();
@@ -147,6 +333,30 @@ export function Dashboard() {
   const pending = total - completed;
   const completionRate = total > 0 ? Math.round((completed / total) * 100) : 0;
   const totalPomodoros = tasks.reduce((sum, t) => sum + t.pomodoroCount, 0);
+
+  const todayTasks = useMemo(() =>
+    tasks.filter((t) => t.dueDate === today && !t.completed).slice(0, 8),
+    [tasks, today]
+  );
+
+  const todayHabitCompletions = useMemo(() => {
+    return habits.filter((h) => {
+      if (h.type === 'daily') return h.completions[today] === true;
+      if (h.type === 'weekly') {
+        return h.completedWeeks[getWeekKey(today)] === true;
+      }
+      return false;
+    }).length;
+  }, [habits, today]);
+
+  const focusMinutes = useMemo(() => totalPomodoros * 25, [totalPomodoros]);
+
+  const productivityScore = useMemo(() => {
+    const taskScore = total > 0 ? (completed / total) * 40 : 0;
+    const habitScore = habits.length > 0 ? (todayHabitCompletions / habits.length) * 30 : 0;
+    const focusScore = Math.min(totalPomodoros * 2, 30);
+    return Math.round(taskScore + habitScore + focusScore);
+  }, [total, completed, habits.length, todayHabitCompletions, totalPomodoros]);
 
   const habitStreak = useMemo(() => {
     if (habits.length === 0) return 0;
@@ -183,6 +393,26 @@ export function Dashboard() {
     return days;
   }, [tasks]);
 
+  const heatmapWeeks = useMemo(() => {
+    const weeks: { label: string; days: { date: string; count: number; completed: number }[] }[] = [];
+    for (let w = 3; w >= 0; w--) {
+      const days: { date: string; count: number; completed: number }[] = [];
+      for (let d = 6; d >= 0; d--) {
+        const date = new Date();
+        date.setDate(date.getDate() - (w * 7 + d));
+        const dateStr = date.toISOString().split('T')[0];
+        const dayTasks = tasks.filter(t => t.dueDate === dateStr);
+        days.push({
+          date: dateStr,
+          count: dayTasks.length,
+          completed: dayTasks.filter(t => t.completed).length,
+        });
+      }
+      weeks.push({ label: `أسبوع ${w + 1}`, days });
+    }
+    return weeks;
+  }, [tasks]);
+
   const todayPomodoros = useMemo(() => {
     return tasks.filter(t => t.dueDate === today).reduce((sum, t) => sum + t.pomodoroCount, 0);
   }, [tasks, today]);
@@ -198,6 +428,11 @@ export function Dashboard() {
     setActiveProjectId(projectId);
     router.push('/');
   }, [router, setActiveProjectId]);
+
+  const handleToggleTodayTask = useCallback((taskId: string) => {
+    toggleComplete(taskId);
+    toast.success('تم تحديث المهمة');
+  }, [toggleComplete]);
 
   const isEmpty = total === 0;
   const greeting = getGreeting();
@@ -244,7 +479,7 @@ export function Dashboard() {
       </div>
 
       <div className="flex-1 overflow-y-auto">
-        <div className="w-full px-6 py-6">
+        <div className="w-full p-4 md:p-6">
           {isEmpty ? (
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
@@ -301,328 +536,296 @@ export function Dashboard() {
               </motion.div>
             </motion.div>
           ) : (
-            <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-6">
-              {/* Greeting */}
-              <motion.div variants={itemVariants}>
-                <div className="flex flex-col gap-0.5">
-                  <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">
-                    {greeting.text} <span className="inline-block">{greeting.icon}</span>
-                  </h1>
-                  <p className="text-sm text-zinc-400">{getArabicDate()}</p>
-                  <p className="mt-1.5 max-w-xl rounded-xl bg-emerald-50/50 px-3 py-2 text-xs italic text-zinc-500 dark:bg-emerald-900/10 dark:text-zinc-400">
-                    <Sparkles className="me-1 inline h-3 w-3 text-emerald-400" />
-                    {dailyQuote}
-                  </p>
-                </div>
-              </motion.div>
+            <motion.div variants={containerVariants} initial="hidden" animate="visible" className="w-full">
+              {/* Responsive Grid: 1 col mobile, 2 col tablet/desktop (layout sidebar = 3rd col on desktop) */}
+              <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
 
-              {/* 4 Stat Cards */}
-              <motion.div variants={itemVariants} className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
-                {[
-                  {
-                    label: 'مهام اليوم',
-                    value: todayCount,
-                    icon: ListTodo,
-                    gradient: 'from-emerald-500 to-emerald-400',
-                    shadow: 'shadow-emerald-500/20',
-                    bgGlow: 'from-emerald-500/10 to-transparent',
-                    ringColor: 'ring-emerald-500/20',
-                  },
-                  {
-                    label: 'مكتملة اليوم',
-                    value: todayCompleted,
-                    icon: CheckCircle2,
-                    gradient: 'from-green-500 to-green-400',
-                    shadow: 'shadow-green-500/20',
-                    bgGlow: 'from-green-500/10 to-transparent',
-                    ringColor: 'ring-green-500/20',
-                  },
-                  {
-                    label: 'جلسات التركيز',
-                    value: totalPomodoros,
-                    icon: Timer,
-                    gradient: 'from-amber-500 to-amber-400',
-                    shadow: 'shadow-amber-500/20',
-                    bgGlow: 'from-amber-500/10 to-transparent',
-                    ringColor: 'ring-amber-500/20',
-                  },
-                  {
-                    label: 'أيام العادات',
-                    value: habitStreak,
-                    icon: Flame,
-                    gradient: 'from-rose-500 to-rose-400',
-                    shadow: 'shadow-rose-500/20',
-                    bgGlow: 'from-rose-500/10 to-transparent',
-                    ringColor: 'ring-rose-500/20',
-                  },
-                ].map((card) => (
-                  <motion.div
-                    key={card.label}
-                    whileHover={{ scale: 1.02, y: -2, transition: { duration: 0.2 } }}
-                    className="group relative overflow-hidden rounded-2xl border border-zinc-200/60 bg-white p-4 shadow-sm transition-all duration-200 hover:shadow-lg hover:shadow-zinc-200/50 dark:border-zinc-800/40 dark:bg-zinc-900/60 dark:hover:shadow-zinc-900/50"
-                  >
-                    <div className={cn('absolute inset-0 bg-gradient-to-br opacity-0 transition-opacity duration-300 group-hover:opacity-100', card.bgGlow)} />
+                {/* --- LEFT COLUMN --- */}
+                <div className="space-y-5">
+                  <ProductivityScoreCard score={productivityScore} />
+                  <WeeklyHeatmapView weeks={heatmapWeeks} />
+                  <FocusSummaryCard totalPomodoros={totalPomodoros} focusMinutes={focusMinutes} todayPomodoros={todayPomodoros} />
+
+                  {/* Recent Activity */}
+                  <motion.div variants={itemVariants} className="card-hover card-shadow relative overflow-hidden rounded-2xl border border-zinc-200/60 bg-white p-5 dark:border-zinc-800/40 dark:bg-zinc-900/60">
                     <div className="relative">
-                      <div className="mb-3 flex items-center justify-between">
-                        <div className={cn('flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br shadow-sm', card.gradient, card.shadow)}>
-                          <card.icon className="h-5 w-5 text-white" />
+                      <div className="mb-4 flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-500 to-emerald-600 shadow-sm shadow-emerald-500/20">
+                            <Clock className="h-4 w-4 text-white" />
+                          </div>
+                          <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">النشاط الأخير</h3>
                         </div>
-                        <motion.span
-                          key={card.value}
-                          initial={{ scale: 0.8, opacity: 0 }}
-                          animate={{ scale: 1, opacity: 1 }}
-                          className="text-2xl font-bold text-zinc-900 dark:text-zinc-100"
-                        >
-                          {card.value}
-                        </motion.span>
+                        <button onClick={goToTasks} className="text-[10px] font-medium text-emerald-600 transition-colors hover:text-emerald-700 cursor-pointer">
+                          عرض الكل <ArrowRight className="me-0.5 inline h-3 w-3" />
+                        </button>
                       </div>
-                      <span className="text-xs font-medium text-zinc-500 dark:text-zinc-400">{card.label}</span>
+                      {recentTasks.length === 0 && projects.length === 0 ? (
+                        <p className="py-6 text-center text-xs text-zinc-400">لا يوجد نشاط بعد</p>
+                      ) : (
+                        <div className="space-y-0">
+                          {recentTasks.map((task, i) => (
+                            <motion.div
+                              key={task.id}
+                              initial={{ opacity: 0, x: -10 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              transition={{ delay: i * 0.05, duration: 0.25 }}
+                              className="relative flex items-start gap-3 pb-4"
+                            >
+                              <div className="flex flex-col items-center">
+                                <div className={cn('h-2.5 w-2.5 rounded-full ring-2 ring-white dark:ring-zinc-900', task.completed ? 'bg-emerald-500' : priorityColor[task.priority]?.dot || 'bg-zinc-300')} />
+                                {i < recentTasks.length - 1 && <div className="mt-1 h-full w-px bg-zinc-100 dark:bg-zinc-800" />}
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <p className={cn('text-sm leading-snug', task.completed ? 'text-zinc-400 line-through' : 'text-zinc-800 dark:text-zinc-200')}>{task.title}</p>
+                                <div className="mt-0.5 flex items-center gap-2">
+                                  <span className="text-[10px] text-zinc-400">{getDateLabel(task.dueDate || today)}</span>
+                                  {task.completed && <span className="rounded-md bg-emerald-50 px-1.5 py-0.5 text-[10px] font-medium text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400">تم</span>}
+                                </div>
+                              </div>
+                            </motion.div>
+                          ))}
+                          {projects.map((p) => {
+                            const count = tasks.filter((t) => t.projectId === p.id).length;
+                            const done = tasks.filter((t) => t.projectId === p.id && t.completed).length;
+                            const pct = count > 0 ? Math.round((done / count) * 100) : 0;
+                            return (
+                              <motion.button
+                                key={p.id}
+                                onClick={() => goToTasksWithProject(p.id)}
+                                initial={{ opacity: 0, x: -10 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                className="relative flex items-center gap-3 pb-3 w-full text-start"
+                              >
+                                <div className="flex flex-col items-center">
+                                  <div className="h-2.5 w-2.5 rounded-full ring-2 ring-white dark:ring-zinc-900" style={{ backgroundColor: p.color }} />
+                                  <div className="mt-1 h-full w-px bg-zinc-100 dark:bg-zinc-800" />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-sm font-medium text-zinc-800 dark:text-zinc-200">{p.name}</p>
+                                  <div className="mt-1 flex items-center gap-2">
+                                    <div className="flex-1 h-1.5 overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800">
+                                      <div className="h-full rounded-full transition-all duration-500" style={{ width: `${pct}%`, backgroundColor: p.color }} />
+                                    </div>
+                                    <span className="text-[10px] text-zinc-400 shrink-0">{done}/{count}</span>
+                                  </div>
+                                </div>
+                              </motion.button>
+                            );
+                          })}
+                        </div>
+                      )}
                     </div>
                   </motion.div>
-                ))}
-              </motion.div>
-
-              {/* Hero Section: Productivity Ring + Progress + Quick Actions */}
-              <motion.div variants={itemVariants} className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-                {/* Productivity Ring */}
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.4 }}
-                  className="relative overflow-hidden rounded-2xl border border-zinc-200/60 bg-white p-6 shadow-sm dark:border-zinc-800/40 dark:bg-zinc-900/60"
-                >
-                  <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/[0.02] to-transparent" />
-                  <div className="relative flex flex-col items-center">
-                    <div className="relative mb-4">
-                      <ProgressRing percent={completionRate} size={100} strokeWidth={7} color="#10b981" />
-                      <div className="absolute inset-0 flex flex-col items-center justify-center">
-                        <motion.span
-                          key={completionRate}
-                          initial={{ opacity: 0, scale: 0.5 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          className="text-2xl font-bold text-zinc-900 dark:text-zinc-100"
-                        >
-                          {completionRate}%
-                        </motion.span>
-                      </div>
-                    </div>
-                    <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">إنتاجيتك اليوم</h3>
-                    <p className="mt-1 text-xs text-zinc-400">{completed} من {total} مهام</p>
-                    <div className="mt-4 w-full">
-                      <div className="mb-1 flex items-center justify-between text-xs">
-                        <span className="text-zinc-500">هدف اليوم</span>
-                        <span className={cn(
-                          'font-medium',
-                          completionRate >= 80 ? 'text-emerald-600' : completionRate >= 40 ? 'text-amber-600' : 'text-zinc-500'
-                        )}>
-                          {todayCount > 0 ? `${todayCompleted}/${todayCount}` : '—'}
-                        </span>
-                      </div>
-                      <div className="h-2 overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800">
-                        <motion.div
-                          initial={{ width: 0 }}
-                          animate={{ width: `${todayCount > 0 ? (todayCompleted / todayCount) * 100 : 0}%` }}
-                          transition={{ duration: 0.8, ease: 'easeOut' }}
-                          className="h-full rounded-full bg-gradient-to-r from-emerald-400 to-emerald-500"
-                        />
-                      </div>
-                    </div>
-                    <motion.p
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: 0.5 }}
-                      className="mt-4 text-xs text-zinc-400"
-                    >
-                      {completionRate >= 80 ? '🎉 أداء رائع، استمر!' : pending <= 2 ? `💪 بقيت ${pending} ${pending === 1 ? 'مهمة' : 'مهام'} فقط` : '🌟 استمر في الإنجاز'}
-                    </motion.p>
-                  </div>
-                </motion.div>
-
-                {/* Quick Actions Grid */}
-                <div className="lg:col-span-2">
-                  <div className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-4">
-                    {[
-                      { icon: Plus, label: 'إضافة مهمة', onClick: goToTasks, color: 'from-emerald-500 to-emerald-600', shadow: 'shadow-emerald-500/20' },
-                      { icon: FolderKanban, label: 'مشروع جديد', onClick: () => router.push('/'), color: 'from-violet-500 to-violet-600', shadow: 'shadow-violet-500/20' },
-                      { icon: Timer, label: 'جلسة تركيز', onClick: () => toggleFocusMode(), color: 'from-amber-500 to-amber-600', shadow: 'shadow-amber-500/20' },
-                      { icon: Calendar, label: 'التقويم', onClick: () => router.push('/calendar'), color: 'from-sky-500 to-sky-600', shadow: 'shadow-sky-500/20' },
-                      { icon: BarChart3, label: 'الإحصائيات', onClick: () => document.getElementById('stats-section')?.scrollIntoView({ behavior: 'smooth' }), color: 'from-indigo-500 to-indigo-600', shadow: 'shadow-indigo-500/20' },
-                      { icon: Flame, label: 'العادات', onClick: () => router.push('/habits'), color: 'from-rose-500 to-rose-600', shadow: 'shadow-rose-500/20' },
-                    ].map((action) => (
-                      <motion.button
-                        key={action.label}
-                        whileHover={{ scale: 1.03, y: -2 }}
-                        whileTap={{ scale: 0.97 }}
-                        onClick={action.onClick}
-                        className="group relative overflow-hidden rounded-2xl border border-zinc-200/60 bg-white/80 p-4 text-start shadow-sm backdrop-blur-sm transition-all duration-200 hover:border-zinc-300/60 hover:shadow-lg dark:border-zinc-800/40 dark:bg-zinc-900/40 dark:hover:border-zinc-700/60"
-                      >
-                        <div className="absolute inset-0 bg-gradient-to-br from-white/50 to-transparent opacity-0 transition-opacity group-hover:opacity-100 dark:from-white/5" />
-                        <div className="relative">
-                          <div className={cn('mb-3 flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br shadow-sm transition-transform duration-200 group-hover:scale-110', action.color, action.shadow)}>
-                            <action.icon className="h-5 w-5 text-white" />
-                          </div>
-                          <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">{action.label}</span>
-                        </div>
-                      </motion.button>
-                    ))}
-                  </div>
                 </div>
-              </motion.div>
 
-              {/* Activity Timeline + Projects */}
-              <motion.div variants={itemVariants} className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-                <div className="rounded-2xl border border-zinc-200/60 bg-white p-5 shadow-sm dark:border-zinc-800/40 dark:bg-zinc-900/60">
-                  <div className="mb-4 flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-50 dark:bg-emerald-900/30">
-                        <Clock className="h-3.5 w-3.5 text-emerald-500" />
-                      </div>
-                      <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">النشاط الأخير</h3>
+                {/* --- RIGHT COLUMN --- */}
+                <div className="space-y-5">
+                  {/* Greeting */}
+                  <motion.div variants={itemVariants}>
+                    <div className="flex flex-col gap-0.5">
+                      <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">
+                        {greeting.text} <span className="inline-block">{greeting.icon}</span>
+                      </h1>
+                      <p className="text-sm text-zinc-400">{getArabicDate()}</p>
+                      <p className="mt-1.5 max-w-xl rounded-xl bg-emerald-50/50 px-3 py-2 text-xs italic text-zinc-500 dark:bg-emerald-900/10 dark:text-zinc-400">
+                        <Sparkles className="me-1 inline h-3 w-3 text-emerald-400" />
+                        {dailyQuote}
+                      </p>
                     </div>
-                    <button
-                      onClick={goToTasks}
-                      className="text-[10px] font-medium text-emerald-600 transition-colors hover:text-emerald-700 cursor-pointer"
+                  </motion.div>
+
+                  {/* 4 Stat Cards */}
+                  <motion.div variants={itemVariants} className="grid grid-cols-2 gap-3">
+                    {[
+                      {
+                        label: 'مهام اليوم', value: todayCount, icon: ListTodo,
+                        gradient: 'from-emerald-500 to-emerald-400', shadow: 'shadow-emerald-500/20',
+                        bgGlow: 'from-emerald-500/10 to-transparent',
+                      },
+                      {
+                        label: 'مكتملة اليوم', value: todayCompleted, icon: CheckCircle2,
+                        gradient: 'from-green-500 to-green-400', shadow: 'shadow-green-500/20',
+                        bgGlow: 'from-green-500/10 to-transparent',
+                      },
+                      {
+                        label: 'جلسات التركيز', value: totalPomodoros, icon: Timer,
+                        gradient: 'from-amber-500 to-amber-400', shadow: 'shadow-amber-500/20',
+                        bgGlow: 'from-amber-500/10 to-transparent',
+                      },
+                      {
+                        label: 'أيام العادات', value: habitStreak, icon: Flame,
+                        gradient: 'from-rose-500 to-rose-400', shadow: 'shadow-rose-500/20',
+                        bgGlow: 'from-rose-500/10 to-transparent',
+                      },
+                    ].map((card) => (
+                      <motion.div
+                        key={card.label}
+                        whileHover={{ scale: 1.02, y: -2, transition: { duration: 0.2 } }}
+                        className="card-hover card-shadow group relative overflow-hidden rounded-2xl border border-zinc-200/60 bg-white p-4 dark:border-zinc-800/40 dark:bg-zinc-900/60"
+                      >
+                        <div className={cn('absolute inset-0 bg-gradient-to-br opacity-0 transition-opacity duration-300 group-hover:opacity-100', card.bgGlow)} />
+                        <div className="relative">
+                          <div className="mb-3 flex items-center justify-between">
+                            <div className={cn('flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br shadow-sm', card.gradient, card.shadow)}>
+                              <card.icon className="h-5 w-5 text-white" />
+                            </div>
+                            <motion.span
+                              key={card.value}
+                              initial={{ scale: 0.8, opacity: 0 }}
+                              animate={{ scale: 1, opacity: 1 }}
+                              className="text-2xl font-bold text-zinc-900 dark:text-zinc-100"
+                            >
+                              {card.value}
+                            </motion.span>
+                          </div>
+                          <span className="text-xs font-medium text-zinc-500 dark:text-zinc-400">{card.label}</span>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </motion.div>
+
+                  {/* Progress Ring + Quick Actions side by side */}
+                  <motion.div variants={itemVariants} className="grid grid-cols-1 gap-5 md:grid-cols-2">
+                    {/* Productivity Ring */}
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ duration: 0.4 }}
+                      className="card-hover card-shadow relative overflow-hidden rounded-2xl border border-zinc-200/60 bg-white p-5 dark:border-zinc-800/40 dark:bg-zinc-900/60"
                     >
-                      عرض الكل <ArrowRight className="me-0.5 inline h-3 w-3" />
-                    </button>
-                  </div>
-                  {recentTasks.length === 0 && projects.length === 0 ? (
-                    <p className="py-6 text-center text-xs text-zinc-400">لا يوجد نشاط بعد</p>
-                  ) : (
-                    <div className="space-y-0">
-                      {recentTasks.map((task, i) => (
-                        <motion.div
-                          key={task.id}
-                          initial={{ opacity: 0, x: -10 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: i * 0.05, duration: 0.25 }}
-                          className="relative flex items-start gap-3 pb-4"
-                        >
-                          <div className="flex flex-col items-center">
-                            <div className={cn(
-                              'h-2.5 w-2.5 rounded-full ring-2 ring-white dark:ring-zinc-900',
-                              task.completed ? 'bg-emerald-500' : priorityColor[task.priority]?.dot || 'bg-zinc-300'
-                            )} />
-                            {i < recentTasks.length - 1 && (
-                              <div className="mt-1 h-full w-px bg-zinc-100 dark:bg-zinc-800" />
-                            )}
+                      <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/[0.02] to-transparent" />
+                      <div className="relative flex flex-col items-center">
+                        <div className="relative mb-3">
+                          <ProgressRing percent={completionRate} size={90} strokeWidth={6} color="#10b981" />
+                          <div className="absolute inset-0 flex flex-col items-center justify-center">
+                            <motion.span key={completionRate} initial={{ opacity: 0, scale: 0.5 }} animate={{ opacity: 1, scale: 1 }} className="text-xl font-bold text-zinc-900 dark:text-zinc-100">
+                              {completionRate}%
+                            </motion.span>
                           </div>
-                          <div className="min-w-0 flex-1">
-                            <p className={cn(
-                              'text-sm leading-snug',
-                              task.completed ? 'text-zinc-400 line-through' : 'text-zinc-800 dark:text-zinc-200'
-                            )}>
-                              {task.title}
-                            </p>
-                            <div className="mt-0.5 flex items-center gap-2">
-                              <span className="text-[10px] text-zinc-400">{getDateLabel(task.dueDate || today)}</span>
-                              {task.completed && (
-                                <span className="rounded-md bg-emerald-50 px-1.5 py-0.5 text-[10px] font-medium text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400">تم</span>
-                              )}
-                            </div>
+                        </div>
+                        <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">إنجاز المهام</h3>
+                        <p className="mt-0.5 text-xs text-zinc-400">{completed} من {total} مهام</p>
+                        <div className="mt-3 w-full">
+                          <div className="mb-1 flex items-center justify-between text-xs">
+                            <span className="text-zinc-500">هدف اليوم</span>
+                            <span className={cn('font-medium', completionRate >= 80 ? 'text-emerald-600' : completionRate >= 40 ? 'text-amber-600' : 'text-zinc-500')}>
+                              {todayCount > 0 ? `${todayCompleted}/${todayCount}` : '—'}
+                            </span>
                           </div>
-                        </motion.div>
-                      ))}
-                      {projects.map((p) => {
-                        const count = tasks.filter((t) => t.projectId === p.id).length;
-                        const done = tasks.filter((t) => t.projectId === p.id && t.completed).length;
-                        const pct = count > 0 ? Math.round((done / count) * 100) : 0;
-                        return (
+                          <AnimatedProgressBar value={todayCompleted} max={todayCount || 1} />
+                        </div>
+                        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }} className="mt-3 text-xs text-zinc-400">
+                          {completionRate >= 80 ? '🎉 أداء رائع، استمر!' : pending <= 2 ? `💪 بقيت ${pending} ${pending === 1 ? 'مهمة' : 'مهام'} فقط` : '🌟 استمر في الإنجاز'}
+                        </motion.p>
+                      </div>
+                    </motion.div>
+
+                    {/* Quick Actions */}
+                    <div>
+                      <div className="grid grid-cols-2 gap-2.5">
+                        {[
+                          { icon: Plus, label: 'إضافة مهمة', onClick: goToTasks, color: 'from-emerald-500 to-emerald-600', shadow: 'shadow-emerald-500/20' },
+                          { icon: FolderKanban, label: 'مشروع جديد', onClick: () => router.push('/'), color: 'from-violet-500 to-violet-600', shadow: 'shadow-violet-500/20' },
+                          { icon: Timer, label: 'جلسة تركيز', onClick: () => toggleFocusMode(), color: 'from-amber-500 to-amber-600', shadow: 'shadow-amber-500/20' },
+                          { icon: Calendar, label: 'التقويم', onClick: () => router.push('/calendar'), color: 'from-sky-500 to-sky-600', shadow: 'shadow-sky-500/20' },
+                          { icon: BarChart3, label: 'الإحصائيات', onClick: () => document.getElementById('stats-section')?.scrollIntoView({ behavior: 'smooth' }), color: 'from-indigo-500 to-indigo-600', shadow: 'shadow-indigo-500/20' },
+                          { icon: Flame, label: 'العادات', onClick: () => router.push('/habits'), color: 'from-rose-500 to-rose-600', shadow: 'shadow-rose-500/20' },
+                        ].map((action) => (
                           <motion.button
-                            key={p.id}
-                            onClick={() => goToTasksWithProject(p.id)}
-                            initial={{ opacity: 0, x: -10 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            className="relative flex items-center gap-3 pb-3 w-full text-start"
+                            key={action.label}
+                            whileHover={{ scale: 1.03, y: -2 }}
+                            whileTap={{ scale: 0.97 }}
+                            onClick={action.onClick}
+                            className="card-hover card-shadow group relative overflow-hidden rounded-2xl border border-zinc-200/60 bg-white/80 p-3 text-start backdrop-blur-sm dark:border-zinc-800/40 dark:bg-zinc-900/40"
                           >
-                            <div className="flex flex-col items-center">
-                              <div className="h-2.5 w-2.5 rounded-full ring-2 ring-white dark:ring-zinc-900" style={{ backgroundColor: p.color }} />
-                              <div className="mt-1 h-full w-px bg-zinc-100 dark:bg-zinc-800" />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <p className="text-sm font-medium text-zinc-800 dark:text-zinc-200">{p.name}</p>
-                              <div className="mt-1 flex items-center gap-2">
-                                <div className="flex-1 h-1.5 overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800">
-                                  <div className="h-full rounded-full transition-all duration-500" style={{ width: `${pct}%`, backgroundColor: p.color }} />
-                                </div>
-                                <span className="text-[10px] text-zinc-400 shrink-0">{done}/{count}</span>
+                            <div className="absolute inset-0 bg-gradient-to-br from-white/50 to-transparent opacity-0 transition-opacity group-hover:opacity-100 dark:from-white/5" />
+                            <div className="relative">
+                              <div className={cn('mb-2 flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br shadow-sm transition-transform duration-200 group-hover:scale-110', action.color, action.shadow)}>
+                                <action.icon className="h-5 w-5 text-white" />
                               </div>
+                              <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">{action.label}</span>
                             </div>
                           </motion.button>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
-
-                {/* Weekly Chart */}
-                <div className="rounded-2xl border border-zinc-200/60 bg-white p-5 shadow-sm dark:border-zinc-800/40 dark:bg-zinc-900/60">
-                  <div className="mb-4 flex items-center gap-2">
-                    <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-50 dark:bg-emerald-900/30">
-                      <BarChart3 className="h-3.5 w-3.5 text-emerald-500" />
-                    </div>
-                    <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">النشاط الأسبوعي</h3>
-                  </div>
-                  <WeekChart days={weekDays} />
-                  <div className="mt-3 flex items-center justify-center gap-4 text-[10px] text-zinc-400">
-                    <div className="flex items-center gap-1.5">
-                      <div className="h-2.5 w-2.5 rounded-sm bg-emerald-200" />
-                      <span>المهام المجدولة</span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <div className="h-2.5 w-2.5 rounded-sm bg-emerald-500" />
-                      <span>المكتملة</span>
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-
-              {/* Overdue Alert */}
-              {overdue > 0 && (
-                <motion.div variants={itemVariants}>
-                  <div className="rounded-2xl border border-rose-200/60 bg-gradient-to-r from-rose-50 to-rose-50/50 p-4 shadow-sm dark:border-rose-900/30 dark:from-rose-950/20 dark:to-rose-950/10">
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-rose-100 dark:bg-rose-900/30">
-                        <Clock className="h-4 w-4 text-rose-500" />
-                      </div>
-                      <div>
-                        <p className="text-sm font-semibold text-rose-700 dark:text-rose-300">
-                          {overdue} {overdue === 1 ? 'مهمة متأخرة' : 'مهام متأخرة'}
-                        </p>
-                        <p className="text-xs text-rose-500">تحتاج إلى مراجعة فورية</p>
+                        ))}
                       </div>
                     </div>
-                  </div>
-                </motion.div>
-              )}
+                  </motion.div>
 
-              {/* Statistics Section */}
-              <motion.div variants={itemVariants} id="stats-section">
-                <div className="rounded-2xl border border-zinc-200/60 bg-white p-5 shadow-sm dark:border-zinc-800/40 dark:bg-zinc-900/60">
-                  <div className="mb-5 flex items-center gap-2">
-                    <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-50 dark:bg-indigo-900/30">
-                      <TrendingUp className="h-3.5 w-3.5 text-indigo-500" />
-                    </div>
-                    <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">ملخص الإنتاجية</h3>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-                    {[
-                      { icon: CheckCircle2, value: `${completionRate}%`, label: 'معدل الإنجاز', color: 'text-emerald-500', bg: 'bg-emerald-50 dark:bg-emerald-900/20' },
-                      { icon: ListTodo, value: completed, label: 'مهام مكتملة', color: 'text-emerald-500', bg: 'bg-emerald-50 dark:bg-emerald-900/20' },
-                      { icon: Timer, value: totalPomodoros, label: 'جلسات تركيز', color: 'text-amber-500', bg: 'bg-amber-50 dark:bg-amber-900/20' },
-                      { icon: Flame, value: `${habitStreak} يوم`, label: 'أفضل ستريك', color: 'text-rose-500', bg: 'bg-rose-50 dark:bg-rose-900/20' },
-                    ].map((stat) => (
-                      <div key={stat.label} className="flex flex-col items-center gap-2 rounded-xl p-4 transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/30">
-                        <div className={cn('flex h-10 w-10 items-center justify-center rounded-xl', stat.bg)}>
-                          <stat.icon className={cn('h-5 w-5', stat.color)} />
+                  {/* Today's Tasks */}
+                  <TodayTasksCard tasks={todayTasks} onToggle={handleToggleTodayTask} onNavigate={goToTasks} />
+
+                  {/* Overdue Alert */}
+                  {overdue > 0 && (
+                    <motion.div variants={itemVariants}>
+                      <div className="card-shadow rounded-2xl border border-rose-200/60 bg-gradient-to-r from-rose-50 to-rose-50/50 p-4 dark:border-rose-900/30 dark:from-rose-950/20 dark:to-rose-950/10">
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-rose-100 dark:bg-rose-900/30">
+                            <Clock className="h-4 w-4 text-rose-500" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-semibold text-rose-700 dark:text-rose-300">
+                              {overdue} {overdue === 1 ? 'مهمة متأخرة' : 'مهام متأخرة'}
+                            </p>
+                            <p className="text-xs text-rose-500">تحتاج إلى مراجعة فورية</p>
+                          </div>
                         </div>
-                        <span className="text-xl font-bold text-zinc-900 dark:text-zinc-100">{stat.value}</span>
-                        <span className="text-[11px] text-zinc-500 dark:text-zinc-400">{stat.label}</span>
                       </div>
-                    ))}
-                  </div>
+                    </motion.div>
+                  )}
+
+                  {/* Weekly Chart + Stats */}
+                  <motion.div variants={itemVariants} className="grid grid-cols-1 gap-5 md:grid-cols-2">
+                    {/* Weekly Chart */}
+                    <div className="card-hover card-shadow rounded-2xl border border-zinc-200/60 bg-white p-5 dark:border-zinc-800/40 dark:bg-zinc-900/60">
+                      <div className="mb-4 flex items-center gap-2">
+                        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-50 dark:bg-emerald-900/30">
+                          <BarChart3 className="h-3.5 w-3.5 text-emerald-500" />
+                        </div>
+                        <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">النشاط الأسبوعي</h3>
+                      </div>
+                      <WeekChart days={weekDays} />
+                      <div className="mt-3 flex items-center justify-center gap-4 text-[10px] text-zinc-400">
+                        <div className="flex items-center gap-1.5">
+                          <div className="h-2.5 w-2.5 rounded-sm bg-emerald-200" />
+                          <span>المهام المجدولة</span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <div className="h-2.5 w-2.5 rounded-sm bg-emerald-500" />
+                          <span>المكتملة</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Statistics Summary */}
+                    <div id="stats-section" className="card-hover card-shadow rounded-2xl border border-zinc-200/60 bg-white p-5 dark:border-zinc-800/40 dark:bg-zinc-900/60">
+                      <div className="mb-4 flex items-center gap-2">
+                        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-50 dark:bg-indigo-900/30">
+                          <TrendingUp className="h-3.5 w-3.5 text-indigo-500" />
+                        </div>
+                        <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">ملخص الإنتاجية</h3>
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        {[
+                          { icon: CheckCircle2, value: `${completionRate}%`, label: 'معدل الإنجاز', color: 'text-emerald-500', bg: 'bg-emerald-50 dark:bg-emerald-900/20' },
+                          { icon: ListTodo, value: completed, label: 'مهام مكتملة', color: 'text-emerald-500', bg: 'bg-emerald-50 dark:bg-emerald-900/20' },
+                          { icon: Timer, value: totalPomodoros, label: 'جلسات تركيز', color: 'text-amber-500', bg: 'bg-amber-50 dark:bg-amber-900/20' },
+                          { icon: Flame, value: `${habitStreak} يوم`, label: 'أفضل ستريك', color: 'text-rose-500', bg: 'bg-rose-50 dark:bg-rose-900/20' },
+                        ].map((stat) => (
+                          <div key={stat.label} className="flex flex-col items-center gap-1.5 rounded-xl p-3 transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/30">
+                            <div className={cn('flex h-9 w-9 items-center justify-center rounded-xl', stat.bg)}>
+                              <stat.icon className={cn('h-4 w-4', stat.color)} />
+                            </div>
+                            <span className="text-lg font-bold text-zinc-900 dark:text-zinc-100">{stat.value}</span>
+                            <span className="text-[10px] text-zinc-500 dark:text-zinc-400">{stat.label}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </motion.div>
                 </div>
-              </motion.div>
+
+              </div>
             </motion.div>
           )}
         </div>

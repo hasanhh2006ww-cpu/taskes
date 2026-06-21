@@ -202,6 +202,7 @@ User Input (keyboard/mouse/touch)
 | 58 | تعديل الفرز من createdAt إلى order | تغيير ترتيب العرض من `b.createdAt - a.createdAt` إلى `a.order - b.order` ليدعم drag-reorder | ✅ |
 | 59 | إعادة تصميم Dashboard (Ultra Modern Light SaaS) | Top Nav (search, bell, avatar, +Add Task), 4 Stats Cards مع gradient/progress, Recent Tasks + Projects, نشاط أسبوعي (SVG bar chart), empty state, Framer Motion animations | ✅ |
 | 60 | إعادة تصميم Dashboard (Nature Inspired Green UI) | تحويل الألوان إلى درجات الأخضر الطبيعي: emerald/green/mint بدلاً من blue/cyan، أيقونات Leaf/Sprout، تفعيل جميع الأزرار (➕ Add Task → تنقل إلى المهام، 🔔 → toast, projects → فلترة حسب المشروع) | ✅ |
+| 61 | Dashboard 3-Column Grid Layout (SaaS Professional) | تحويل Dashboard إلى لوحة تحكم احترافية بـ 3 أعمدة: عمود أيسر (Productivity Score + Weekly Heatmap + Focus Summary + Recent Activity)، عمود أوسط (Greeting + 4 Stat Cards + Progress Ring + Quick Actions + Today's Tasks + Overdue Alert + Weekly Chart + Statistics)، وعمود أيمن (Sidebar من الـ Layout)، glass cards + card-hover + floating shadows + AnimatedProgressBar + smooth layout animations، Responsive: Desktop=3cols / Tablet=2cols / Mobile=1col | ✅ |
 
 ## [ORPHANS & PENDING]
 
