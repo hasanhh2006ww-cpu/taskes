@@ -203,6 +203,8 @@ User Input (keyboard/mouse/touch)
 | 59 | إعادة تصميم Dashboard (Ultra Modern Light SaaS) | Top Nav (search, bell, avatar, +Add Task), 4 Stats Cards مع gradient/progress, Recent Tasks + Projects, نشاط أسبوعي (SVG bar chart), empty state, Framer Motion animations | ✅ |
 | 60 | إعادة تصميم Dashboard (Nature Inspired Green UI) | تحويل الألوان إلى درجات الأخضر الطبيعي: emerald/green/mint بدلاً من blue/cyan، أيقونات Leaf/Sprout، تفعيل جميع الأزرار (➕ Add Task → تنقل إلى المهام، 🔔 → toast, projects → فلترة حسب المشروع) | ✅ |
 | 61 | Dashboard 3-Column Grid Layout (SaaS Professional) | تحويل Dashboard إلى لوحة تحكم احترافية بـ 3 أعمدة: عمود أيسر (Productivity Score + Weekly Heatmap + Focus Summary + Recent Activity)، عمود أوسط (Greeting + 4 Stat Cards + Progress Ring + Quick Actions + Today's Tasks + Overdue Alert + Weekly Chart + Statistics)، وعمود أيمن (Sidebar من الـ Layout)، glass cards + card-hover + floating shadows + AnimatedProgressBar + smooth layout animations، Responsive: Desktop=3cols / Tablet=2cols / Mobile=1col | ✅ |
+| 62 | Main Goal Card | إضافة بطاقة "الهدف الرئيسي" في الصف الأول من Dashboard. تعرض الهدف المستنتج من أول مشروع غير فارغ (أو أكبر مشروع مهام)، مع نسبة الإنجاز، المهام المتبقية، الموعد النهائي. Glass card + Target icon + AnimatedProgressBar + Framer Motion. | ✅ |
+| 63 | Productivity Heatmap (30-day) | إضافة خريطة إنتاجية حرارية شبيهة بـ GitHub Contributions في الصف الأول من Dashboard. تعرض آخر 30 يوماً من إنجاز المهام بـ 4 مستويات ألوان (رمادي/أخضر فاتح/متوسط/قوي). Hover tooltip مع التاريخ وعدد المهام. Stagger animation للمربعات. | ✅ |
 
 ## [ORPHANS & PENDING]
 

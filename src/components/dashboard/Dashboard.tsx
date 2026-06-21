@@ -131,6 +131,121 @@ function AnimatedProgressBar({ value, max, color = 'emerald' }: { value: number;
   );
 }
 
+function MainGoalCard({ goal }: { goal: { title: string; completed: number; total: number; remaining: number; deadline: string | null } | null }) {
+  if (!goal) {
+    return (
+      <motion.div variants={itemVariants} className="card-hover card-shadow relative overflow-hidden rounded-2xl border border-zinc-200/60 bg-white p-5 dark:border-zinc-800/40 dark:bg-zinc-900/60">
+        <div className="relative flex flex-col items-center py-6 text-center">
+          <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-zinc-100 dark:bg-zinc-800">
+            <Target className="h-6 w-6 text-zinc-400" />
+          </div>
+          <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">الهدف الرئيسي</h3>
+          <p className="mt-1 text-xs text-zinc-400">أنشئ مشروعاً وابدأ في إضافة المهام</p>
+        </div>
+      </motion.div>
+    );
+  }
+  const pct = goal.total > 0 ? Math.round((goal.completed / goal.total) * 100) : 0;
+  return (
+    <motion.div variants={itemVariants} className="card-hover card-shadow relative overflow-hidden rounded-2xl border border-zinc-200/60 bg-white p-5 dark:border-zinc-800/40 dark:bg-zinc-900/60">
+      <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/[0.02] to-transparent" />
+      <div className="relative">
+        <div className="mb-4 flex items-center gap-2">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-500 to-emerald-600 shadow-sm shadow-emerald-500/20">
+            <Target className="h-4 w-4 text-white" />
+          </div>
+          <div>
+            <p className="text-[11px] font-medium text-zinc-400">الهدف الرئيسي</p>
+            <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">{goal.title}</h3>
+          </div>
+        </div>
+        <div className="mb-3 flex items-center justify-between">
+          <span className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">{pct}%</span>
+          <span className="text-xs text-zinc-500">{goal.completed}/{goal.total} مهام</span>
+        </div>
+        <AnimatedProgressBar value={goal.completed} max={goal.total} />
+        <div className="mt-3 flex items-center justify-between text-xs">
+          <span className="text-zinc-500">
+            <span className="font-medium text-zinc-700 dark:text-zinc-300">{goal.remaining}</span> مهام متبقية
+          </span>
+          {goal.deadline && (
+            <span className="text-zinc-400">{getDateLabel(goal.deadline)}</span>
+          )}
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+function ProductivityHeatmap({ days }: { days: { date: string; completed: number }[] }) {
+  const today = getToday();
+  const monthName = MONTH_NAMES[new Date().getMonth()];
+  const weekLabels = ['ح', 'ن', 'ث', 'ر', 'خ', 'ج', 'س'];
+  const weeks: { date: string; completed: number }[][] = [];
+  for (let i = 0; i < days.length; i += 7) {
+    weeks.push(days.slice(i, i + 7));
+  }
+  return (
+    <motion.div variants={itemVariants} className="card-hover card-shadow relative overflow-hidden rounded-2xl border border-zinc-200/60 bg-white p-5 dark:border-zinc-800/40 dark:bg-zinc-900/60">
+      <div className="relative">
+        <div className="mb-3 flex items-center gap-2">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-500 to-emerald-600 shadow-sm shadow-emerald-500/20">
+            <Activity className="h-4 w-4 text-white" />
+          </div>
+          <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+            خريطة الإنتاجية — {monthName}
+          </h3>
+        </div>
+        <div className="flex gap-1">
+          <div className="flex flex-col gap-1 pt-5">
+            {weekLabels.map((l) => (
+              <div key={l} className="flex h-3 w-3 items-center justify-center">
+                <span className="text-[8px] text-zinc-400">{l}</span>
+              </div>
+            ))}
+          </div>
+          <div className="flex flex-1 gap-1 overflow-x-auto">
+            {weeks.map((week, wi) => (
+              <div key={wi} className="flex flex-1 flex-col gap-1">
+                {week.map((day) => {
+                  const level = day.completed === 0 ? 0 : day.completed <= 2 ? 1 : day.completed <= 5 ? 2 : 3;
+                  const bg = ['bg-zinc-100 dark:bg-zinc-800', 'bg-emerald-200', 'bg-emerald-400', 'bg-emerald-600'][level];
+                  const d = new Date(day.date);
+                  const isToday = day.date === today;
+                  return (
+                    <div
+                      key={day.date}
+                      className={cn(
+                        'group relative h-3 w-full rounded-sm transition-colors',
+                        bg,
+                        isToday && 'ring-2 ring-emerald-500 ring-offset-1 ring-offset-white dark:ring-offset-zinc-900'
+                      )}
+                    >
+                      <div className="pointer-events-none absolute bottom-full start-1/2 z-20 mb-1.5 -translate-x-1/2 whitespace-nowrap rounded-lg bg-zinc-900 px-2 py-1 text-[10px] text-white opacity-0 shadow-lg transition-opacity group-hover:opacity-100 dark:bg-zinc-700">
+                        {d.getDate()} {MONTH_NAMES[d.getMonth()]}
+                        <br />
+                        {day.completed > 0 ? `أنجزت ${day.completed} مهام` : 'لا مهام'}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="mt-3 flex items-center justify-end gap-1.5 text-[10px] text-zinc-400">
+          <span>أقل</span>
+          <div className="h-2.5 w-2.5 rounded-sm bg-zinc-100 dark:bg-zinc-800" />
+          <div className="h-2.5 w-2.5 rounded-sm bg-emerald-200" />
+          <div className="h-2.5 w-2.5 rounded-sm bg-emerald-400" />
+          <div className="h-2.5 w-2.5 rounded-sm bg-emerald-600" />
+          <span>أكثر</span>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
   visible: {
@@ -417,6 +532,37 @@ export function Dashboard() {
     return tasks.filter(t => t.dueDate === today).reduce((sum, t) => sum + t.pomodoroCount, 0);
   }, [tasks, today]);
 
+  const mainGoal = useMemo(() => {
+    const projectStats = projects.map(p => {
+      const projectTasks = tasks.filter(t => t.projectId === p.id);
+      return { project: p, tasks: projectTasks, count: projectTasks.length };
+    }).filter(ps => ps.count > 0).sort((a, b) => b.count - a.count);
+    if (projectStats.length === 0) return null;
+    const { project, tasks: projectTasks } = projectStats[0];
+    const completed = projectTasks.filter(t => t.completed).length;
+    const total = projectTasks.length;
+    const deadlines = projectTasks.filter(t => t.dueDate).map(t => t.dueDate!).sort();
+    return {
+      title: project.name,
+      completed,
+      total,
+      remaining: total - completed,
+      deadline: deadlines.length > 0 ? deadlines[deadlines.length - 1] : null,
+    };
+  }, [projects, tasks]);
+
+  const heatmap30Days = useMemo(() => {
+    const days: { date: string; completed: number }[] = [];
+    for (let i = 29; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const dateStr = d.toISOString().split('T')[0];
+      const completed = tasks.filter(t => t.dueDate === dateStr && t.completed).length;
+      days.push({ date: dateStr, completed });
+    }
+    return days;
+  }, [tasks]);
+
   const goToTasks = useCallback(() => {
     router.push('/');
     setTimeout(() => {
@@ -537,7 +683,13 @@ export function Dashboard() {
             </motion.div>
           ) : (
             <motion.div variants={containerVariants} initial="hidden" animate="visible" className="w-full">
-              {/* Responsive Grid: 1 col mobile, 2 col tablet/desktop (layout sidebar = 3rd col on desktop) */}
+              {/* Row 1: Main Goal + Productivity Heatmap */}
+              <motion.div variants={itemVariants} className="mb-5 grid grid-cols-1 gap-5 md:grid-cols-2">
+                <MainGoalCard goal={mainGoal} />
+                <ProductivityHeatmap days={heatmap30Days} />
+              </motion.div>
+
+              {/* Row 2-3: Existing 2-column grid */}
               <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
 
                 {/* --- LEFT COLUMN --- */}
