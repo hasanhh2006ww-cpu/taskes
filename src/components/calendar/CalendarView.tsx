@@ -7,6 +7,8 @@ import { useHabitStore } from '@/store/useHabitStore';
 import { logger } from '@/lib/logger';
 import { cn } from '@/lib/cn';
 import { getToday } from '@/lib/constants';
+import { useProjectStore } from '@/store/useProjectStore';
+import { TaskDetail } from '@/components/tasks/TaskDetail';
 import {
   ChevronLeft,
   ChevronRight,
@@ -15,6 +17,10 @@ import {
   Clock,
   ListTodo,
   Flame,
+  Target,
+  FolderKanban,
+  Calendar,
+  CheckCircle2,
 } from 'lucide-react';
 
 type ViewMode = 'month' | 'week' | 'day' | 'agenda';
@@ -55,6 +61,9 @@ export function CalendarView() {
   const addTask = useTaskStore((s) => s.addTask);
   const habits = useHabitStore((s) => s.habits);
   const toggleComplete = useTaskStore((s) => s.toggleComplete);
+  const projects = useProjectStore((s) => s.projects);
+  const activeTaskId = useTaskStore((s) => s.activeTaskId);
+  const setActiveTaskId = useTaskStore((s) => s.setActiveTaskId);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [viewMode, setViewMode] = useState<ViewMode>('month');
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
@@ -76,6 +85,11 @@ export function CalendarView() {
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
   const todayStr = getToday();
+
+  function handleTaskClick(taskId: string) {
+    logger.info(`Calendar: task clicked ${taskId}`);
+    setActiveTaskId(taskId);
+  }
 
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const firstDayOfMonth = new Date(year, month, 1).getDay();
@@ -262,10 +276,12 @@ export function CalendarView() {
               weeks={weeks}
               todayStr={todayStr}
               selectedDate={selectedDate}
+              activeTaskId={activeTaskId}
               getTasksForDate={getTasksForDate}
               getHabitsForDate={getHabitsForDate}
               onDayClick={handleDayClick}
               onDayDoubleClick={handleDayDoubleClick}
+              onTaskClick={handleTaskClick}
               formatDateStr={formatDateStr}
             />
           )}
@@ -274,10 +290,12 @@ export function CalendarView() {
               weekDays={weekDays}
               todayStr={todayStr}
               selectedDate={selectedDate}
+              activeTaskId={activeTaskId}
               getTasksForDate={getTasksForDate}
               getHabitsForDate={getHabitsForDate}
               onDayClick={handleDayClick}
               onDayDoubleClick={handleDayDoubleClick}
+              onTaskClick={handleTaskClick}
             />
           )}
           {viewMode === 'day' && (
@@ -288,6 +306,7 @@ export function CalendarView() {
               getHabitsForDate={getHabitsForDate}
               onDayDoubleClick={handleDayDoubleClick}
               toggleComplete={toggleComplete}
+              onTaskClick={handleTaskClick}
               tasks={tasks}
             />
           )}
@@ -297,20 +316,30 @@ export function CalendarView() {
               todayStr={todayStr}
               getTasksForDate={getTasksForDate}
               toggleComplete={toggleComplete}
+              onTaskClick={handleTaskClick}
+              activeTaskId={activeTaskId}
             />
           )}
         </div>
-        {/* Right sidebar with selected day details */}
-        {selectedDate && (
-          <DayDetails
-            selectedDate={selectedDate}
-            tasks={getTasksForDate(selectedDate)}
-            habits={getHabitsForDate(selectedDate)}
-            onClose={() => setSelectedDate(null)}
-            onCreateTask={() => openCreateModal(selectedDate)}
-            toggleComplete={toggleComplete}
-          />
-        )}
+        {/* Right panel: task detail, day summary, or default content */}
+        <CalendarRightPanel
+          activeTaskId={activeTaskId}
+          selectedDate={selectedDate}
+          tasks={tasks}
+          habits={habits}
+          projects={projects}
+          getTasksForDate={getTasksForDate}
+          getHabitsForDate={getHabitsForDate}
+          onCloseTask={() => setActiveTaskId(null)}
+          onCloseDay={() => setSelectedDate(null)}
+          onCreateTask={() => selectedDate && openCreateModal(selectedDate)}
+          onQuickAddTask={() => openCreateModal(getToday())}
+          onQuickViewDay={() => { setCurrentDate(new Date(getToday())); setViewMode('day'); }}
+          onTaskClick={handleTaskClick}
+          toggleComplete={toggleComplete}
+          currentDate={currentDate}
+          onDateSelect={(d) => { setCurrentDate(d); setViewMode('month'); }}
+        />
       </div>
 
       {/* Create Event Modal */}
@@ -337,11 +366,12 @@ export function CalendarView() {
 }
 
 function MonthView({
-  year, month, weeks, todayStr, selectedDate, getTasksForDate, getHabitsForDate, onDayClick, onDayDoubleClick, formatDateStr,
+  year, month, weeks, todayStr, selectedDate, activeTaskId, getTasksForDate, getHabitsForDate, onDayClick, onDayDoubleClick, onTaskClick, formatDateStr,
 }: {
-  year: number; month: number; weeks: (number | null)[][]; todayStr: string; selectedDate: string | null;
+  year: number; month: number; weeks: (number | null)[][]; todayStr: string; selectedDate: string | null; activeTaskId: string | null;
   getTasksForDate: (d: string) => any[]; getHabitsForDate: (d: string) => any[];
-  onDayClick: (d: string) => void; onDayDoubleClick: (d: string) => void; formatDateStr: (y: number, m: number, d: number) => string;
+  onDayClick: (d: string) => void; onDayDoubleClick: (d: string) => void; onTaskClick: (id: string) => void;
+  formatDateStr: (y: number, m: number, d: number) => string;
 }) {
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
@@ -397,11 +427,13 @@ function MonthView({
                     {dayTasks.slice(0, 3).map((t: any) => (
                       <div
                         key={t.id}
+                        onClick={(e) => { e.stopPropagation(); onTaskClick(t.id); }}
                         className={cn(
-                          'flex items-center gap-1 rounded-md border-r-4 px-1.5 py-0.5 text-[10px] font-medium leading-tight transition-all duration-200 md:text-xs',
+                          'flex cursor-pointer items-center gap-1 rounded-md border-r-4 px-1.5 py-0.5 text-[10px] font-medium leading-tight transition-all duration-200 md:text-xs',
                           t.completed
                             ? 'border-zinc-300 bg-zinc-50 text-zinc-400 line-through dark:border-zinc-700 dark:bg-zinc-800/30 dark:text-zinc-500'
-                            : 'border-teal-500 bg-teal-50 text-teal-700 hover:brightness-95 dark:border-teal-400 dark:bg-teal-950/40 dark:text-teal-300 dark:hover:brightness-125'
+                            : 'border-teal-500 bg-teal-50 text-teal-700 hover:brightness-95 dark:border-teal-400 dark:bg-teal-950/40 dark:text-teal-300 dark:hover:brightness-125',
+                          activeTaskId === t.id && 'ring-2 ring-emerald-400 dark:ring-emerald-500'
                         )}
                       >
                         <span className="truncate">{t.title}</span>
@@ -427,11 +459,11 @@ function MonthView({
 }
 
 function WeekView({
-  weekDays, todayStr, selectedDate, getTasksForDate, getHabitsForDate, onDayClick, onDayDoubleClick,
+  weekDays, todayStr, selectedDate, activeTaskId, getTasksForDate, getHabitsForDate, onDayClick, onDayDoubleClick, onTaskClick,
 }: {
-  weekDays: Date[]; todayStr: string; selectedDate: string | null;
+  weekDays: Date[]; todayStr: string; selectedDate: string | null; activeTaskId: string | null;
   getTasksForDate: (d: string) => any[]; getHabitsForDate: (d: string) => any[];
-  onDayClick: (d: string) => void; onDayDoubleClick: (d: string) => void;
+  onDayClick: (d: string) => void; onDayDoubleClick: (d: string) => void; onTaskClick: (id: string) => void;
 }) {
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
@@ -510,10 +542,10 @@ function WeekView({
 }
 
 function DayView({
-  currentDate, todayStr, getTasksForDate, getHabitsForDate, onDayDoubleClick, toggleComplete, tasks,
+  currentDate, todayStr, getTasksForDate, getHabitsForDate, onDayDoubleClick, toggleComplete, onTaskClick, tasks,
 }: {
   currentDate: Date; todayStr: string; getTasksForDate: (d: string) => any[]; getHabitsForDate: (d: string) => any[];
-  onDayDoubleClick: (d: string) => void; toggleComplete: (id: string) => void; tasks: any[];
+  onDayDoubleClick: (d: string) => void; toggleComplete: (id: string) => void; onTaskClick: (id: string) => void; tasks: any[];
 }) {
   const dateStr = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(currentDate.getDate()).padStart(2, '0')}`;
   const dayTasks = getTasksForDate(dateStr);
@@ -543,8 +575,9 @@ function DayView({
             return (
               <div
                 key={t.id}
+                onClick={(e) => { e.stopPropagation(); onTaskClick(t.id); }}
                 className={cn(
-                  'absolute start-2 end-2 overflow-hidden rounded-md border-r-4 px-3 py-2 shadow-sm transition-all duration-200 hover:shadow-md',
+                  'absolute start-2 end-2 cursor-pointer overflow-hidden rounded-md border-r-4 px-3 py-2 shadow-sm transition-all duration-200 hover:shadow-md',
                   t.completed
                     ? 'border-zinc-300 bg-zinc-50 text-zinc-400 line-through dark:border-zinc-700 dark:bg-zinc-800/30 dark:text-zinc-500'
                     : 'border-teal-500 bg-teal-50 text-teal-700 hover:brightness-95 dark:border-teal-400 dark:bg-teal-950/40 dark:text-teal-300 dark:hover:brightness-125'
@@ -555,7 +588,8 @@ function DayView({
                   <input
                     type="checkbox"
                     checked={t.completed}
-                    onChange={() => toggleComplete(t.id)}
+                    onChange={(e) => { e.stopPropagation(); toggleComplete(t.id); }}
+                    onClick={(e) => e.stopPropagation()}
                     className="h-3.5 w-3.5 shrink-0 cursor-pointer rounded border-zinc-300"
                   />
                   <span className="truncate text-sm font-medium">{t.title}</span>
@@ -580,8 +614,9 @@ function DayView({
           {dayTasks.map((t: any) => (
             <div
               key={t.id}
+              onClick={(e) => { e.stopPropagation(); onTaskClick(t.id); }}
               className={cn(
-                'flex items-center gap-2 rounded-md border-r-4 px-2 py-1.5 text-xs font-medium transition-all duration-200',
+                'flex cursor-pointer items-center gap-2 rounded-md border-r-4 px-2 py-1.5 text-xs font-medium transition-all duration-200',
                 t.completed
                   ? 'border-zinc-300 bg-zinc-50 text-zinc-400 line-through dark:border-zinc-700 dark:bg-zinc-800/30 dark:text-zinc-500'
                   : 'border-teal-500 bg-teal-50 text-teal-700 hover:brightness-95 dark:border-teal-400 dark:bg-teal-950/40 dark:text-teal-300 dark:hover:brightness-125'
@@ -609,9 +644,9 @@ function DayView({
 }
 
 function AgendaView({
-  tasks, todayStr, getTasksForDate, toggleComplete,
+  tasks, todayStr, getTasksForDate, toggleComplete, onTaskClick, activeTaskId,
 }: {
-  tasks: any[]; todayStr: string; getTasksForDate: (d: string) => any[]; toggleComplete: (id: string) => void;
+  tasks: any[]; todayStr: string; getTasksForDate: (d: string) => any[]; toggleComplete: (id: string) => void; onTaskClick: (id: string) => void; activeTaskId: string | null;
 }) {
   const upcomingDays = useMemo(() => {
     const days: { date: string; tasks: any[] }[] = [];
@@ -656,17 +691,20 @@ function AgendaView({
                   {dayTasks.map((t: any) => (
                     <div
                       key={t.id}
+                      onClick={(e) => { e.stopPropagation(); onTaskClick(t.id); }}
                       className={cn(
-                        'flex items-center gap-3 rounded-xl border-r-4 px-3 py-2.5 shadow-sm transition-all duration-200',
+                        'flex cursor-pointer items-center gap-3 rounded-xl border-r-4 px-3 py-2.5 shadow-sm transition-all duration-200',
                         t.completed
                           ? 'border-zinc-300 bg-zinc-50 text-zinc-400 line-through dark:border-zinc-700 dark:bg-zinc-800/30'
-                          : 'border-teal-500 bg-teal-50 text-teal-700 hover:brightness-95 dark:border-teal-400 dark:bg-teal-950/40 dark:text-teal-300 dark:hover:brightness-125'
+                          : 'border-teal-500 bg-teal-50 text-teal-700 hover:brightness-95 dark:border-teal-400 dark:bg-teal-950/40 dark:text-teal-300 dark:hover:brightness-125',
+                        activeTaskId === t.id && 'ring-2 ring-emerald-400 dark:ring-emerald-500'
                       )}
                     >
                       <input
                         type="checkbox"
                         checked={t.completed}
-                        onChange={() => toggleComplete(t.id)}
+                        onChange={(e) => { e.stopPropagation(); toggleComplete(t.id); }}
+                        onClick={(e) => e.stopPropagation()}
                         className="h-4 w-4 cursor-pointer rounded border-zinc-300"
                       />
                       <span className="flex-1 text-sm font-medium">{t.title}</span>
@@ -685,13 +723,159 @@ function AgendaView({
   );
 }
 
-function DayDetails({
-  selectedDate, tasks, habits, onClose, onCreateTask, toggleComplete,
+function CalendarRightPanel({
+  activeTaskId, selectedDate, tasks, habits, projects,
+  getTasksForDate, getHabitsForDate,
+  onCloseTask, onCloseDay, onCreateTask, toggleComplete,
+  currentDate, onDateSelect, onTaskClick,
+  onQuickAddTask, onQuickViewDay,
 }: {
-  selectedDate: string; tasks: any[]; habits: any[]; onClose: () => void; onCreateTask: () => void; toggleComplete: (id: string) => void;
+  activeTaskId: string | null;
+  selectedDate: string | null;
+  tasks: any[];
+  habits: any[];
+  projects: any[];
+  getTasksForDate: (d: string) => any[];
+  getHabitsForDate: (d: string) => any[];
+  onCloseTask: () => void;
+  onCloseDay: () => void;
+  onCreateTask: () => void;
+  toggleComplete: (id: string) => void;
+  currentDate: Date;
+  onDateSelect: (d: Date) => void;
+  onTaskClick: (id: string) => void;
+  onQuickAddTask: () => void;
+  onQuickViewDay: () => void;
 }) {
-  const d = new Date(selectedDate);
-  const isToday = selectedDate === getToday();
+  {/* Active task → show TaskDetail */}
+  if (activeTaskId) {
+    logger.info('CalendarRightPanel: showing TaskDetail');
+    return (
+      <motion.div
+        initial={{ width: 0, opacity: 0 }}
+        animate={{ width: 320, opacity: 1 }}
+        exit={{ width: 0, opacity: 0 }}
+        transition={{ duration: 0.2 }}
+        className="hidden overflow-y-auto border-s border-zinc-200/60 bg-white dark:border-zinc-800/40 dark:bg-zinc-900/60 md:block"
+      >
+        <TaskDetail />
+      </motion.div>
+    );
+  }
+
+  {/* Selected date → show day summary */}
+  if (selectedDate) {
+    const d = new Date(selectedDate);
+    const isToday = selectedDate === getToday();
+    const dayTasks = getTasksForDate(selectedDate);
+    const dayHabits = getHabitsForDate(selectedDate);
+
+    return (
+      <motion.div
+        initial={{ width: 0, opacity: 0 }}
+        animate={{ width: 280, opacity: 1 }}
+        exit={{ width: 0, opacity: 0 }}
+        transition={{ duration: 0.2 }}
+        className="hidden overflow-y-auto border-s border-zinc-200/60 bg-white dark:border-zinc-800/40 dark:bg-zinc-900/60 md:block"
+      >
+        <div className="flex items-center justify-between border-b border-zinc-200/60 px-4 py-3 dark:border-zinc-800/40">
+          <div>
+            <p className="text-sm font-semibold text-zinc-800 dark:text-zinc-200">
+              {isToday ? 'اليوم' : DAY_NAMES[d.getDay()]}
+            </p>
+            <p className="text-xs text-zinc-400">{d.getDate()} {MONTH_NAMES[d.getMonth()]} {d.getFullYear()}</p>
+          </div>
+          <button onClick={onCloseDay} className="flex h-7 w-7 items-center justify-center rounded-lg text-zinc-400 hover:bg-zinc-100 hover:text-zinc-600 dark:hover:bg-zinc-800 dark:hover:text-zinc-300">
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+        <div className="p-4">
+          <div className="mb-4 flex items-center justify-between">
+            <h4 className="text-xs font-medium text-zinc-500 dark:text-zinc-400">المهام ({dayTasks.length})</h4>
+            <button
+              onClick={onCreateTask}
+              className="flex items-center gap-1 rounded-lg bg-emerald-500 px-2.5 py-1.5 text-xs font-medium text-white transition-colors hover:bg-emerald-600"
+            >
+              <Plus className="h-3 w-3" />
+              جديد
+            </button>
+          </div>
+          {dayTasks.length === 0 && (
+            <p className="py-6 text-center text-xs text-zinc-400">لا توجد مهام في هذا اليوم</p>
+          )}
+          <div className="space-y-1">
+            {dayTasks.map((t: any) => (
+              <div
+                key={t.id}
+                onClick={() => onTaskClick(t.id)}
+                className={cn(
+                  'flex cursor-pointer items-center gap-2 rounded-md border-r-4 px-2 py-1.5 text-xs font-medium transition-all duration-200',
+                  t.completed
+                    ? 'border-zinc-300 bg-zinc-50 text-zinc-400 line-through dark:border-zinc-700 dark:bg-zinc-800/30 dark:text-zinc-500'
+                    : 'border-teal-500 bg-teal-50 text-teal-700 hover:brightness-95 dark:border-teal-400 dark:bg-teal-950/40 dark:text-teal-300 dark:hover:brightness-125'
+                )}
+              >
+                <input
+                  type="checkbox"
+                  checked={t.completed}
+                  onChange={(e) => { e.stopPropagation(); toggleComplete(t.id); }}
+                  onClick={(e) => e.stopPropagation()}
+                  className="h-3.5 w-3.5 shrink-0 cursor-pointer rounded border-zinc-300"
+                />
+                <span className="flex-1 truncate">{t.title}</span>
+              </div>
+            ))}
+          </div>
+
+          {dayHabits.length > 0 && (
+            <>
+              <div className="mb-3 mt-6 border-t border-zinc-100 pt-4 dark:border-zinc-800" />
+              <h4 className="mb-3 text-xs font-medium text-zinc-500 dark:text-zinc-400">العادات ({dayHabits.length})</h4>
+              <div className="space-y-1.5">
+                {dayHabits.map((h: any) => (
+                  <div key={h.id} className="flex items-center gap-2 rounded-lg px-2 py-1.5">
+                    <Flame className="h-3 w-3 shrink-0 text-amber-500" />
+                    <span className="flex-1 truncate text-xs">{h.title}</span>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+      </motion.div>
+    );
+  }
+
+  {/* Nothing selected → Today's Tasks + Mini Calendar + Quick Actions */}
+  const todayStr = getToday();
+  const todayAllTasks = getTasksForDate(todayStr);
+  const overdueTasks = tasks.filter((t: any) => t.date && t.date < todayStr && !t.completed);
+  const todayUpcoming = todayAllTasks.filter((t: any) => !t.completed);
+  const todayHabits = getHabitsForDate(todayStr);
+
+  {/* Mini calendar helpers */}
+  const mcYear = currentDate.getFullYear();
+  const mcMonth = currentDate.getMonth();
+  const mcFirstDay = new Date(mcYear, mcMonth, 1).getDay();
+  const mcDaysInMonth = new Date(mcYear, mcMonth + 1, 0).getDate();
+  const mcToday = new Date(todayStr);
+  const mcWeeks: (number | null)[][] = [];
+  let mcDay: (number | null)[] = [];
+  for (let i = 0; i < mcFirstDay; i++) mcDay.push(null);
+  for (let d = 1; d <= mcDaysInMonth; d++) {
+    mcDay.push(d);
+    if (mcDay.length === 7) { mcWeeks.push(mcDay); mcDay = []; }
+  }
+  if (mcDay.length > 0) { while (mcDay.length < 7) mcDay.push(null); mcWeeks.push(mcDay); }
+
+  function handlePrevMonth() {
+    const prev = new Date(mcYear, mcMonth - 1, 1);
+    onDateSelect(prev);
+  }
+  function handleNextMonth() {
+    const next = new Date(mcYear, mcMonth + 1, 1);
+    onDateSelect(next);
+  }
 
   return (
     <motion.div
@@ -699,68 +883,134 @@ function DayDetails({
       animate={{ width: 280, opacity: 1 }}
       exit={{ width: 0, opacity: 0 }}
       transition={{ duration: 0.2 }}
-      className="hidden border-s border-zinc-200/60 bg-white overflow-y-auto dark:border-zinc-800/40 dark:bg-zinc-900/60 md:block"
+      className="hidden overflow-y-auto border-s border-zinc-200/60 bg-white dark:border-zinc-800/40 dark:bg-zinc-900/60 md:block"
     >
-      <div className="flex items-center justify-between border-b border-zinc-200/60 px-4 py-3 dark:border-zinc-800/40">
+      <div className="space-y-6 p-4">
+        {/* Today's Tasks */}
         <div>
-          <p className="text-sm font-semibold text-zinc-800 dark:text-zinc-200">
-            {isToday ? 'اليوم' : DAY_NAMES[d.getDay()]}
-          </p>
-          <p className="text-xs text-zinc-400">{d.getDate()} {MONTH_NAMES[d.getMonth()]} {d.getFullYear()}</p>
-        </div>
-        <button onClick={onClose} className="flex h-7 w-7 items-center justify-center rounded-lg text-zinc-400 hover:bg-zinc-100 hover:text-zinc-600 dark:hover:bg-zinc-800 dark:hover:text-zinc-300">
-          <X className="h-4 w-4" />
-        </button>
-      </div>
-      <div className="p-4">
-        <div className="mb-4 flex items-center justify-between">
-          <h4 className="text-xs font-medium text-zinc-500 dark:text-zinc-400">المهام ({tasks.length})</h4>
-          <button
-            onClick={onCreateTask}
-            className="flex items-center gap-1 rounded-lg bg-emerald-500 px-2.5 py-1.5 text-xs font-medium text-white transition-colors hover:bg-emerald-600"
-          >
-            <Plus className="h-3 w-3" />
-            جديد
-          </button>
-        </div>
-        {tasks.length === 0 && (
-          <p className="py-6 text-center text-xs text-zinc-400">لا توجد مهام في هذا اليوم</p>
-        )}
-        <div className="space-y-1">
-          {tasks.map((t: any) => (
-            <div
-              key={t.id}
-              className={cn(
-                'flex items-center gap-2 rounded-md border-r-4 px-2 py-1.5 text-xs font-medium transition-all duration-200',
-                t.completed
-                  ? 'border-zinc-300 bg-zinc-50 text-zinc-400 line-through dark:border-zinc-700 dark:bg-zinc-800/30 dark:text-zinc-500'
-                  : 'border-teal-500 bg-teal-50 text-teal-700 hover:brightness-95 dark:border-teal-400 dark:bg-teal-950/40 dark:text-teal-300 dark:hover:brightness-125'
-              )}
-            >
-              <input
-                type="checkbox"
-                checked={t.completed}
-                onChange={() => toggleComplete(t.id)}
-                className="h-3.5 w-3.5 shrink-0 cursor-pointer rounded border-zinc-300"
-              />
-              <span className="flex-1 truncate">{t.title}</span>
+          <div className="mb-3 flex items-center gap-2">
+            <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+            <h4 className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">مهام اليوم</h4>
+            <span className="me-auto text-[10px] text-zinc-400">{todayStr}</span>
+          </div>
+          {overdueTasks.length > 0 && (
+            <div className="mb-2 rounded-lg bg-red-50 px-3 py-2 dark:bg-red-950/20">
+              <p className="text-[10px] font-medium text-red-500 dark:text-red-400">{overdueTasks.length} مهام متأخرة</p>
             </div>
-          ))}
+          )}
+          {todayUpcoming.length === 0 && overdueTasks.length === 0 && (
+            <p className="py-3 text-center text-xs text-zinc-400">لا توجد مهام لليوم</p>
+          )}
+          <div className="space-y-1">
+            {[...overdueTasks, ...todayUpcoming].slice(0, 6).map((t: any) => (
+              <div
+                key={t.id}
+                onClick={() => onTaskClick(t.id)}
+                className={cn(
+                  'flex cursor-pointer items-center gap-2 rounded-md border-r-4 px-2 py-1.5 text-xs font-medium transition-all',
+                  t.completed
+                    ? 'border-zinc-300 bg-zinc-50 text-zinc-400 line-through dark:border-zinc-700 dark:bg-zinc-800/30 dark:text-zinc-500'
+                    : 'border-teal-500 bg-teal-50 text-teal-700 hover:brightness-95 dark:border-teal-400 dark:bg-teal-950/40 dark:text-teal-300 dark:hover:brightness-125'
+                )}
+              >
+                <span className="flex-1 truncate">{t.title}</span>
+                {t.date && t.date < todayStr && !t.completed && (
+                  <span className="shrink-0 rounded bg-red-100 px-1 py-0.5 text-[9px] text-red-500 dark:bg-red-900/30 dark:text-red-400">متأخر</span>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
 
-        {habits.length > 0 && (
-          <>
-            <div className="mb-3 mt-6 border-t border-zinc-100 pt-4 dark:border-zinc-800" />
-            <h4 className="mb-3 text-xs font-medium text-zinc-500 dark:text-zinc-400">العادات ({habits.length})</h4>
-            <div className="space-y-1.5">
-              {habits.map((h: any) => (
+        {/* Mini Calendar */}
+        <div>
+          <div className="mb-2 flex items-center justify-between">
+            <button onClick={handlePrevMonth} className="flex h-6 w-6 items-center justify-center rounded text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800">
+              <ChevronRight className="h-3.5 w-3.5" />
+            </button>
+            <span className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+              {MONTH_NAMES[mcMonth]} {mcYear}
+            </span>
+            <button onClick={handleNextMonth} className="flex h-6 w-6 items-center justify-center rounded text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800">
+              <ChevronLeft className="h-3.5 w-3.5" />
+            </button>
+          </div>
+          <div className="grid grid-cols-7 gap-0 text-center">
+            {DAY_NAMES_SHORT.map((dn) => (
+              <div key={dn} className="py-1 text-[9px] font-medium text-zinc-400">{dn}</div>
+            ))}
+            {mcWeeks.flat().map((d, i) => {
+              const isTodayCell = d !== null && d === mcToday.getDate() && mcMonth === mcToday.getMonth() && mcYear === mcToday.getFullYear();
+              return (
+                <div
+                  key={i}
+                  className={cn(
+                    'py-1 text-[11px] transition-colors',
+                    d === null ? '' : 'cursor-pointer rounded hover:bg-zinc-100 dark:hover:bg-zinc-800',
+                    isTodayCell ? 'rounded bg-emerald-500 font-semibold text-white' : 'text-zinc-600 dark:text-zinc-400'
+                  )}
+                  onClick={() => {
+                    if (d !== null) {
+                      const target = new Date(mcYear, mcMonth, d);
+                      target.setHours(12);
+                      onDateSelect(target);
+                    }
+                  }}
+                >
+                  {d}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Quick Actions */}
+        <div>
+          <div className="mb-3 flex items-center gap-2">
+            <Target className="h-4 w-4 text-emerald-500" />
+            <h4 className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">إجراءات سريعة</h4>
+          </div>
+          <div className="space-y-2">
+            <button
+              onClick={onQuickAddTask}
+              className="flex w-full items-center gap-2 rounded-lg bg-emerald-50 px-3 py-2 text-xs font-medium text-emerald-600 transition-colors hover:bg-emerald-100 dark:bg-emerald-900/20 dark:text-emerald-400 dark:hover:bg-emerald-900/30"
+            >
+              <Plus className="h-3.5 w-3.5" />
+              إضافة مهمة
+            </button>
+            <button
+              onClick={onQuickViewDay}
+              className="flex w-full items-center gap-2 rounded-lg bg-zinc-50 px-3 py-2 text-xs font-medium text-zinc-600 transition-colors hover:bg-zinc-100 dark:bg-zinc-800/30 dark:text-zinc-400 dark:hover:bg-zinc-800/50"
+            >
+              <Calendar className="h-3.5 w-3.5" />
+              عرض اليوم
+            </button>
+            <div className="flex items-center gap-2 rounded-lg bg-zinc-50 px-3 py-2 text-xs text-zinc-500 dark:bg-zinc-800/30 dark:text-zinc-400">
+              <FolderKanban className="h-3.5 w-3.5 shrink-0" />
+              <span className="flex-1">مشاريع نشطة</span>
+              <span className="rounded bg-zinc-200 px-1.5 py-0.5 text-[10px] font-medium text-zinc-600 dark:bg-zinc-700 dark:text-zinc-300">
+                {projects.filter((p: any) => p.isActive !== false).length}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Today's Habits summary */}
+        {todayHabits.length > 0 && (
+          <div>
+            <div className="mb-3 flex items-center gap-2">
+              <Flame className="h-4 w-4 text-amber-500" />
+              <h4 className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">عادات اليوم</h4>
+            </div>
+            <div className="space-y-1">
+              {todayHabits.slice(0, 4).map((h: any) => (
                 <div key={h.id} className="flex items-center gap-2 rounded-lg px-2 py-1.5">
                   <Flame className="h-3 w-3 shrink-0 text-amber-500" />
                   <span className="flex-1 truncate text-xs">{h.title}</span>
                 </div>
               ))}
             </div>
-          </>
+          </div>
         )}
       </div>
     </motion.div>

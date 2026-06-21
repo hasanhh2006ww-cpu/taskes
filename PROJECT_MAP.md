@@ -54,7 +54,7 @@ my-taske/
 │   │   ├── command-palette/
 │   │   │   └── CommandPalette.tsx # Ctrl+K palette (Arabic)
 │   │   └── calendar/
-│   │       └── CalendarView.tsx    # Google Calendar-like: Month/Week/Day/Agenda views, full-screen, event creation modal, task+habit integration
+│   │       └── CalendarView.tsx    # Google Calendar-like: 4 views + interactive tasks (click → TaskDetail panel) + DaySummary + today's tasks/mini calendar/quick-actions sidebar
 │   │
 │   ├── store/                     # Zustand — domain-split
 │   │   ├── useTaskStore.ts        # Tasks CRUD, filter, reorder (batch)
@@ -216,6 +216,7 @@ User Input (keyboard/mouse/touch)
 | 69 | "إنشاء أول مهمة" و"إضافة مهمة" في Dashboard لا تعمل بعد تغيير التوجيه | تغيير 3 occurrences من `router.push('/')` إلى `router.push('/tasks')` في Dashboard.tsx: goToTasks (سطر 567), goToTasksWithProject (سطر 575), ومشروع جديد (سطر 881) | ✅ |
 | 70 | إعادة تصميم التقويم (Google Calendar-like) | إعادة كتابة CalendarView.tsx بالكامل: 4 أوضاع عرض (شهر/أسبوع/يوم/جدول)، شريط علوي مع Today+تنقل+مغير عرض، خلايا أيام تعرض المهام والعادات، نافذة إنشاء مهمة بالضغط على يوم، لوحة جانبية لتفاصيل اليوم المحدد، تصميم Full-Screen، أنماط Google Calendar، تسجيل عبر logger | ✅ |
 | 71 | تحسين تباين وعرض المهام في التقويم (Calendar Events Styling) | توحيد نمط بطاقات المهام عبر جميع أوضاع العرض (Month/Week/Day/Agenda/Details): bg-teal-50 + border-r-4 border-teal-500 + text-teal-700 في الوضع المضيء، dark:bg-teal-950/40 + dark:border-teal-400 + dark:text-teal-300 في المظلم، rounded-md + font-medium + hover:brightness, إزالة PRIORITY_COLORS و isSameDay غير المستخدمين | ✅ |
+| 72 | نظام التفاعل مع المهام في التقويم & لوحة جانبية ذكية (Calendar Interaction System) | 3 مراحل: (1) جعل كل بطاقة مهمة قابلة للنقر (`cursor-pointer` + `stopPropagation` + `setActiveTaskId`) عبر MonthView / WeekView / DayView / AgendaView مع hover effects + ring للإختيار; (2) استبدال DayDetails القديم بـ CalendarRightPanel الذكي: يُظهر TaskDetail عند اختيار مهمة (وضع تعديل كامل)، DaySummary مع checkbox/toggle عند اختيار تاريخ، ولوحة Today's Tasks + Mini Calendar + Quick Actions عند عدم اختيار شيء; (3) تسجيل كل تفاعل عبر logger + تكامل مع useTaskStore / useProjectStore + إزالة updateTask/deleteTask/Button غير المستخدمين | ✅ |
 
 ## [ORPHANS & PENDING]
 
