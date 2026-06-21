@@ -211,6 +211,7 @@ User Input (keyboard/mouse/touch)
 | 65 | Logo Redesign — Premium SaaS Brand Mark | إعادة تصميم logo.svg بالكامل: شكل "S" متدفق بـ teal-to-emerald gradient + ورقة في المنحنى السفلي + 3 نجوم لامعة (4-pointed stars) على خلفية داكنة م rounded. تصميم premium متجهي (SVG) قابل للتصغير لأيقونة المتصفح والشريط الجانبي والتطبيق. | ✅ |
 | 67 | Sidebar branding too small (logo h-7, no text) | استبدال logo.svg بـ v1.png (h-12 expanded / h-9 collapsed) + إضافة نص "Stilldo" بخط font-extrabold tracking-wide + ربط العلامة التجارية بالكامل كـ Link إلى /dashboard مع hover scale+shadow+transition + تسجيل تنقل عبر logger | ✅ |
 | 68 | Root route "/" shows Task page instead of Dashboard | تغيير / من عرض المهام إلى redirect إلى /dashboard عبر router.replace + إنشاء /tasks ونقل صفحة المهام إليها + تحديث Sidebar (روابط التصفية والمشاريع) من / إلى /tasks + إضافة تسجيل redirect عبر logger | ✅ |
+| 69 | "إنشاء أول مهمة" و"إضافة مهمة" في Dashboard لا تعمل بعد تغيير التوجيه | تغيير 3 occurrences من `router.push('/')` إلى `router.push('/tasks')` في Dashboard.tsx: goToTasks (سطر 567), goToTasksWithProject (سطر 575), ومشروع جديد (سطر 881) | ✅ |
 
 ## [ORPHANS & PENDING]
 

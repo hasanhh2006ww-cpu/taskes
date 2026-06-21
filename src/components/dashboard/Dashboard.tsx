@@ -564,7 +564,7 @@ export function Dashboard() {
   }, [tasks]);
 
   const goToTasks = useCallback(() => {
-    router.push('/');
+    router.push('/tasks');
     setTimeout(() => {
       document.querySelector<HTMLInputElement>('[data-task-input]')?.focus();
     }, 100);
@@ -572,7 +572,7 @@ export function Dashboard() {
 
   const goToTasksWithProject = useCallback((projectId: string) => {
     setActiveProjectId(projectId);
-    router.push('/');
+    router.push('/tasks');
   }, [router, setActiveProjectId]);
 
   const handleToggleTodayTask = useCallback((taskId: string) => {
@@ -878,7 +878,7 @@ export function Dashboard() {
                       <div className="grid grid-cols-2 gap-2.5">
                         {[
                           { icon: Plus, label: 'إضافة مهمة', onClick: goToTasks, color: 'from-emerald-500 to-emerald-600', shadow: 'shadow-emerald-500/20' },
-                          { icon: FolderKanban, label: 'مشروع جديد', onClick: () => router.push('/'), color: 'from-violet-500 to-violet-600', shadow: 'shadow-violet-500/20' },
+                          { icon: FolderKanban, label: 'مشروع جديد', onClick: () => router.push('/tasks'), color: 'from-violet-500 to-violet-600', shadow: 'shadow-violet-500/20' },
                           { icon: Timer, label: 'جلسة تركيز', onClick: () => toggleFocusMode(), color: 'from-amber-500 to-amber-600', shadow: 'shadow-amber-500/20' },
                           { icon: Calendar, label: 'التقويم', onClick: () => router.push('/calendar'), color: 'from-sky-500 to-sky-600', shadow: 'shadow-sky-500/20' },
                           { icon: BarChart3, label: 'الإحصائيات', onClick: () => document.getElementById('stats-section')?.scrollIntoView({ behavior: 'smooth' }), color: 'from-indigo-500 to-indigo-600', shadow: 'shadow-indigo-500/20' },
