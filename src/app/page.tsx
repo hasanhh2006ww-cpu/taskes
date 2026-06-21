@@ -1,31 +1,42 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useUIStore } from '@/store/useUIStore';
+import { useTaskStore } from '@/store/useTaskStore';
 import { TaskList } from '@/components/tasks/TaskList';
 import { TaskDetail } from '@/components/tasks/TaskDetail';
 import { cn } from '@/lib/cn';
 
 export default function Home() {
-  const { focusMode, activeTaskId } = useUIStore();
+  const { focusMode } = useUIStore();
+  const activeTaskId = useTaskStore((s) => s.activeTaskId);
+  const setActiveTaskId = useTaskStore((s) => s.setActiveTaskId);
   const [isAdding, setIsAdding] = useState(false);
 
   useEffect(() => {
     const input = document.querySelector<HTMLInputElement>('[data-task-input]');
     if (!input) return;
     const onFocus = () => setIsAdding(true);
-    const onBlur = () => {
-      setTimeout(() => {
-        if (document.activeElement !== input) setIsAdding(false);
-      }, 120);
-    };
     input.addEventListener('focus', onFocus);
-    input.addEventListener('blur', onBlur);
-    return () => {
-      input.removeEventListener('focus', onFocus);
-      input.removeEventListener('blur', onBlur);
-    };
+    return () => input.removeEventListener('focus', onFocus);
   }, []);
+
+  useEffect(() => {
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') {
+        setIsAdding(false);
+        setActiveTaskId(null);
+        document.querySelector<HTMLInputElement>('[data-task-input]')?.blur();
+      }
+    }
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [setActiveTaskId]);
+
+  const handleClose = useCallback(() => {
+    setIsAdding(false);
+    setActiveTaskId(null);
+  }, [setActiveTaskId]);
 
   const showDetailPanel = !focusMode && (!!activeTaskId || isAdding);
 
@@ -48,7 +59,7 @@ export default function Home() {
           !showDetailPanel && 'hidden'
         )}
       >
-        <TaskDetail />
+        <TaskDetail onClose={handleClose} />
       </div>
     </div>
   );

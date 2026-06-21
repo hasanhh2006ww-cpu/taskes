@@ -10,7 +10,7 @@ import { PRIORITIES } from '@/lib/constants';
 import { Calendar, Trash2, Star, X } from 'lucide-react';
 import type { Priority } from '@/lib/types';
 
-export function TaskDetail() {
+export function TaskDetail({ onClose }: { onClose?: () => void }) {
   const { tasks, activeTaskId, setActiveTaskId, updateTask, deleteTask, toggleComplete, toggleImportant } =
     useTaskStore();
   const projects = useProjectStore((s) => s.projects);
@@ -30,8 +30,17 @@ export function TaskDetail() {
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="flex h-full flex-col items-center justify-center gap-1 px-6"
+        className="relative flex h-full flex-col items-center justify-center gap-1 px-6"
       >
+        {onClose && (
+          <button
+            onClick={onClose}
+            className="absolute start-2 top-2 flex h-8 w-8 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-600 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
+            aria-label="إغلاق"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        )}
         <p className="text-3xl font-bold text-zinc-200 dark:text-zinc-700">
           {today.getDate()}
         </p>
