@@ -8,6 +8,20 @@ export type WeeklyFrequency = 1 | 2 | 3 | 4 | 5;
 
 export type MonthPeriod = 'start' | 'middle' | 'end';
 
+export interface SubTask {
+  id: string;
+  title: string;
+  completed: boolean;
+  order: number;
+}
+
+export interface ActivityLogEntry {
+  id: string;
+  type: string;
+  message: string;
+  timestamp: number;
+}
+
 export interface Task {
   id: string;
   title: string;
@@ -20,6 +34,10 @@ export interface Task {
   order: number;
   important: boolean;
   pomodoroCount: number;
+  subtasks: SubTask[];
+  activityLog: ActivityLogEntry[];
+  focusSessions: number;
+  totalFocusTime: number;
 }
 
 export interface Project {

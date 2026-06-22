@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { v4 as uuid } from 'uuid';
-import type { Task, FilterType, Priority } from '@/lib/types';
+import type { Task, SubTask, ActivityLogEntry, FilterType, Priority } from '@/lib/types';
 import { loadFromStorage, saveToStorage } from '@/lib/storage';
 import { STORAGE_KEYS, getToday } from '@/lib/constants';
 
@@ -21,6 +21,13 @@ interface TaskState {
   setTasks: (tasks: Task[]) => void;
   incrementPomodoro: (id: string) => void;
   getFilteredTasks: () => Task[];
+  addSubtask: (taskId: string, title: string) => void;
+  toggleSubtask: (taskId: string, subtaskId: string) => void;
+  deleteSubtask: (taskId: string, subtaskId: string) => void;
+  updateSubtask: (taskId: string, subtaskId: string, title: string) => void;
+  reorderSubtasks: (taskId: string, fromIndex: number, toIndex: number) => void;
+  addActivityLog: (taskId: string, type: string, message: string) => void;
+  addFocusSession: (taskId: string, durationMinutes: number) => void;
 }
 
 const initialTasks = loadFromStorage<Task[]>(STORAGE_KEYS.TASKS, []);
@@ -50,6 +57,10 @@ export const useTaskStore = create<TaskState>((set, get) => ({
       createdAt: Date.now(),
       order: tasks.length,
       pomodoroCount: 0,
+      subtasks: [],
+      activityLog: [],
+      focusSessions: 0,
+      totalFocusTime: 0,
     };
     const updated = [...tasks, newTask];
     set({ tasks: updated, activeTaskId: newTask.id });
@@ -127,5 +138,85 @@ export const useTaskStore = create<TaskState>((set, get) => ({
     }
 
     return filtered;
+  },
+
+  addSubtask: (taskId, title) => {
+    const tasks = get().tasks.map((t) => {
+      if (t.id !== taskId) return t;
+      const subs = (t as any).subtasks || [];
+      const newSub: SubTask = { id: uuid(), title, completed: false, order: subs.length };
+      return { ...t, subtasks: [...subs, newSub] };
+    });
+    set({ tasks });
+    saveToStorage(STORAGE_KEYS.TASKS, tasks);
+  },
+
+  toggleSubtask: (taskId, subtaskId) => {
+    const tasks = get().tasks.map((t) => {
+      if (t.id !== taskId) return t;
+      const subs = ((t as any).subtasks || []).map((s: SubTask) =>
+        s.id === subtaskId ? { ...s, completed: !s.completed } : s
+      );
+      return { ...t, subtasks: subs };
+    });
+    set({ tasks });
+    saveToStorage(STORAGE_KEYS.TASKS, tasks);
+  },
+
+  deleteSubtask: (taskId, subtaskId) => {
+    const tasks = get().tasks.map((t) => {
+      if (t.id !== taskId) return t;
+      return { ...t, subtasks: ((t as any).subtasks || []).filter((s: SubTask) => s.id !== subtaskId) };
+    });
+    set({ tasks });
+    saveToStorage(STORAGE_KEYS.TASKS, tasks);
+  },
+
+  updateSubtask: (taskId, subtaskId, title) => {
+    const tasks = get().tasks.map((t) => {
+      if (t.id !== taskId) return t;
+      const subs = ((t as any).subtasks || []).map((s: SubTask) =>
+        s.id === subtaskId ? { ...s, title } : s
+      );
+      return { ...t, subtasks: subs };
+    });
+    set({ tasks });
+    saveToStorage(STORAGE_KEYS.TASKS, tasks);
+  },
+
+  reorderSubtasks: (taskId, fromIndex, toIndex) => {
+    const tasks = get().tasks.map((t) => {
+      if (t.id !== taskId) return t;
+      const subs = [...((t as any).subtasks || [])];
+      const [moved] = subs.splice(fromIndex, 1);
+      subs.splice(toIndex, 0, moved);
+      return { ...t, subtasks: subs.map((s: SubTask, i: number) => ({ ...s, order: i })) };
+    });
+    set({ tasks });
+    saveToStorage(STORAGE_KEYS.TASKS, tasks);
+  },
+
+  addActivityLog: (taskId, type, message) => {
+    const tasks = get().tasks.map((t) => {
+      if (t.id !== taskId) return t;
+      const entry: ActivityLogEntry = { id: uuid(), type, message, timestamp: Date.now() };
+      const logs = [...((t as any).activityLog || []), entry];
+      return { ...t, activityLog: logs };
+    });
+    set({ tasks });
+    saveToStorage(STORAGE_KEYS.TASKS, tasks);
+  },
+
+  addFocusSession: (taskId, durationMinutes) => {
+    const tasks = get().tasks.map((t) => {
+      if (t.id !== taskId) return t;
+      return {
+        ...t,
+        focusSessions: ((t as any).focusSessions || 0) + 1,
+        totalFocusTime: ((t as any).totalFocusTime || 0) + durationMinutes,
+      };
+    });
+    set({ tasks });
+    saveToStorage(STORAGE_KEYS.TASKS, tasks);
   },
 }));
