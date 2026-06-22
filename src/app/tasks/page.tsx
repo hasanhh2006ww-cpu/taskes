@@ -45,22 +45,13 @@ export default function TasksPage() {
       <div
         className={cn(
           'flex-1 min-w-0 overflow-hidden border-e border-zinc-200/60 dark:border-zinc-800/60',
-          focusMode && 'max-w-2xl mx-auto border-e-0',
-          showDetailPanel && 'hidden md:flex md:flex-1'
+          focusMode && 'max-w-2xl mx-auto border-e-0'
         )}
       >
         <TaskList />
       </div>
 
-      <div
-        className={cn(
-          'w-full shrink-0 md:w-80',
-          focusMode && 'hidden',
-          !showDetailPanel && 'hidden'
-        )}
-      >
-        <TaskDetail onClose={handleClose} />
-      </div>
+      {showDetailPanel && <TaskDetail onClose={handleClose} />}
     </div>
   );
 }

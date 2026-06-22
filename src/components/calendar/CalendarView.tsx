@@ -752,20 +752,10 @@ function CalendarRightPanel({
   onQuickAddTask: () => void;
   onQuickViewDay: () => void;
 }) {
-  {/* Active task → show TaskDetail */}
+  {/* Active task → show TaskDetail as fixed drawer */}
   if (activeTaskId) {
     logger.info('CalendarRightPanel: showing TaskDetail');
-    return (
-      <motion.div
-        initial={{ width: 0, opacity: 0 }}
-        animate={{ width: 320, opacity: 1 }}
-        exit={{ width: 0, opacity: 0 }}
-        transition={{ duration: 0.2 }}
-        className="hidden overflow-y-auto border-s border-zinc-200/60 bg-white dark:border-zinc-800/40 dark:bg-zinc-900/60 md:block"
-      >
-        <TaskDetail />
-      </motion.div>
-    );
+    return <TaskDetail />;
   }
 
   {/* Selected date → show day summary */}
