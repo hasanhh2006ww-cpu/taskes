@@ -27,14 +27,14 @@ function SortableHabitCard({ habit }: { habit: Habit }) {
   const Icon = getHabitIcon(habit.icon);
   const habitColor = habit.color || '#f59e0b';
   return (
-    <div ref={setNodeRef} style={style} {...attributes} className="mb-3">
-      <div className="rounded-xl border border-zinc-200/60 bg-white/50 p-4 backdrop-blur-sm dark:border-zinc-800/40 dark:bg-zinc-900/40">
+    <div ref={setNodeRef} style={style} {...attributes}>
+      <div className="rounded-xl border border-zinc-200/60 bg-white/50 p-4 backdrop-blur-sm transition-all duration-200 dark:border-zinc-800/40 dark:bg-zinc-900/40 hover:shadow-md">
         <div className="flex items-center gap-3 min-w-0">
           <button {...listeners} className="cursor-grab touch-none text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300" aria-label="سحب">
             <GripVertical className="h-5 w-5" />
           </button>
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg" style={{ backgroundColor: `${habitColor}18` }}>
-            <Icon className="h-4 w-4" style={{ color: habitColor }} />
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl" style={{ backgroundColor: `${habitColor}18` }}>
+            <Icon className="h-5 w-5" style={{ color: habitColor }} />
           </div>
           <div className="min-w-0 flex-1">
             <div className="truncate text-sm font-medium text-zinc-900 dark:text-zinc-100">{habit.title}</div>
@@ -56,6 +56,7 @@ export function HabitTrackerPro() {
   const [editHabit, setEditHabit] = useState<Habit | null>(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [isReordering, setIsReordering] = useState(false);
+  const [celebratingId, setCelebratingId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
@@ -113,10 +114,28 @@ export function HabitTrackerPro() {
     toast.success('تم حذف العادة');
   }
 
+  function getProgressPercent(habit: Habit): number {
+    const today = getToday();
+    if (habit.type === 'daily') return habit.completions[today] === true ? 100 : 0;
+    if (habit.type === 'weekly') return habit.completedWeeks[getWeekKey(today)] === true ? 100 : 0;
+    if (habit.type === 'monthly') {
+      const monthKey = getMonthWeekKey(today);
+      const m = habit as MonthlyHabit;
+      const done = m.completedDays[monthKey] || 0;
+      return Math.min(100, Math.round((done / m.targetCount) * 100));
+    }
+    return 0;
+  }
+
   function toggleCompletion(habit: DailyHabit | WeeklyHabit | MonthlyHabit) {
+    const wasCompleted = isCompletedToday(habit);
     if (habit.type === 'daily') toggleDailyCompletion(habit.id);
     else if (habit.type === 'weekly') toggleWeeklyCompletion(habit.id);
     else toggleMonthlyCompletion(habit.id);
+    if (!wasCompleted) {
+      setCelebratingId(habit.id);
+      setTimeout(() => setCelebratingId(null), 700);
+    }
   }
 
   function isCompletedToday(habit: DailyHabit | WeeklyHabit | MonthlyHabit): boolean {
@@ -344,20 +363,30 @@ export function HabitTrackerPro() {
             </SortableContext>
           </DndContext>
         ) : (
-          displayedHabits.map((habit) => {
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
+          {displayedHabits.map((habit) => {
             const completed = isCompletedToday(habit);
+            const hColor = (habit as any).color || '#f59e0b';
+            const Icon = getHabitIcon((habit as any).icon);
+            const progress = getProgressPercent(habit);
             return (
-              <div key={habit.id} className="mb-3">
-                <div className="rounded-xl border border-zinc-200/60 bg-white/50 p-4 backdrop-blur-sm transition-colors dark:border-zinc-800/40 dark:bg-zinc-900/40">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3 min-w-0">
+              <div key={habit.id}>
+                <div
+                  className={cn(
+                    'rounded-xl border border-zinc-200/60 bg-white/50 p-4 backdrop-blur-sm transition-all duration-200 dark:border-zinc-800/40 dark:bg-zinc-900/40 hover:shadow-lg hover:-translate-y-0.5',
+                    celebratingId === habit.id && 'ring-2 ring-offset-2 dark:ring-offset-zinc-900'
+                  )}
+                  style={{ '--tw-ring-color': hColor } as React.CSSProperties}
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-start gap-3 min-w-0">
                       <button
                         onClick={() => toggleCompletion(habit)}
                         className={cn(
-                          'flex h-7 w-7 shrink-0 items-center justify-center rounded-full border-2 transition-all',
+                          'flex h-7 w-7 shrink-0 items-center justify-center rounded-full border-2 transition-all duration-200 mt-0.5',
                           completed
-                            ? 'border-emerald-500 bg-emerald-500 text-white'
-                            : 'border-zinc-300 dark:border-zinc-600'
+                            ? 'border-emerald-500 bg-emerald-500 text-white scale-100'
+                            : 'border-zinc-300 dark:border-zinc-600 hover:border-zinc-400 dark:hover:border-zinc-500'
                         )}
                       >
                         {completed && (
@@ -367,15 +396,9 @@ export function HabitTrackerPro() {
                         )}
                       </button>
 
-                      {(() => {
-                        const hColor = (habit as any).color || '#f59e0b';
-                        const Icon = getHabitIcon((habit as any).icon);
-                        return (
-                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg" style={{ backgroundColor: `${hColor}18` }}>
-                            <Icon className="h-5 w-5" style={{ color: hColor }} />
-                          </div>
-                        );
-                      })()}
+                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl" style={{ backgroundColor: `${hColor}18` }}>
+                        <Icon className="h-5 w-5" style={{ color: hColor }} />
+                      </div>
 
                       <div className="min-w-0 flex-1">
                         <div
@@ -385,15 +408,16 @@ export function HabitTrackerPro() {
                           {habit.title}
                         </div>
 
-                        <div className="mt-0.5 flex items-center gap-2">
-                          {(() => {
-                            const hColor = (habit as any).color || '#f59e0b';
-                            return (
-                              <span className="inline-block rounded-full px-2 py-0.5 text-[10px] font-medium text-white" style={{ backgroundColor: hColor }}>
-                                {habit.type === 'daily' ? 'يومي' : habit.type === 'weekly' ? 'أسبوعي' : 'شهري'}
-                              </span>
-                            );
-                          })()}
+                        {(habit as any).description && (
+                          <div className="mt-0.5 text-xs text-zinc-400 dark:text-zinc-500 line-clamp-1">
+                            {(habit as any).description}
+                          </div>
+                        )}
+
+                        <div className="mt-1.5 flex items-center gap-2 flex-wrap">
+                          <span className="inline-block rounded-full px-2 py-0.5 text-[10px] font-medium text-white" style={{ backgroundColor: hColor }}>
+                            {habit.type === 'daily' ? 'يومي' : habit.type === 'weekly' ? 'أسبوعي' : 'شهري'}
+                          </span>
 
                           {habit.type === 'weekly' && (
                             <span className="text-[10px] text-zinc-400 dark:text-zinc-500">
@@ -446,10 +470,18 @@ export function HabitTrackerPro() {
                       </Button>
                     </div>
                   </div>
+
+                  <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-zinc-200/60 dark:bg-zinc-700/40">
+                    <div
+                      className="h-full rounded-full transition-all duration-500 ease-out"
+                      style={{ width: `${progress}%`, backgroundColor: hColor }}
+                    />
+                  </div>
                 </div>
               </div>
             );
-          })
+          })}
+          </div>
         )}
       </div>
 
