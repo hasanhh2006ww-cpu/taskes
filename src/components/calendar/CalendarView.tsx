@@ -9,6 +9,7 @@ import { cn } from '@/lib/cn';
 import { getToday } from '@/lib/constants';
 import { useProjectStore } from '@/store/useProjectStore';
 import { TaskDetail } from '@/components/tasks/TaskDetail';
+import { getHabitIcon } from '@/lib/habitIcons';
 import {
   ChevronLeft,
   ChevronRight,
@@ -631,12 +632,16 @@ function DayView({
           {dayHabits.length === 0 && (
             <p className="text-xs text-zinc-400">لا توجد عادات في هذا اليوم</p>
           )}
-          {dayHabits.map((h: any) => (
-            <div key={h.id} className="flex items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-zinc-50 dark:hover:bg-zinc-800/30">
-              <Flame className="h-3 w-3 shrink-0 text-amber-500" />
-              <span className="flex-1 truncate text-xs">{h.title}</span>
-            </div>
-          ))}
+          {dayHabits.map((h: any) => {
+            const HIcon = getHabitIcon(h.icon);
+            const hColor = h.color || '#f59e0b';
+            return (
+              <div key={h.id} className="flex items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-zinc-50 dark:hover:bg-zinc-800/30">
+                <HIcon className="h-3 w-3 shrink-0" style={{ color: hColor }} />
+                <span className="flex-1 truncate text-xs">{h.title}</span>
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>
@@ -832,12 +837,16 @@ function CalendarRightPanel({
               <div className="mb-3 mt-6 border-t border-zinc-100 pt-4 dark:border-zinc-800" />
               <h4 className="mb-3 text-xs font-medium text-zinc-500 dark:text-zinc-400">العادات ({dayHabits.length})</h4>
               <div className="space-y-1.5">
-                {dayHabits.map((h: any) => (
-                  <div key={h.id} className="flex items-center gap-2 rounded-lg px-2 py-1.5">
-                    <Flame className="h-3 w-3 shrink-0 text-amber-500" />
-                    <span className="flex-1 truncate text-xs">{h.title}</span>
-                  </div>
-                ))}
+                {dayHabits.map((h: any) => {
+                  const HIcon = getHabitIcon(h.icon);
+                  const hColor = h.color || '#f59e0b';
+                  return (
+                    <div key={h.id} className="flex items-center gap-2 rounded-lg px-2 py-1.5">
+                      <HIcon className="h-3 w-3 shrink-0" style={{ color: hColor }} />
+                      <span className="flex-1 truncate text-xs">{h.title}</span>
+                    </div>
+                  );
+                })}
               </div>
             </>
           )}
@@ -1003,12 +1012,16 @@ function CalendarRightPanel({
               <h4 className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">عادات اليوم</h4>
             </div>
             <div className="space-y-1">
-              {todayHabits.slice(0, 4).map((h: any) => (
-                <div key={h.id} className="flex items-center gap-2 rounded-lg px-2 py-1.5">
-                  <Flame className="h-3 w-3 shrink-0 text-amber-500" />
-                  <span className="flex-1 truncate text-xs">{h.title}</span>
-                </div>
-              ))}
+              {todayHabits.slice(0, 4).map((h: any) => {
+                const HIcon = getHabitIcon(h.icon);
+                const hColor = h.color || '#f59e0b';
+                return (
+                  <div key={h.id} className="flex items-center gap-2 rounded-lg px-2 py-1.5">
+                    <HIcon className="h-3 w-3 shrink-0" style={{ color: hColor }} />
+                    <span className="flex-1 truncate text-xs">{h.title}</span>
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}

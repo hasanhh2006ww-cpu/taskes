@@ -6,10 +6,11 @@ import type { Habit, DailyHabit, WeeklyHabit, MonthlyHabit } from '@/lib/types';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { cn } from '@/lib/cn';
-import { Plus, Trash2, GripVertical, Download, Upload } from 'lucide-react';
+import { Plus, Trash2, GripVertical, Download, Upload, Flame } from 'lucide-react';
 import { getToday, getWeekKey, getMonthWeekKey } from '@/lib/constants';
 import { AddEditHabitModal } from './AddEditHabitModal';
 import { ConfirmDialog } from './ConfirmDialog';
+import { getHabitIcon } from '@/lib/habitIcons';
 import toast from 'react-hot-toast';
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core';
 import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
@@ -24,6 +25,8 @@ function SortableHabitCard({ habit }: { habit: Habit }) {
     transition,
     opacity: isDragging ? 0.5 : 1,
   };
+  const Icon = getHabitIcon(habit.icon);
+  const habitColor = habit.color || '#f59e0b';
   return (
     <div ref={setNodeRef} style={style} {...attributes} className="mb-3">
       <div className="rounded-xl border border-zinc-200/60 bg-white/50 p-4 backdrop-blur-sm dark:border-zinc-800/40 dark:bg-zinc-900/40">
@@ -31,16 +34,12 @@ function SortableHabitCard({ habit }: { habit: Habit }) {
           <button {...listeners} className="cursor-grab touch-none text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300" aria-label="سحب">
             <GripVertical className="h-5 w-5" />
           </button>
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg" style={{ backgroundColor: `${habitColor}18` }}>
+            <Icon className="h-4 w-4" style={{ color: habitColor }} />
+          </div>
           <div className="min-w-0 flex-1">
             <div className="truncate text-sm font-medium text-zinc-900 dark:text-zinc-100">{habit.title}</div>
-            <span className={cn(
-              'inline-block rounded-full px-2 py-0.5 text-[10px] font-medium',
-              habit.type === 'daily'
-                ? 'bg-blue-100 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400'
-                : habit.type === 'weekly'
-                ? 'bg-amber-100 text-amber-600 dark:bg-amber-950/30 dark:text-amber-400'
-                : 'bg-purple-100 text-purple-600 dark:bg-purple-950/30 dark:text-purple-400'
-            )}>
+            <span className="inline-block rounded-full px-2 py-0.5 text-[10px] font-medium text-white" style={{ backgroundColor: habitColor }}>
               {habit.type === 'daily' ? 'يومي' : habit.type === 'weekly' ? 'أسبوعي' : 'شهري'}
             </span>
           </div>
@@ -89,6 +88,8 @@ export function HabitTrackerPro() {
         id,
         title,
         type,
+        icon: (options?.icon as string) || (editHabit as any).icon || 'Flame',
+        color: (options?.color as string) || (editHabit as any).color || '#f59e0b',
         createdAt: editHabit.createdAt,
         order: editHabit.order,
         streak: 0,
@@ -380,6 +381,16 @@ export function HabitTrackerPro() {
                         )}
                       </button>
 
+                      {(() => {
+                        const hColor = (habit as any).color || '#f59e0b';
+                        const Icon = getHabitIcon((habit as any).icon);
+                        return (
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg" style={{ backgroundColor: `${hColor}18` }}>
+                            <Icon className="h-5 w-5" style={{ color: hColor }} />
+                          </div>
+                        );
+                      })()}
+
                       <div className="min-w-0 flex-1">
                         {editingId === habit.id ? (
                           <Input
@@ -400,16 +411,14 @@ export function HabitTrackerPro() {
                         )}
 
                         <div className="mt-0.5 flex items-center gap-2">
-                          <span className={cn(
-                            'inline-block rounded-full px-2 py-0.5 text-[10px] font-medium',
-                            habit.type === 'daily'
-                              ? 'bg-blue-100 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400'
-                              : habit.type === 'weekly'
-                              ? 'bg-amber-100 text-amber-600 dark:bg-amber-950/30 dark:text-amber-400'
-                              : 'bg-purple-100 text-purple-600 dark:bg-purple-950/30 dark:text-purple-400'
-                          )}>
-                            {habit.type === 'daily' ? 'يومي' : habit.type === 'weekly' ? 'أسبوعي' : 'شهري'}
-                          </span>
+                          {(() => {
+                            const hColor = (habit as any).color || '#f59e0b';
+                            return (
+                              <span className="inline-block rounded-full px-2 py-0.5 text-[10px] font-medium text-white" style={{ backgroundColor: hColor }}>
+                                {habit.type === 'daily' ? 'يومي' : habit.type === 'weekly' ? 'أسبوعي' : 'شهري'}
+                              </span>
+                            );
+                          })()}
 
                           {habit.type === 'weekly' && (
                             <span className="text-[10px] text-zinc-400 dark:text-zinc-500">
@@ -429,7 +438,7 @@ export function HabitTrackerPro() {
 
                     <div className="flex items-center gap-1 shrink-0">
                       {habit.streak > 0 && (
-                        <div className="flex items-center gap-1 text-xs font-medium text-amber-500 dark:text-amber-400">
+                        <div className="flex items-center gap-1 text-xs font-medium" style={{ color: (habit as any).color || '#f59e0b' }}>
                           <span>🔥</span>
                           <span>{habit.streak}</span>
                         </div>

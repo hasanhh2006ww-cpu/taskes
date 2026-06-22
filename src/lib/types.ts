@@ -33,19 +33,23 @@ export interface DailyHabit {
   id: string;
   title: string;
   type: 'daily';
+  icon: string;
+  color: string;
   createdAt: number;
   order: number;
   completions: Record<string, boolean>;
   streak: number;
   bestStreak: number;
   lastCompletedDate: string | null;
-  lastStreakWarningSent?: string; // Date string for daily warning
+  lastStreakWarningSent?: string;
 }
 
 export interface WeeklyHabit {
   id: string;
   title: string;
   type: 'weekly';
+  icon: string;
+  color: string;
   frequency: WeeklyFrequency;
   daysOfWeek: number[];
   createdAt: number;
@@ -61,6 +65,8 @@ export interface MonthlyHabit {
   id: string;
   title: string;
   type: 'monthly';
+  icon: string;
+  color: string;
   period: MonthPeriod;
   targetCount: number;
   createdAt: number;

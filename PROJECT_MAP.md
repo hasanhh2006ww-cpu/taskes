@@ -42,8 +42,11 @@ my-taske/
 │   │   │   ├── TaskList.tsx       # DnD context, add task input, filter display
 │   │   │   └── TaskDetail.tsx     # Right panel: title, priority, date, etc.
 │   │   ├── habits/
-│   │   │   ├── HabitTrackerPro.tsx  # Professional: daily/weekly/monthly + 5 tabs (الكل/يومي/أسبوعي/شهري/إحصائيات) + FAB + drag-reorder + inline edit
-│   │   │   ├── AddEditHabitModal.tsx # Modal مشترك للإضافة والتعديل: اسم، نوع، خيارات أسبوعية/شهرية، التحقق من التكرار
+│   │   │   ├── HabitTrackerPro.tsx    # Professional: daily/weekly/monthly + 5 tabs (الكل/يومي/أسبوعي/شهري/إحصائيات) + FAB + drag-reorder + inline edit + icon+color display
+│   │   │   ├── AddEditHabitModal.tsx  # Modal مشترك للإضافة والتعديل: اسم، نوع، خيارات أسبوعية/شهرية، التحقق من التكرار + تخصيص العادة (أيقونة ولون)
+│   │   │   ├── IconPicker.tsx        # معرض أيقونات 120+ مقسمة لفئات مع بحث و Framer Motion
+│   │   │   ├── ColorPicker.tsx       # منتقي لون 40+ لون مع checkmark + glow + scale animation
+│   │   │   ├── HabitPreview.tsx      # بطاقة معاينة حية للأيقونة واللون والاسم والنوع
 │   │   │   └── ConfirmDialog.tsx     # نافذة تأكيد قابلة لإعادة الاستخدام: title + message + نعم/إلغاء
 │   │   ├── ui/
 │   │   │   ├── Button.tsx         # ghost/primary/danger + sm/md/icon (44px touch on mobile)
@@ -68,6 +71,7 @@ my-taske/
 │   └── lib/                       # Shared core
 │       ├── types.ts               # Task (pomodoroCount), Project, Priority, FilterType, FocusSession, Habit
 │       ├── constants.ts           # PRIORITIES (Arabic), PROJECT_COLORS, STORAGE_KEYS (incl. FOCUS_SETTINGS, HABITS), FOCUS_PRESETS, getToday()
+│       ├── habitIcons.ts          # 120+ أيقونة عادات مقسمة لفئات + 43 لون + getHabitIcon/getIconByName utility
 │       ├── focus-suggest.ts       # Smart focus suggestion engine + END_SOUNDS + playBell/playBeep/playEndSound
 │       ├── cn.ts                  # clsx + twMerge utility
 │       ├── logger.ts              # Async non-blocking logger
@@ -217,6 +221,7 @@ User Input (keyboard/mouse/touch)
 | 70 | إعادة تصميم التقويم (Google Calendar-like) | إعادة كتابة CalendarView.tsx بالكامل: 4 أوضاع عرض (شهر/أسبوع/يوم/جدول)، شريط علوي مع Today+تنقل+مغير عرض، خلايا أيام تعرض المهام والعادات، نافذة إنشاء مهمة بالضغط على يوم، لوحة جانبية لتفاصيل اليوم المحدد، تصميم Full-Screen، أنماط Google Calendar، تسجيل عبر logger | ✅ |
 | 71 | تحسين تباين وعرض المهام في التقويم (Calendar Events Styling) | توحيد نمط بطاقات المهام عبر جميع أوضاع العرض (Month/Week/Day/Agenda/Details): bg-teal-50 + border-r-4 border-teal-500 + text-teal-700 في الوضع المضيء، dark:bg-teal-950/40 + dark:border-teal-400 + dark:text-teal-300 في المظلم، rounded-md + font-medium + hover:brightness, إزالة PRIORITY_COLORS و isSameDay غير المستخدمين | ✅ |
 | 72 | نظام التفاعل مع المهام في التقويم & لوحة جانبية ذكية (Calendar Interaction System) | 3 مراحل: (1) جعل كل بطاقة مهمة قابلة للنقر (`cursor-pointer` + `stopPropagation` + `setActiveTaskId`) عبر MonthView / WeekView / DayView / AgendaView مع hover effects + ring للإختيار; (2) استبدال DayDetails القديم بـ CalendarRightPanel الذكي: يُظهر TaskDetail عند اختيار مهمة (وضع تعديل كامل)، DaySummary مع checkbox/toggle عند اختيار تاريخ، ولوحة Today's Tasks + Mini Calendar + Quick Actions عند عدم اختيار شيء; (3) تسجيل كل تفاعل عبر logger + تكامل مع useTaskStore / useProjectStore + إزالة updateTask/deleteTask/Button غير المستخدمين | ✅ |
+| 73 | تخصيص العادات (Habit Customization) — أيقونة + لون لكل عادة | إضافة `icon` و `color` إلى DailyHabit/WeeklyHabit/MonthlyHabit في types.ts + إنشاء `habitIcons.ts` (120+ أيقونة مقسمة لفئات: رياضة/صحة/تعلم/إنتاجية/مال/روحانيات/إبداع/نمط حياة/سفر/اجتماعي/تقنية/سلبيات) + `IconPicker.tsx` (معرض أيقونات مع بحث وتصنيفات قابلة للطي وFramer Motion) + `ColorPicker.tsx` (40+ لون، دوائر مع checkmark متحرك + glow + ring-color عبر CSS variable) + `HabitPreview.tsx` (بطاقة معاينة حية) + دمج كل ذلك في `AddEditHabitModal.tsx` تحت قسم "تخصيص العادة" + تحديث `HabitTrackerPro.tsx` (SortableHabitCard + البطاقات الرئيسية) لعرض الأيقونة واللون المختار + تحديث `CalendarView.tsx` (3 نقاط عرض عادات) لاستخدام getHabitIcon واللون المخصص بدلاً من Flame الثابت + قيم افتراضية (Flame / #f59e0b) في useHabitStore.addHabit + تمرير icon/color عبر options في save/edit + إزالة استيرادات غير مستخدمة | ✅ |
 
 ## [ORPHANS & PENDING]
 

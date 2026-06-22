@@ -1,12 +1,16 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { cn } from '@/lib/cn';
-import { X } from 'lucide-react';
+import { X, Palette } from 'lucide-react';
 import type { Habit, WeeklyFrequency } from '@/lib/types';
 import { WEEKLY_FREQUENCIES, MONTH_PERIODS } from '@/lib/constants';
+import { IconPicker } from './IconPicker';
+import { ColorPicker } from './ColorPicker';
+import { HabitPreview } from './HabitPreview';
 
 const DAY_NAMES = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
 
@@ -26,6 +30,8 @@ export function AddEditHabitModal({ open, mode, initialData, allHabits, onClose,
   const [weeklyDays, setWeeklyDays] = useState<number[]>([1, 3, 5]);
   const [monthlyPeriod, setMonthlyPeriod] = useState<'start' | 'middle' | 'end'>('middle');
   const [monthlyTarget, setMonthlyTarget] = useState<number>(4);
+  const [selectedIcon, setSelectedIcon] = useState('Flame');
+  const [selectedColor, setSelectedColor] = useState('#f59e0b');
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -33,6 +39,8 @@ export function AddEditHabitModal({ open, mode, initialData, allHabits, onClose,
     if (mode === 'edit' && initialData) {
       setTitle(initialData.title);
       setType(initialData.type);
+      setSelectedIcon(initialData.icon || 'Flame');
+      setSelectedColor(initialData.color || '#f59e0b');
       if (initialData.type === 'weekly') {
         setWeeklyFreq(initialData.frequency);
         setWeeklyDays(initialData.daysOfWeek);
@@ -48,6 +56,8 @@ export function AddEditHabitModal({ open, mode, initialData, allHabits, onClose,
     } else {
       setTitle('');
       setType('daily');
+      setSelectedIcon('Flame');
+      setSelectedColor('#f59e0b');
       setWeeklyFreq(3);
       setWeeklyDays([1, 3, 5]);
       setMonthlyPeriod('middle');
@@ -67,11 +77,11 @@ export function AddEditHabitModal({ open, mode, initialData, allHabits, onClose,
       setError('يوجد عادة بنفس الاسم والنوع');
       return;
     }
-    let options: Record<string, unknown> | undefined;
+    let options: Record<string, unknown> = { icon: selectedIcon, color: selectedColor };
     if (type === 'weekly') {
-      options = { frequency: weeklyFreq, daysOfWeek: weeklyDays };
+      options = { ...options, frequency: weeklyFreq, daysOfWeek: weeklyDays };
     } else if (type === 'monthly') {
-      options = { period: monthlyPeriod, targetCount: monthlyTarget };
+      options = { ...options, period: monthlyPeriod, targetCount: monthlyTarget };
     }
     onSave(title.trim(), type, options);
   }
@@ -198,6 +208,31 @@ export function AddEditHabitModal({ open, mode, initialData, allHabits, onClose,
             </div>
           </div>
         )}
+
+        {/* Customize Habit */}
+        <div className="mb-4 rounded-xl border border-zinc-200/60 bg-zinc-50/50 p-3 dark:border-zinc-700/60 dark:bg-zinc-800/30">
+          <div className="mb-3 flex items-center gap-2">
+            <Palette className="h-4 w-4 text-zinc-500" />
+            <h3 className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">تخصيص العادة</h3>
+          </div>
+
+          {/* Live Preview */}
+          <div className="mb-3">
+            <HabitPreview title={title} icon={selectedIcon} color={selectedColor} type={type} />
+          </div>
+
+          {/* Color Picker */}
+          <div className="mb-3 space-y-1.5">
+            <label className="text-xs font-medium text-zinc-500 dark:text-zinc-400">اللون</label>
+            <ColorPicker selected={selectedColor} onSelect={setSelectedColor} />
+          </div>
+
+          {/* Icon Picker */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-medium text-zinc-500 dark:text-zinc-400">الأيقونة</label>
+            <IconPicker selected={selectedIcon} onSelect={setSelectedIcon} />
+          </div>
+        </div>
 
         <div className="flex items-center gap-3">
           <Button variant="ghost" onClick={onClose} className="flex-1">إلغاء</Button>
