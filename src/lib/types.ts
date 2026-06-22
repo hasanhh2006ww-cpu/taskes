@@ -32,6 +32,7 @@ export interface Project {
 export interface DailyHabit {
   id: string;
   title: string;
+  description?: string;
   type: 'daily';
   icon: string;
   color: string;
@@ -47,6 +48,7 @@ export interface DailyHabit {
 export interface WeeklyHabit {
   id: string;
   title: string;
+  description?: string;
   type: 'weekly';
   icon: string;
   color: string;
@@ -64,6 +66,7 @@ export interface WeeklyHabit {
 export interface MonthlyHabit {
   id: string;
   title: string;
+  description?: string;
   type: 'monthly';
   icon: string;
   color: string;

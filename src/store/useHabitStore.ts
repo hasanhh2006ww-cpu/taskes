@@ -89,6 +89,7 @@ export const useHabitStore = create<HabitState>((set, get) => ({
         newHabit = {
           id: uuid(),
           title,
+          description: (options as any)?.description || '',
           type: 'daily',
           icon: (options as any)?.icon || 'Flame',
           color: (options as any)?.color || '#f59e0b',
@@ -106,6 +107,7 @@ export const useHabitStore = create<HabitState>((set, get) => ({
         newHabit = {
           id: uuid(),
           title,
+          description: weeklyOptions.description || '',
           type: 'weekly',
           icon: weeklyOptions.icon || 'Flame',
           color: weeklyOptions.color || '#f59e0b',
@@ -125,6 +127,7 @@ export const useHabitStore = create<HabitState>((set, get) => ({
         newHabit = {
           id: uuid(),
           title,
+          description: monthlyOptions.description || '',
           type: 'monthly',
           icon: monthlyOptions.icon || 'Flame',
           color: monthlyOptions.color || '#f59e0b',

@@ -5,12 +5,13 @@ import { cn } from '@/lib/cn';
 
 interface HabitPreviewProps {
   title: string;
+  description?: string;
   icon: string;
   color: string;
   type: 'daily' | 'weekly' | 'monthly';
 }
 
-export function HabitPreview({ title, icon, color, type }: HabitPreviewProps) {
+export function HabitPreview({ title, description, icon, color, type }: HabitPreviewProps) {
   const Icon = getHabitIcon(icon);
 
   return (
@@ -26,6 +27,11 @@ export function HabitPreview({ title, icon, color, type }: HabitPreviewProps) {
           <div className="truncate text-sm font-medium text-zinc-900 dark:text-zinc-100">
             {title || 'اسم العادة'}
           </div>
+          {description && (
+            <div className="mt-0.5 truncate text-xs text-zinc-400 dark:text-zinc-500">
+              {description}
+            </div>
+          )}
           <span
             className="inline-block rounded-full px-2 py-0.5 text-[10px] font-medium text-white"
             style={{ backgroundColor: color }}

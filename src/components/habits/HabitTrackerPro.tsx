@@ -3,7 +3,6 @@
 import { useState, useRef } from 'react';
 import { useHabitStore } from '@/store/useHabitStore';
 import type { Habit, DailyHabit, WeeklyHabit, MonthlyHabit } from '@/lib/types';
-import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { cn } from '@/lib/cn';
 import { Plus, Trash2, GripVertical, Download, Upload, Flame } from 'lucide-react';
@@ -53,8 +52,6 @@ export function HabitTrackerPro() {
   const { habits, addHabit, updateHabit, deleteHabit, reorderHabits, toggleDailyCompletion, toggleWeeklyCompletion, toggleMonthlyCompletion, exportData, importData } = useHabitStore();
 
   const [activeTab, setActiveTab] = useState<'all' | 'daily' | 'weekly' | 'monthly' | 'stats'>('all');
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editTitle, setEditTitle] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
   const [editHabit, setEditHabit] = useState<Habit | null>(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
@@ -79,7 +76,7 @@ export function HabitTrackerPro() {
     const { id } = editHabit;
     if (editHabit.type === type) {
       if (type === 'daily') {
-        updateHabit(id, { title });
+        updateHabit(id, { title, ...options });
       } else {
         updateHabit(id, { title, ...options });
       }
@@ -87,6 +84,7 @@ export function HabitTrackerPro() {
       const base = {
         id,
         title,
+        description: (options?.description as string) || (editHabit as any).description || '',
         type,
         icon: (options?.icon as string) || (editHabit as any).icon || 'Flame',
         color: (options?.color as string) || (editHabit as any).color || '#f59e0b',
@@ -113,18 +111,6 @@ export function HabitTrackerPro() {
     deleteHabit(deleteConfirmId);
     setDeleteConfirmId(null);
     toast.success('تم حذف العادة');
-  }
-
-  function handleEditStart(habit: { id: string; title: string }) {
-    setEditingId(habit.id);
-    setEditTitle(habit.title);
-  }
-
-  function handleEditSaveInline(id: string) {
-    if (!editTitle.trim()) return;
-    updateHabit(id, { title: editTitle.trim() });
-    setEditingId(null);
-    setEditTitle('');
   }
 
   function toggleCompletion(habit: DailyHabit | WeeklyHabit | MonthlyHabit) {
@@ -392,23 +378,12 @@ export function HabitTrackerPro() {
                       })()}
 
                       <div className="min-w-0 flex-1">
-                        {editingId === habit.id ? (
-                          <Input
-                            value={editTitle}
-                            onChange={(e) => setEditTitle(e.target.value)}
-                            onKeyDown={(e) => e.key === 'Enter' && handleEditSaveInline(habit.id)}
-                            onBlur={() => handleEditSaveInline(habit.id)}
-                            autoFocus
-                            className="text-sm"
-                          />
-                        ) : (
-                          <div
-                            className="truncate text-sm font-medium text-zinc-900 dark:text-zinc-100 cursor-pointer hover:text-indigo-600 dark:hover:text-indigo-400"
-                            onDoubleClick={() => handleEditStart(habit)}
-                          >
-                            {habit.title}
-                          </div>
-                        )}
+                        <div
+                          className="truncate text-sm font-medium text-zinc-900 dark:text-zinc-100 cursor-pointer hover:text-indigo-600 dark:hover:text-indigo-400"
+                          onClick={() => setEditHabit(habit as Habit)}
+                        >
+                          {habit.title}
+                        </div>
 
                         <div className="mt-0.5 flex items-center gap-2">
                           {(() => {

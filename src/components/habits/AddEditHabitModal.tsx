@@ -25,6 +25,7 @@ interface AddEditHabitModalProps {
 
 export function AddEditHabitModal({ open, mode, initialData, allHabits, onClose, onSave }: AddEditHabitModalProps) {
   const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
   const [type, setType] = useState<'daily' | 'weekly' | 'monthly'>('daily');
   const [weeklyFreq, setWeeklyFreq] = useState<WeeklyFrequency>(3);
   const [weeklyDays, setWeeklyDays] = useState<number[]>([1, 3, 5]);
@@ -38,6 +39,7 @@ export function AddEditHabitModal({ open, mode, initialData, allHabits, onClose,
     if (!open) return;
     if (mode === 'edit' && initialData) {
       setTitle(initialData.title);
+      setDescription(initialData.description || '');
       setType(initialData.type);
       setSelectedIcon(initialData.icon || 'Flame');
       setSelectedColor(initialData.color || '#f59e0b');
@@ -55,6 +57,7 @@ export function AddEditHabitModal({ open, mode, initialData, allHabits, onClose,
       }
     } else {
       setTitle('');
+      setDescription('');
       setType('daily');
       setSelectedIcon('Flame');
       setSelectedColor('#f59e0b');
@@ -77,7 +80,7 @@ export function AddEditHabitModal({ open, mode, initialData, allHabits, onClose,
       setError('يوجد عادة بنفس الاسم والنوع');
       return;
     }
-    let options: Record<string, unknown> = { icon: selectedIcon, color: selectedColor };
+    let options: Record<string, unknown> = { icon: selectedIcon, color: selectedColor, description: description.trim() };
     if (type === 'weekly') {
       options = { ...options, frequency: weeklyFreq, daysOfWeek: weeklyDays };
     } else if (type === 'monthly') {
@@ -116,6 +119,17 @@ export function AddEditHabitModal({ open, mode, initialData, allHabits, onClose,
             onChange={(e) => { setTitle(e.target.value); setError(''); }}
             onKeyDown={(e) => e.key === 'Enter' && handleSave()}
             autoFocus
+          />
+        </div>
+
+        <div className="mb-4 space-y-1.5">
+          <label className="text-xs font-medium text-zinc-500 dark:text-zinc-400">وصف العادة (اختياري)</label>
+          <textarea
+            placeholder="وصف قصير للعادة..."
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-xs text-zinc-900 placeholder-zinc-400 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:placeholder-zinc-500"
+            rows={2}
           />
         </div>
 
@@ -218,7 +232,7 @@ export function AddEditHabitModal({ open, mode, initialData, allHabits, onClose,
 
           {/* Live Preview */}
           <div className="mb-3">
-            <HabitPreview title={title} icon={selectedIcon} color={selectedColor} type={type} />
+            <HabitPreview title={title} description={description} icon={selectedIcon} color={selectedColor} type={type} />
           </div>
 
           {/* Color Picker */}
