@@ -43,42 +43,29 @@ export function TaskDetail({ onClose }: { onClose?: () => void }) {
   if (!taskNotNull) {
     const today = new Date();
     return (
-      <>
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          onClick={handleDrawerClose}
-          className="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm"
-        />
-        <motion.div
-          initial={{ x: '-100%' }}
-          animate={{ x: 0 }}
-          transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-          className="fixed inset-y-0 left-0 z-50 flex w-full flex-col bg-white shadow-2xl dark:bg-zinc-950 sm:w-[420px] lg:w-[460px]"
-        >
-          <div className="flex items-center justify-between border-b border-zinc-200/60 px-4 py-4 dark:border-zinc-800/60">
-            <h2 className="text-sm font-medium text-zinc-400 dark:text-zinc-500">التفاصيل</h2>
-            <button
-              onClick={handleDrawerClose}
-              className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-600 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
-              aria-label="إغلاق"
-            >
-              <X className="h-4 w-4" />
-            </button>
-          </div>
-          <div className="flex flex-1 flex-col items-center justify-center gap-1 px-6">
-            <p className="text-3xl font-bold text-zinc-200 dark:text-zinc-700">
-              {today.getDate()}
-            </p>
-            <p className="text-sm text-zinc-400 dark:text-zinc-500">
-              {today.toLocaleDateString('ar-SA', { weekday: 'long', month: 'long', year: 'numeric' })}
-            </p>
-            <p className="mt-4 text-xs text-zinc-400 dark:text-zinc-500">
-              ابدأ بإضافة مهمة جديدة
-            </p>
-          </div>
-        </motion.div>
-      </>
+      <div className="flex h-full flex-col">
+        <div className="flex items-center justify-between border-b border-zinc-200/60 px-4 py-4 dark:border-zinc-800/60">
+          <h2 className="text-sm font-medium text-zinc-400 dark:text-zinc-500">التفاصيل</h2>
+          <button
+            onClick={handleDrawerClose}
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-600 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
+            aria-label="إغلاق"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+        <div className="flex flex-1 flex-col items-center justify-center gap-1 px-6">
+          <p className="text-3xl font-bold text-zinc-200 dark:text-zinc-700">
+            {today.getDate()}
+          </p>
+          <p className="text-sm text-zinc-400 dark:text-zinc-500">
+            {today.toLocaleDateString('ar-SA', { weekday: 'long', month: 'long', year: 'numeric' })}
+          </p>
+          <p className="mt-4 text-xs text-zinc-400 dark:text-zinc-500">
+            ابدأ بإضافة مهمة جديدة
+          </p>
+        </div>
+      </div>
     );
   }
 

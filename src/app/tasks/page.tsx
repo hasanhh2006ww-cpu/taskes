@@ -38,20 +38,30 @@ export default function TasksPage() {
     setActiveTaskId(null);
   }, [setActiveTaskId]);
 
-  const showDetailPanel = !focusMode && (!!activeTaskId || isAdding);
+  const showAddPanel = !focusMode && isAdding && !activeTaskId;
+  const showTaskView = !focusMode && !!activeTaskId;
 
   return (
     <div className="flex flex-1 min-w-0">
       <div
         className={cn(
           'flex-1 min-w-0 overflow-hidden border-e border-zinc-200/60 dark:border-zinc-800/60',
-          focusMode && 'max-w-2xl mx-auto border-e-0'
+          focusMode && 'max-w-2xl mx-auto border-e-0',
+          (showAddPanel || showTaskView) && 'hidden md:flex'
         )}
       >
         <TaskList />
       </div>
 
-      {showDetailPanel && <TaskDetail onClose={handleClose} />}
+      {/* Add mode: side panel (part of layout, no overlay) */}
+      {showAddPanel && (
+        <div className="w-full shrink-0 border-s border-zinc-200/60 bg-white dark:border-zinc-800/40 dark:bg-zinc-900/60 md:w-80">
+          <TaskDetail onClose={handleClose} />
+        </div>
+      )}
+
+      {/* View mode: fixed drawer with backdrop overlay */}
+      {showTaskView && <TaskDetail onClose={handleClose} />}
     </div>
   );
 }
