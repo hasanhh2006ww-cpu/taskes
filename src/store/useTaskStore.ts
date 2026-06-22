@@ -3,12 +3,14 @@ import { v4 as uuid } from 'uuid';
 import type { Task, SubTask, ActivityLogEntry, FilterType, Priority } from '@/lib/types';
 import { loadFromStorage, saveToStorage } from '@/lib/storage';
 import { STORAGE_KEYS, getToday } from '@/lib/constants';
+import { logger } from '@/lib/logger';
 
 interface TaskState {
   tasks: Task[];
   filter: FilterType;
   activeProjectId: string | null;
   activeTaskId: string | null;
+  expandedTasks: Record<string, boolean>;
   setFilter: (filter: FilterType) => void;
   setActiveProjectId: (id: string | null) => void;
   setActiveTaskId: (id: string | null) => void;
@@ -28,15 +30,19 @@ interface TaskState {
   reorderSubtasks: (taskId: string, fromIndex: number, toIndex: number) => void;
   addActivityLog: (taskId: string, type: string, message: string) => void;
   addFocusSession: (taskId: string, durationMinutes: number) => void;
+  toggleTaskExpanded: (id: string) => void;
 }
 
 const initialTasks = loadFromStorage<Task[]>(STORAGE_KEYS.TASKS, []);
+
+const initialExpanded = loadFromStorage<Record<string, boolean>>(STORAGE_KEYS.EXPANDED_TASKS, {});
 
 export const useTaskStore = create<TaskState>((set, get) => ({
   tasks: initialTasks,
   filter: 'all',
   activeProjectId: null,
   activeTaskId: null,
+  expandedTasks: initialExpanded,
 
   setFilter: (filter) => set({ filter, activeProjectId: null }),
 
@@ -218,5 +224,14 @@ export const useTaskStore = create<TaskState>((set, get) => ({
     });
     set({ tasks });
     saveToStorage(STORAGE_KEYS.TASKS, tasks);
+  },
+
+  toggleTaskExpanded: (id) => {
+    const expandedTasks = { ...get().expandedTasks };
+    const newState = !expandedTasks[id];
+    expandedTasks[id] = newState;
+    set({ expandedTasks });
+    saveToStorage(STORAGE_KEYS.EXPANDED_TASKS, expandedTasks);
+    logger.info(`Task expanded ${newState ? 'open' : 'close'}`, { taskId: id });
   },
 }));

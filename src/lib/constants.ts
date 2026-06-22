@@ -22,6 +22,7 @@ export const STORAGE_KEYS = {
   USER_TIMEZONE: 'my-taske-user-timezone',
   NOTIFICATION_SETTINGS: 'my-taske-notification-settings',
   FOCUS_DURATION: 'my-taske-focus-duration',
+  EXPANDED_TASKS: 'my-taske-expanded-tasks',
 } as const;
 
 export const FOCUS_PRESETS = [

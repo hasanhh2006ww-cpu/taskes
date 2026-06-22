@@ -10,7 +10,7 @@ import { useProjectStore } from '@/store/useProjectStore';
 import { useUIStore } from '@/store/useUIStore';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
-import { GripVertical, Trash2, Star, Circle, CheckCircle2 } from 'lucide-react';
+import { GripVertical, Trash2, Star, Circle, CheckCircle2, ChevronDown, ListChecks } from 'lucide-react';
 import { PRIORITIES } from '@/lib/constants';
 import type { Task } from '@/lib/types';
 
@@ -21,7 +21,7 @@ interface TaskItemProps {
 }
 
 export const TaskItem = memo(function TaskItem({ task }: TaskItemProps) {
-  const { toggleComplete, toggleImportant, deleteTask, setActiveTaskId, activeTaskId } = useTaskStore();
+  const { toggleComplete, toggleImportant, deleteTask, setActiveTaskId, activeTaskId, expandedTasks, toggleTaskExpanded, updateTask } = useTaskStore();
   const projects = useProjectStore((s) => s.projects);
   const { focusMode } = useUIStore();
   const project = task.projectId ? projects.find((p) => p.id === task.projectId) : null;
@@ -209,9 +209,80 @@ export const TaskItem = memo(function TaskItem({ task }: TaskItemProps) {
           />
         </Button>
 
+        <Button size="icon" onClick={() => toggleTaskExpanded(task.id)} data-no-swipe>
+          <ChevronDown
+            className={cn(
+              'h-4 w-4 transition-transform duration-200',
+              expandedTasks[task.id] && 'rotate-180'
+            )}
+          />
+        </Button>
+
         <Button size="icon" variant="danger" onClick={() => deleteTask(task.id)}>
           <Trash2 className="h-4 w-4 md:h-3.5 md:w-3.5" />
         </Button>
+      </motion.div>
+
+      <motion.div layout className="overflow-hidden">
+        {expandedTasks[task.id] && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.15 }}
+        >
+        <div className="border-t border-zinc-100 dark:border-zinc-800/50 px-2.5 sm:px-3 py-2 space-y-2">
+          {task.description && (
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">
+              {task.description}
+            </p>
+          )}
+
+          {task.subtasks.length > 0 && (
+            <div className="space-y-1">
+              <div className="flex items-center gap-1.5 text-[11px] text-zinc-400 dark:text-zinc-500">
+                <ListChecks className="h-3 w-3" />
+                <span>المهام الفرعية ({task.subtasks.filter((s) => s.completed).length}/{task.subtasks.length})</span>
+              </div>
+              {task.subtasks.map((sub) => (
+                <button
+                  key={sub.id}
+                  onClick={() => {
+                    const updated = task.subtasks.map((s) =>
+                      s.id === sub.id ? { ...s, completed: !s.completed } : s
+                    );
+                    updateTask(task.id, { subtasks: updated });
+                  }}
+                  className="flex w-full items-center gap-2 rounded-md px-2 py-1 text-start text-xs transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/30"
+                >
+                  {sub.completed ? (
+                    <CheckCircle2 className="h-3 w-3 shrink-0 text-emerald-500" />
+                  ) : (
+                    <Circle className="h-3 w-3 shrink-0 text-zinc-300 dark:text-zinc-600" />
+                  )}
+                  <span className={cn(sub.completed && 'text-zinc-400 line-through dark:text-zinc-500')}>
+                    {sub.title}
+                  </span>
+                </button>
+              ))}
+            </div>
+          )}
+
+          {task.activityLog.length > 0 && (
+            <div className="space-y-1">
+              <span className="text-[11px] text-zinc-400 dark:text-zinc-500">النشاطات</span>
+              {task.activityLog.slice(-3).reverse().map((entry) => (
+                <div key={entry.id} className="flex items-center gap-1.5 text-[11px] text-zinc-400 dark:text-zinc-500">
+                  <span className="text-[10px] text-zinc-300 dark:text-zinc-600">
+                    {new Date(entry.timestamp).toLocaleDateString('ar-SA', { month: 'short', day: 'numeric' })}
+                  </span>
+                  <span>{entry.message}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+        </motion.div>
+        )}
       </motion.div>
     </motion.div>
   );
