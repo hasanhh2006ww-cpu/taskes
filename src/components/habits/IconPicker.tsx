@@ -60,7 +60,7 @@ export function IconPicker({ selected, onSelect }: IconPickerProps) {
                     transition={{ duration: 0.15 }}
                     className="overflow-hidden"
                   >
-                    <div className="grid grid-cols-6 gap-1 p-1 md:grid-cols-8">
+                    <div className="grid grid-cols-4 gap-1 p-1 md:grid-cols-6 lg:grid-cols-8">
                       {cat.items.map((item) => {
                         const Icon = getIconByName(item.name);
                         const isSelected = selected === item.name;

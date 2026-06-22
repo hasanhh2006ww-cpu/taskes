@@ -92,8 +92,8 @@ export function AddEditHabitModal({ open, mode, initialData, allHabits, onClose,
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center">
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative w-full max-w-lg rounded-t-2xl bg-white p-6 shadow-2xl dark:bg-zinc-900 sm:rounded-2xl sm:mx-4">
-        <div className="mb-5 flex items-center justify-between">
+      <div className="relative w-[95vw] md:max-w-2xl lg:max-w-3xl max-h-[92vh] md:max-h-[90vh] rounded-t-2xl bg-white shadow-2xl dark:bg-zinc-900 sm:rounded-2xl overflow-hidden flex flex-col">
+        <div className="flex items-center justify-between px-4 pt-4 pb-2 md:px-5 md:pt-5 shrink-0">
           <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
             {mode === 'add' ? 'إضافة عادة جديدة' : 'تعديل العادة'}
           </h2>
@@ -105,13 +105,14 @@ export function AddEditHabitModal({ open, mode, initialData, allHabits, onClose,
           </button>
         </div>
 
+        <div className="overflow-y-auto px-4 pb-2 md:px-5">
         {error && (
-          <div className="mb-4 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-600 dark:border-rose-800/30 dark:bg-rose-950/30 dark:text-rose-400">
+          <div className="mb-3 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-600 dark:border-rose-800/30 dark:bg-rose-950/30 dark:text-rose-400">
             {error}
           </div>
         )}
 
-        <div className="mb-4 space-y-1.5">
+        <div className="mb-3 space-y-1.5">
           <label className="text-xs font-medium text-zinc-500 dark:text-zinc-400">اسم العادة *</label>
           <Input
             placeholder="مثال: قراءة 30 دقيقة"
@@ -122,7 +123,7 @@ export function AddEditHabitModal({ open, mode, initialData, allHabits, onClose,
           />
         </div>
 
-        <div className="mb-4 space-y-1.5">
+        <div className="mb-3 space-y-1.5">
           <label className="text-xs font-medium text-zinc-500 dark:text-zinc-400">وصف العادة (اختياري)</label>
           <textarea
             placeholder="وصف قصير للعادة..."
@@ -133,7 +134,7 @@ export function AddEditHabitModal({ open, mode, initialData, allHabits, onClose,
           />
         </div>
 
-        <div className="mb-4 space-y-1.5">
+        <div className="mb-3 space-y-1.5">
           <label className="text-xs font-medium text-zinc-500 dark:text-zinc-400">نوع العادة</label>
           <div className="grid grid-cols-3 gap-2">
             {(['daily', 'weekly', 'monthly'] as const).map((t) => (
@@ -154,7 +155,7 @@ export function AddEditHabitModal({ open, mode, initialData, allHabits, onClose,
         </div>
 
         {type === 'weekly' && (
-          <div className="mb-4 space-y-3">
+          <div className="mb-3 space-y-2">
             <div className="space-y-1.5">
               <label className="text-xs font-medium text-zinc-500 dark:text-zinc-400">التكرار</label>
               <select
@@ -195,7 +196,7 @@ export function AddEditHabitModal({ open, mode, initialData, allHabits, onClose,
         )}
 
         {type === 'monthly' && (
-          <div className="mb-4 space-y-3">
+          <div className="mb-3 space-y-2">
             <div className="space-y-1.5">
               <label className="text-xs font-medium text-zinc-500 dark:text-zinc-400">الفترة</label>
               <select
@@ -224,19 +225,19 @@ export function AddEditHabitModal({ open, mode, initialData, allHabits, onClose,
         )}
 
         {/* Customize Habit */}
-        <div className="mb-4 rounded-xl border border-zinc-200/60 bg-zinc-50/50 p-3 dark:border-zinc-700/60 dark:bg-zinc-800/30">
+        <div className="mb-3 rounded-xl border border-zinc-200/60 bg-zinc-50/50 p-2.5 dark:border-zinc-700/60 dark:bg-zinc-800/30">
           <div className="mb-3 flex items-center gap-2">
             <Palette className="h-4 w-4 text-zinc-500" />
             <h3 className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">تخصيص العادة</h3>
           </div>
 
           {/* Live Preview */}
-          <div className="mb-3">
+          <div className="mb-2">
             <HabitPreview title={title} description={description} icon={selectedIcon} color={selectedColor} type={type} />
           </div>
 
           {/* Color Picker */}
-          <div className="mb-3 space-y-1.5">
+          <div className="mb-2 space-y-1.5">
             <label className="text-xs font-medium text-zinc-500 dark:text-zinc-400">اللون</label>
             <ColorPicker selected={selectedColor} onSelect={setSelectedColor} />
           </div>
@@ -248,15 +249,18 @@ export function AddEditHabitModal({ open, mode, initialData, allHabits, onClose,
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
-          <Button variant="ghost" onClick={onClose} className="flex-1">إلغاء</Button>
-          <Button
-            variant="primary"
-            onClick={handleSave}
-            className="flex-1 bg-emerald-500 hover:bg-emerald-600 dark:bg-emerald-500 dark:hover:bg-emerald-600"
-          >
-            {mode === 'add' ? 'حفظ العادة' : 'تحديث العادة'}
-          </Button>
+        </div>
+        <div className="sticky bottom-0 bg-white dark:bg-zinc-900 border-t border-zinc-200/60 dark:border-zinc-800/40 backdrop-blur px-4 py-3 md:px-5 shrink-0">
+          <div className="flex items-center gap-3">
+            <Button variant="ghost" onClick={onClose} className="flex-1">إلغاء</Button>
+            <Button
+              variant="primary"
+              onClick={handleSave}
+              className="flex-1 bg-emerald-500 hover:bg-emerald-600 dark:bg-emerald-500 dark:hover:bg-emerald-600"
+            >
+              {mode === 'add' ? 'حفظ العادة' : 'تحديث العادة'}
+            </Button>
+          </div>
         </div>
       </div>
     </div>
