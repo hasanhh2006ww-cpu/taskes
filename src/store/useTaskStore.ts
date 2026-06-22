@@ -35,7 +35,7 @@ interface TaskState {
 
 const initialTasks = loadFromStorage<Task[]>(STORAGE_KEYS.TASKS, []);
 
-const initialExpanded = loadFromStorage<Record<string, boolean>>(STORAGE_KEYS.EXPANDED_TASKS, {});
+const initialExpanded = loadFromStorage<Record<string, boolean> | null>(STORAGE_KEYS.EXPANDED_TASKS, {}) ?? {};
 
 export const useTaskStore = create<TaskState>((set, get) => ({
   tasks: initialTasks,

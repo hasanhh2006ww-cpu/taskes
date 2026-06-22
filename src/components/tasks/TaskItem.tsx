@@ -237,17 +237,17 @@ export const TaskItem = memo(function TaskItem({ task }: TaskItemProps) {
             </p>
           )}
 
-          {task.subtasks.length > 0 && (
+          {(task.subtasks ?? []).length > 0 && (
             <div className="space-y-1">
               <div className="flex items-center gap-1.5 text-[11px] text-zinc-400 dark:text-zinc-500">
                 <ListChecks className="h-3 w-3" />
-                <span>المهام الفرعية ({task.subtasks.filter((s) => s.completed).length}/{task.subtasks.length})</span>
+                <span>المهام الفرعية ({(task.subtasks ?? []).filter((s) => s.completed).length}/{(task.subtasks ?? []).length})</span>
               </div>
-              {task.subtasks.map((sub) => (
+              {(task.subtasks ?? []).map((sub) => (
                 <button
                   key={sub.id}
                   onClick={() => {
-                    const updated = task.subtasks.map((s) =>
+                    const updated = (task.subtasks ?? []).map((s) =>
                       s.id === sub.id ? { ...s, completed: !s.completed } : s
                     );
                     updateTask(task.id, { subtasks: updated });
@@ -267,10 +267,10 @@ export const TaskItem = memo(function TaskItem({ task }: TaskItemProps) {
             </div>
           )}
 
-          {task.activityLog.length > 0 && (
+          {(task.activityLog ?? []).length > 0 && (
             <div className="space-y-1">
               <span className="text-[11px] text-zinc-400 dark:text-zinc-500">النشاطات</span>
-              {task.activityLog.slice(-3).reverse().map((entry) => (
+              {(task.activityLog ?? []).slice(-3).reverse().map((entry) => (
                 <div key={entry.id} className="flex items-center gap-1.5 text-[11px] text-zinc-400 dark:text-zinc-500">
                   <span className="text-[10px] text-zinc-300 dark:text-zinc-600">
                     {new Date(entry.timestamp).toLocaleDateString('ar-SA', { month: 'short', day: 'numeric' })}
