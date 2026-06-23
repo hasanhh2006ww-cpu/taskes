@@ -228,6 +228,7 @@ User Input (keyboard/mouse/touch)
 | 77 | فصل add mode عن view mode في TaskDetail Drawer | إصلاح مشكلة ظهور backdrop/blur عند إضافة مهمة جديدة: فصل `showDetailPanel` إلى `showAddPanel` (`isAdding && !activeTaskId`) و `showTaskView` (!!activeTaskId). Add mode يُرَندَر كـ side panel جزء من Layout (`w-full md:w-80` بدون fixed/backdrop). View mode يبقى كـ fixed drawer مع backdrop. | ✅ |
 | 78 | Expand/Collapse Task Items | إضافة expand/collapse لكل مهمة عبر زر ChevronDown: يعرض الوصف (description)، المهام الفرعية (subtasks مع toggle inline)، وآخر 3 نشاطات (activity log). يُحفظ حالة التوسيع في localStorage عبر `STORAGE_KEYS.EXPANDED_TASKS`. استخدام `layout` + fade-in لحركة سلسة بدون `height: auto`. تسجيل عبر logger. | ✅ |
 | 79 | Fix: page crash on old tasks without subtasks/activityLog | المهام القديمة في localStorage قد لا تحتوي على `subtasks` أو `activityLog` → `Cannot read properties of undefined (reading 'length')` في TaskItem.tsx سطر 240 و 270. الإصلاح: استخدام `task.subtasks ?? []` و `task.activityLog ?? []` في كل نقاط الوصول داخل TaskItem.tsx. | ✅ |
+| 80 | Supabase Client + Next.js env vars + NaN guards | تصحيح بيئة Supabase: (1) تغيير `.env` من `VITE_APP_*` (Vite) إلى `NEXT_PUBLIC_*` (Next.js). (2) إعادة كتابة `supabase.ts` باستخدام `process.env` مع التحقق من وجود المتغيرات ورسائل خطأ واضحة. (3) إضافة حواجز NaN في Dashboard: `ProgressRing` (`Number.isFinite` + clamp [0,100])، `AnimatedProgressBar` (`Number.isFinite` لـ value/max)، `WeekChart` (تعقيم جميع قيم total/done). (4) إزالة `import.meta.env` نهائياً. | ✅ |
 
 ## [ORPHANS & PENDING]
 

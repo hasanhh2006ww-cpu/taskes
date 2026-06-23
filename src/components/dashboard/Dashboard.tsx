@@ -63,24 +63,29 @@ function formatDuration(minutes: number): string {
 }
 
 function WeekChart({ days }: { days: { label: string; total: number; done: number }[] }) {
-  const maxVal = Math.max(...days.map(d => d.total), 1);
+  const safeDays = days.map(d => ({
+    label: d.label,
+    total: Number.isFinite(d.total) ? Math.max(0, d.total) : 0,
+    done: Number.isFinite(d.done) ? Math.max(0, d.done) : 0,
+  }));
+  const maxVal = Math.max(...safeDays.map(d => d.total), 1);
   return (
     <div className="flex items-end justify-between gap-1.5 h-24 pt-2">
-      {days.map((day, i) => {
-        const totalH = Math.max((day.total / maxVal) * 100, day.done > 0 ? 8 : 0);
-        const doneH = day.done > 0 ? (day.done / day.total) * totalH : 0;
+      {safeDays.map((day, i) => {
+        const totalH = day.total > 0 ? Math.max((day.total / maxVal) * 100, 8) : 0;
+        const doneH = day.done > 0 && day.total > 0 ? Math.max((day.done / day.total) * totalH, 4) : 0;
         return (
           <div key={i} className="flex flex-col items-center gap-1 flex-1">
-            <div className="relative w-full flex items-end justify-center" style={{ height: `${Math.max(totalH, doneH)}%` }}>
+            <div className="relative w-full flex items-end justify-center" style={{ height: `${Math.max(totalH, doneH) || 0}%` }}>
               {day.total > 0 && (
                 <div className="absolute bottom-0 w-full flex flex-col-reverse items-center">
                   <div
                     className="w-full rounded-t-md bg-gradient-to-t from-emerald-200 to-emerald-100 transition-all duration-500"
-                    style={{ height: `${totalH > 0 ? totalH : 0}%`, minHeight: day.total > 0 ? '4px' : '0' }}
+                    style={{ height: `${totalH}%`, minHeight: '4px' }}
                   />
                   <div
                     className="absolute bottom-0 w-1/2 rounded-t-md bg-gradient-to-t from-emerald-500 to-emerald-400 transition-all duration-500"
-                    style={{ height: `${doneH > 0 ? doneH : 0}%`, minHeight: day.done > 0 ? '4px' : '0' }}
+                    style={{ height: `${doneH}%`, minHeight: day.done > 0 ? '4px' : '0' }}
                   />
                 </div>
               )}
@@ -94,9 +99,10 @@ function WeekChart({ days }: { days: { label: string; total: number; done: numbe
 }
 
 function ProgressRing({ percent, size = 96, strokeWidth = 6, color }: { percent: number; size?: number; strokeWidth?: number; color: string }) {
+  const safePercent = Number.isFinite(percent) ? Math.max(0, Math.min(percent, 100)) : 0;
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
-  const dashOffset = circumference * (1 - Math.min(percent, 100) / 100);
+  const dashOffset = circumference * (1 - safePercent / 100);
   return (
     <svg width={size} height={size} className="-rotate-90 shrink-0">
       <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="rgba(0,0,0,0.06)" strokeWidth={strokeWidth} />
@@ -118,7 +124,9 @@ function ProgressRing({ percent, size = 96, strokeWidth = 6, color }: { percent:
 }
 
 function AnimatedProgressBar({ value, max, color = 'emerald' }: { value: number; max: number; color?: string }) {
-  const pct = max > 0 ? Math.min((value / max) * 100, 100) : 0;
+  const safeValue = Number.isFinite(value) ? Math.max(0, value) : 0;
+  const safeMax = Number.isFinite(max) ? Math.max(0, max) : 1;
+  const pct = safeMax > 0 ? Math.min((safeValue / safeMax) * 100, 100) : 0;
   return (
     <div className="h-2 overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800">
       <motion.div
