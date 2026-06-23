@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useCallback } from 'react';
+import { useMemo, useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, type Variants } from 'framer-motion';
 import { useTaskStore } from '@/store/useTaskStore';
@@ -56,6 +56,7 @@ function getArabicDate(): string {
 }
 
 function formatDuration(minutes: number): string {
+  if (!Number.isFinite(minutes) || minutes < 1) return '0 د';
   if (minutes < 60) return `${minutes} د`;
   const h = Math.floor(minutes / 60);
   const m = minutes % 60;
@@ -455,7 +456,7 @@ export function Dashboard() {
   const overdue = tasks.filter((t) => t.dueDate && t.dueDate < today && !t.completed).length;
   const pending = total - completed;
   const completionRate = total > 0 ? Math.round((completed / total) * 100) : 0;
-  const totalPomodoros = tasks.reduce((sum, t) => sum + t.pomodoroCount, 0);
+  const totalPomodoros = tasks.reduce((sum, t) => sum + (t.pomodoroCount ?? 0), 0);
 
   const todayTasks = useMemo(() =>
     tasks.filter((t) => t.dueDate === today && !t.completed).slice(0, 8),
@@ -464,9 +465,9 @@ export function Dashboard() {
 
   const todayHabitCompletions = useMemo(() => {
     return habits.filter((h) => {
-      if (h.type === 'daily') return h.completions[today] === true;
+      if (h.type === 'daily') return h.completions?.[today] === true;
       if (h.type === 'weekly') {
-        return h.completedWeeks[getWeekKey(today)] === true;
+        return h.completedWeeks?.[getWeekKey(today)] === true;
       }
       return false;
     }).length;
@@ -537,7 +538,7 @@ export function Dashboard() {
   }, [tasks]);
 
   const todayPomodoros = useMemo(() => {
-    return tasks.filter(t => t.dueDate === today).reduce((sum, t) => sum + t.pomodoroCount, 0);
+    return tasks.filter(t => t.dueDate === today).reduce((sum, t) => sum + (t.pomodoroCount ?? 0), 0);
   }, [tasks, today]);
 
   const mainGoal = useMemo(() => {
@@ -588,9 +589,20 @@ export function Dashboard() {
     toast.success('تم تحديث المهمة');
   }, [toggleComplete]);
 
+  const [greeting, setGreeting] = useState({ text: '', icon: '' });
+  const [arabicDate, setArabicDate] = useState('');
+  const [dailyQuote, setDailyQuote] = useState('');
+  useEffect(() => {
+    useTaskStore.getState().rehydrate();
+    useProjectStore.getState().rehydrate();
+    useHabitStore.getState().rehydrate();
+    useUIStore.getState().rehydrate();
+    setGreeting(getGreeting());
+    setArabicDate(getArabicDate());
+    setDailyQuote(QUOTES[new Date().getDate() % QUOTES.length]);
+  }, []);
+
   const isEmpty = total === 0;
-  const greeting = getGreeting();
-  const dailyQuote = QUOTES[new Date().getDate() % QUOTES.length];
 
   return (
     <div className="flex h-full flex-col bg-zinc-50 dark:bg-transparent">
@@ -634,63 +646,44 @@ export function Dashboard() {
 
       <div className="flex-1 overflow-y-auto">
         <div className="w-full p-4 md:p-6">
-          {isEmpty ? (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.4 }}
-              className="flex flex-col items-center justify-center py-16 text-center"
-            >
+          {isEmpty && (
+            <motion.div variants={itemVariants} className="mb-5 flex flex-col items-center justify-center py-12 text-center rounded-2xl border border-zinc-200/60 bg-white dark:border-zinc-800/40 dark:bg-zinc-900/60">
               <motion.div
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 transition={{ type: 'spring', stiffness: 200, damping: 15, delay: 0.1 }}
-                className="mb-6 flex h-28 w-28 items-center justify-center rounded-3xl bg-gradient-to-br from-emerald-50 to-emerald-100 shadow-sm dark:from-emerald-900/20 dark:to-emerald-800/20"
+                className="mb-6 flex h-24 w-24 items-center justify-center rounded-3xl bg-gradient-to-br from-emerald-50 to-emerald-100 shadow-sm dark:from-emerald-900/20 dark:to-emerald-800/20"
               >
-                <Sprout className="h-14 w-14 text-emerald-400" />
+                <Sprout className="h-12 w-12 text-emerald-400" />
               </motion.div>
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2, duration: 0.4 }}
-              >
-                <h2 className="mb-2 text-2xl font-bold text-zinc-900 dark:text-zinc-100">ابدأ رحلة الإنجاز</h2>
-                <p className="mb-8 text-sm text-zinc-400">أنشئ أول مهمة لك وابدأ في تنظيم يومك</p>
-              </motion.div>
+              <h2 className="mb-2 text-xl font-bold text-zinc-900 dark:text-zinc-100">ابدأ رحلة الإنجاز</h2>
+              <p className="mb-6 text-sm text-zinc-400">أنشئ أول مهمة لك وابدأ في تنظيم يومك</p>
               <motion.button
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3, duration: 0.4 }}
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.97 }}
                 onClick={goToTasks}
-                className="rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 px-8 py-3.5 text-sm font-semibold text-white shadow-lg shadow-emerald-500/30 transition-all hover:shadow-xl hover:shadow-emerald-500/40"
+                className="rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-500/30 transition-all hover:shadow-xl hover:shadow-emerald-500/40"
               >
                 إنشاء أول مهمة
               </motion.button>
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4, duration: 0.4 }}
-                className="mt-10 grid grid-cols-2 gap-4 md:flex md:gap-6"
-              >
+              <motion.div className="mt-6 grid grid-cols-2 gap-3 md:flex md:gap-4">
                 {[
                   { icon: CheckCircle2, label: 'إدارة المهام', color: 'text-emerald-500', bg: 'bg-emerald-50 dark:bg-emerald-900/30' },
                   { icon: FolderKanban, label: 'المشاريع', color: 'text-violet-500', bg: 'bg-violet-50 dark:bg-violet-900/30' },
                   { icon: Timer, label: 'جلسات التركيز', color: 'text-amber-500', bg: 'bg-amber-50 dark:bg-amber-900/30' },
                   { icon: Flame, label: 'العادات', color: 'text-rose-500', bg: 'bg-rose-50 dark:bg-rose-900/30' },
                 ].map((feature) => (
-                  <div key={feature.label} className="flex items-center gap-3 rounded-2xl border border-zinc-100 bg-white px-4 py-3 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/50">
-                    <div className={cn('flex h-9 w-9 items-center justify-center rounded-xl', feature.bg)}>
-                      <feature.icon className={cn('h-[18px] w-[18px]', feature.color)} />
+                  <div key={feature.label} className="flex items-center gap-2 rounded-xl border border-zinc-100 bg-white px-3 py-2 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/50">
+                    <div className={cn('flex h-8 w-8 items-center justify-center rounded-lg', feature.bg)}>
+                      <feature.icon className={cn('h-4 w-4', feature.color)} />
                     </div>
-                    <span className="text-sm font-medium text-zinc-600 dark:text-zinc-400">{feature.label}</span>
+                    <span className="text-xs font-medium text-zinc-600 dark:text-zinc-400">{feature.label}</span>
                   </div>
                 ))}
               </motion.div>
             </motion.div>
-          ) : (
-            <motion.div variants={containerVariants} initial="hidden" animate="visible" className="w-full">
+          )}
+          <motion.div variants={containerVariants} initial="hidden" animate="visible" className="w-full">
               {/* Row 1: Main Goal + Productivity Heatmap */}
               <motion.div variants={itemVariants} className="mb-5 grid grid-cols-1 gap-5 md:grid-cols-2">
                 <MainGoalCard goal={mainGoal} />
@@ -787,7 +780,7 @@ export function Dashboard() {
                       <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">
                         {greeting.text} <span className="inline-block">{greeting.icon}</span>
                       </h1>
-                      <p className="text-sm text-zinc-400">{getArabicDate()}</p>
+                      <p className="text-sm text-zinc-400">{arabicDate}</p>
                       <p className="mt-1.5 max-w-xl rounded-xl bg-emerald-50/50 px-3 py-2 text-xs italic text-zinc-500 dark:bg-emerald-900/10 dark:text-zinc-400">
                         <Sparkles className="me-1 inline h-3 w-3 text-emerald-400" />
                         {dailyQuote}
@@ -987,7 +980,6 @@ export function Dashboard() {
 
               </div>
             </motion.div>
-          )}
         </div>
       </div>
     </div>

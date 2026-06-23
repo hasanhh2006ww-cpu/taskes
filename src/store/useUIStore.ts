@@ -33,22 +33,19 @@ interface UIState {
   saveFocusSession: (session: FocusSession) => void;
   clearFocusSession: () => void;
   updateFocusSettings: (settings: Partial<FocusSettings>) => void;
+  rehydrate: () => void;
 }
-
-const stored = loadFromStorage<{ darkMode: boolean }>(STORAGE_KEYS.UI, {
-  darkMode: false,
-});
 
 const defaultSettings: FocusSettings = { workMin: 25, breakMin: 5, youtubeUrl: '', endSound: 'chime', endSoundUrl: '' };
 
 export const useUIStore = create<UIState>((set, get) => ({
-  darkMode: stored.darkMode,
+  darkMode: false,
   focusMode: false,
   sidebarOpen: true,
   sidebarCollapsed: false,
   activeTaskId: null,
-  focusSession: loadFromStorage<FocusSession | null>(STORAGE_KEYS.FOCUS_SESSION, null),
-  focusSettings: loadFromStorage<FocusSettings>(STORAGE_KEYS.FOCUS_SETTINGS, defaultSettings),
+  focusSession: null,
+  focusSettings: defaultSettings,
 
   toggleDarkMode: () => {
     const next = !get().darkMode;
@@ -79,5 +76,12 @@ export const useUIStore = create<UIState>((set, get) => ({
     const next = { ...get().focusSettings, ...settings };
     set({ focusSettings: next });
     saveToStorage(STORAGE_KEYS.FOCUS_SETTINGS, next);
+  },
+
+  rehydrate: () => {
+    const stored = loadFromStorage<{ darkMode: boolean }>(STORAGE_KEYS.UI, { darkMode: false });
+    const focusSession = loadFromStorage<FocusSession | null>(STORAGE_KEYS.FOCUS_SESSION, null);
+    const focusSettings = loadFromStorage<FocusSettings>(STORAGE_KEYS.FOCUS_SETTINGS, defaultSettings);
+    set({ darkMode: stored.darkMode, focusSession, focusSettings });
   },
 }));

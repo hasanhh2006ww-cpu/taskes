@@ -417,12 +417,15 @@ function MonthView({
                     )}>
                       {day}
                     </span>
-                    <button
+                    <span
                       onClick={(e) => { e.stopPropagation(); onDayDoubleClick(dateStr); }}
-                      className="flex h-5 w-5 items-center justify-center rounded-full opacity-0 transition-opacity hover:bg-zinc-200 group-hover:opacity-100 dark:hover:bg-zinc-700"
+                      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.stopPropagation(); onDayDoubleClick(dateStr); } }}
+                      role="button"
+                      tabIndex={0}
+                      className="flex h-5 w-5 cursor-pointer items-center justify-center rounded-full opacity-0 transition-opacity hover:bg-zinc-200 group-hover:opacity-100 dark:hover:bg-zinc-700"
                     >
                       <Plus className="h-3 w-3 text-zinc-400" />
-                    </button>
+                    </span>
                   </div>
                   <div className="mt-0.5 space-y-0.5">
                     {dayTasks.slice(0, 3).map((t: any) => (

@@ -31,11 +31,11 @@ interface TaskState {
   addActivityLog: (taskId: string, type: string, message: string) => void;
   addFocusSession: (taskId: string, durationMinutes: number) => void;
   toggleTaskExpanded: (id: string) => void;
+  rehydrate: () => void;
 }
 
-const initialTasks = loadFromStorage<Task[]>(STORAGE_KEYS.TASKS, []);
-
-const initialExpanded = loadFromStorage<Record<string, boolean> | null>(STORAGE_KEYS.EXPANDED_TASKS, {}) ?? {};
+const initialTasks: Task[] = [];
+const initialExpanded: Record<string, boolean> = {};
 
 export const useTaskStore = create<TaskState>((set, get) => ({
   tasks: initialTasks,
@@ -233,5 +233,11 @@ export const useTaskStore = create<TaskState>((set, get) => ({
     set({ expandedTasks });
     saveToStorage(STORAGE_KEYS.EXPANDED_TASKS, expandedTasks);
     logger.info(`Task expanded ${newState ? 'open' : 'close'}`, { taskId: id });
+  },
+
+  rehydrate: () => {
+    const tasks = loadFromStorage<Task[]>(STORAGE_KEYS.TASKS, []);
+    const expandedTasks = loadFromStorage<Record<string, boolean> | null>(STORAGE_KEYS.EXPANDED_TASKS, {}) ?? {};
+    set({ tasks, expandedTasks });
   },
 }));

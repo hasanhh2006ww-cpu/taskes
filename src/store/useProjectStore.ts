@@ -9,9 +9,10 @@ interface ProjectState {
   addProject: (name: string) => void;
   updateProject: (id: string, updates: Partial<Project>) => void;
   deleteProject: (id: string) => void;
+  rehydrate: () => void;
 }
 
-const initialProjects = loadFromStorage<Project[]>(STORAGE_KEYS.PROJECTS, []);
+const initialProjects: Project[] = [];
 
 export const useProjectStore = create<ProjectState>((set, get) => ({
   projects: initialProjects,
@@ -39,5 +40,10 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
     const projects = get().projects.filter((p) => p.id !== id);
     set({ projects });
     saveToStorage(STORAGE_KEYS.PROJECTS, projects);
+  },
+
+  rehydrate: () => {
+    const projects = loadFromStorage<Project[]>(STORAGE_KEYS.PROJECTS, []);
+    set({ projects });
   },
 }));

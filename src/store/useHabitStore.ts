@@ -25,12 +25,13 @@ interface HabitState {
   setHabits: (habits: Habit[]) => void;
   exportData: () => string;
   importData: (json: string) => void;
+  rehydrate: () => void;
 }
 
 
 
-const initialHabits = loadFromStorage<Habit[]>(STORAGE_KEYS.HABITS, []);
-const initialTimezone = loadFromStorage<UserTimezone>(STORAGE_KEYS.USER_TIMEZONE, { offset: 0, label: 'UTC', iso: 'UTC' });
+const initialHabits: Habit[] = [];
+const initialTimezone: UserTimezone = { offset: 0, label: 'UTC', iso: 'UTC' };
 
 
 function calculateDailyStreak(habit: DailyHabit): number {
@@ -471,5 +472,11 @@ export const useHabitStore = create<HabitState>((set, get) => ({
     set({ habits: data.habits, userTimezone: newTimezone });
     saveToStorage(STORAGE_KEYS.HABITS, data.habits);
     saveToStorage(STORAGE_KEYS.USER_TIMEZONE, newTimezone);
+  },
+
+  rehydrate: () => {
+    const habits = loadFromStorage<Habit[]>(STORAGE_KEYS.HABITS, []);
+    const userTimezone = loadFromStorage<UserTimezone>(STORAGE_KEYS.USER_TIMEZONE, { offset: 0, label: 'UTC', iso: 'UTC' });
+    set({ habits, userTimezone });
   },
 }));
