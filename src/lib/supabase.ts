@@ -1,22 +1,24 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+function getSupabaseClient() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-if (!supabaseUrl) {
-  throw new Error(
-    'Missing NEXT_PUBLIC_SUPABASE_URL environment variable. ' +
-    'Add it to your .env file: NEXT_PUBLIC_SUPABASE_URL=https://xxx.supabase.co'
-  );
+  if (!supabaseUrl || !supabaseAnonKey) {
+    if (typeof window === 'undefined') {
+      console.warn('Supabase env vars missing during build — skipping client init');
+    }
+    return null;
+  }
+
+  return createClient(supabaseUrl, supabaseAnonKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
+    },
+  });
 }
 
-if (!supabaseAnonKey) {
-  throw new Error(
-    'Missing NEXT_PUBLIC_SUPABASE_ANON_KEY environment variable. ' +
-    'Add it to your .env file: NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key'
-  );
-}
-
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
+const supabase = getSupabaseClient();
 
 export default supabase;
