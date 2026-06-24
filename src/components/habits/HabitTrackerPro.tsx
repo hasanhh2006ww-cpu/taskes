@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useHabitStore } from '@/store/useHabitStore';
 import type { Habit, DailyHabit, WeeklyHabit, MonthlyHabit } from '@/lib/types';
 import { Button } from '@/components/ui/Button';
@@ -58,6 +58,10 @@ export function HabitTrackerPro() {
   const [isReordering, setIsReordering] = useState(false);
   const [celebratingId, setCelebratingId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    useHabitStore.getState().rehydrate();
+  }, []);
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
