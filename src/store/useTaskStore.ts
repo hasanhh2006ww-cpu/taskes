@@ -14,7 +14,7 @@ interface TaskState {
   setFilter: (filter: FilterType) => void;
   setActiveProjectId: (id: string | null) => void;
   setActiveTaskId: (id: string | null) => void;
-  addTask: (task: { title: string; priority?: Priority; projectId?: string; dueDate?: string }) => void;
+  addTask: (task: { title: string; priority?: Priority; projectId?: string; dueDate?: string }) => string;
   updateTask: (id: string, updates: Partial<Task>) => void;
   deleteTask: (id: string) => void;
   toggleComplete: (id: string) => void;
@@ -69,8 +69,9 @@ export const useTaskStore = create<TaskState>((set, get) => ({
       totalFocusTime: 0,
     };
     const updated = [...tasks, newTask];
-    set({ tasks: updated, activeTaskId: newTask.id });
+    set({ tasks: updated });
     saveToStorage(STORAGE_KEYS.TASKS, updated);
+    return newTask.id;
   },
 
   updateTask: (id, updates) => {

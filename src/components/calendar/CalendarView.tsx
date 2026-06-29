@@ -178,12 +178,13 @@ export function CalendarView() {
 
   function handleCreateTask() {
     if (!newTitle.trim()) return;
-    addTask({
+    const newId = addTask({
       title: newTitle.trim(),
       priority: newPriority,
       projectId: newProjectId,
       dueDate: modalDate,
     });
+    setActiveTaskId(newId);
     logger.info(`Calendar: created task "${newTitle.trim()}" on ${modalDate}`);
     setShowModal(false);
     setNewTitle('');

@@ -26,7 +26,7 @@ import { PRIORITIES } from '@/lib/constants';
 import type { Priority } from '@/lib/types';
 
 export function TaskList() {
-  const { addTask, reorderTasks, getFilteredTasks, filter, activeProjectId } = useTaskStore();
+  const { addTask, setActiveTaskId, reorderTasks, getFilteredTasks, filter, activeProjectId } = useTaskStore();
   const { projects } = useProjectStore();
   const [newTitle, setNewTitle] = useState('');
   const [newPriority, setNewPriority] = useState<Priority>('medium');
@@ -50,7 +50,12 @@ export function TaskList() {
 
   function handleAdd() {
     if (!newTitle.trim()) return;
-    addTask({ title: newTitle.trim(), priority: newPriority });
+    const newId = addTask({ title: newTitle.trim(), priority: newPriority });
+    if (window.innerWidth >= 768) {
+      setActiveTaskId(newId);
+    } else {
+      document.querySelector<HTMLInputElement>('[data-task-input]')?.blur();
+    }
     setNewTitle('');
   }
 

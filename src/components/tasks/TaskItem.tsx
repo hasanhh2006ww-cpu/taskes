@@ -172,7 +172,13 @@ export const TaskItem = memo(function TaskItem({ task }: TaskItemProps) {
         <div
           data-no-swipe
           className="min-w-0 flex-1 cursor-pointer py-0.5"
-          onClick={() => setActiveTaskId(task.id)}
+          onClick={() => {
+            if (window.innerWidth < 768) {
+              toggleTaskExpanded(task.id);
+            } else {
+              setActiveTaskId(task.id);
+            }
+          }}
         >
           <span
             className={cn(
@@ -196,6 +202,12 @@ export const TaskItem = memo(function TaskItem({ task }: TaskItemProps) {
                 {new Date(task.dueDate).toLocaleDateString('ar-SA', { month: 'short', day: 'numeric' })}
               </span>
             )}
+            <button
+              onClick={() => setActiveTaskId(task.id)}
+              className="md:hidden inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[10px] font-medium text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300"
+            >
+              التفاصيل
+            </button>
           </div>
         </div>
 

@@ -17,8 +17,13 @@ export default function TasksPage() {
     const input = document.querySelector<HTMLInputElement>('[data-task-input]');
     if (!input) return;
     const onFocus = () => setIsAdding(true);
+    const onBlur = () => setIsAdding(false);
     input.addEventListener('focus', onFocus);
-    return () => input.removeEventListener('focus', onFocus);
+    input.addEventListener('blur', onBlur);
+    return () => {
+      input.removeEventListener('focus', onFocus);
+      input.removeEventListener('blur', onBlur);
+    };
   }, []);
 
   useEffect(() => {
