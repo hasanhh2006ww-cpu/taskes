@@ -59,12 +59,16 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
 
       <div
         className={cn(
-          'fixed inset-y-0 start-0 z-40 md:relative md:z-0 md:shrink-0',
-          sidebarOpen ? 'translate-x-0' : '-translate-x-full',
-          'md:translate-x-0'
+          // Mobile: fixed drawer anchored to start (right in RTL)
+          'fixed inset-y-0 start-0 z-40',
+          sidebarOpen ? 'translate-x-0' : 'translate-x-full',
+          // Tablet+: normal document flow, not fixed
+          'md:relative md:inset-auto md:z-0 md:shrink-0 md:translate-x-0',
+          // Width: mobile drawer = 280px, tablet+ = 268px, lg+ collapsed = 78px
+          'w-[280px] md:w-[268px]',
+          sidebarCollapsed && 'lg:w-[78px]'
         )}
         style={{
-          width: sidebarCollapsed ? 78 : 268,
           transition: 'width 300ms ease-in-out, transform 200ms ease-in-out',
         }}
       >
