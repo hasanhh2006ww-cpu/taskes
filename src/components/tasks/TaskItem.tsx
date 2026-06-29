@@ -204,7 +204,7 @@ export const TaskItem = memo(function TaskItem({ task }: TaskItemProps) {
             )}
             <button
               onClick={() => setActiveTaskId(task.id)}
-              className="md:hidden inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[10px] font-medium text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300"
+              className="md:hidden inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-xs font-medium min-h-[44px] text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300"
             >
               التفاصيل
             </button>

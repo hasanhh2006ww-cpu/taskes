@@ -28,7 +28,18 @@ export function ConfirmDialog({
       if (e.key === 'Escape') onCancel();
     }
     window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    if (window.innerWidth < 768) {
+      window.history.pushState(null, '');
+    }
+    const onPopState = () => onCancel();
+    window.addEventListener('popstate', onPopState);
+    return () => {
+      document.body.style.overflow = prev;
+      window.removeEventListener('keydown', onKeyDown);
+      window.removeEventListener('popstate', onPopState);
+    };
   }, [open, onCancel]);
 
   if (!open) return null;

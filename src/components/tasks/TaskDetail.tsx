@@ -40,6 +40,20 @@ export function TaskDetail({ onClose }: { onClose?: () => void }) {
     }
   }, [taskNotNull?.id]);
 
+  useEffect(() => {
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = prev; };
+  }, []);
+
+  useEffect(() => {
+    if (window.innerWidth >= 768) return;
+    window.history.pushState(null, '');
+    const onPopState = () => handleDrawerClose();
+    window.addEventListener('popstate', onPopState);
+    return () => window.removeEventListener('popstate', onPopState);
+  }, [handleDrawerClose]);
+
   if (!taskNotNull) {
     const today = new Date();
     return (
@@ -156,10 +170,10 @@ export function TaskDetail({ onClose }: { onClose?: () => void }) {
       />
       <motion.div
         key={t.id}
-        initial={{ x: '-100%' }}
+        initial={{ x: '100%' }}
         animate={{ x: 0 }}
         transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-        className="fixed inset-y-0 left-0 z-50 flex w-full flex-col bg-white shadow-2xl dark:bg-zinc-950 sm:w-[420px] lg:w-[460px]"
+        className="fixed inset-y-0 right-0 z-50 flex w-full flex-col bg-white shadow-2xl dark:bg-zinc-950 sm:w-[420px] lg:w-[460px]"
       >
         {/* Fixed Header */}
         <div className="shrink-0 border-b border-zinc-200/60 px-4 py-3 dark:border-zinc-800/60">
@@ -461,7 +475,7 @@ export function TaskDetail({ onClose }: { onClose?: () => void }) {
         </div>
 
         {/* Fixed Footer */}
-        <div className="shrink-0 border-t border-zinc-200/60 px-4 py-3 dark:border-zinc-800/60">
+        <div className="shrink-0 border-t border-zinc-200/60 px-4 py-3 safe-area-bottom dark:border-zinc-800/60">
           <div className="flex items-center justify-between gap-2">
             <button
               onClick={handleFocusStart}

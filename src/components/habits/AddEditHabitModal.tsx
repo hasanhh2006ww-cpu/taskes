@@ -37,6 +37,26 @@ export function AddEditHabitModal({ open, mode, initialData, allHabits, onClose,
 
   useEffect(() => {
     if (!open) return;
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') onClose();
+    }
+    window.addEventListener('keydown', onKeyDown);
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    if (window.innerWidth < 768) {
+      window.history.pushState(null, '');
+    }
+    const onPopState = () => onClose();
+    window.addEventListener('popstate', onPopState);
+    return () => {
+      document.body.style.overflow = prev;
+      window.removeEventListener('keydown', onKeyDown);
+      window.removeEventListener('popstate', onPopState);
+    };
+  }, [open, onClose]);
+
+  useEffect(() => {
+    if (!open) return;
     if (mode === 'edit' && initialData) {
       setTitle(initialData.title);
       setDescription(initialData.description || '');

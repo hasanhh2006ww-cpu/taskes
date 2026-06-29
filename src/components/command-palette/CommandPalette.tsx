@@ -70,6 +70,21 @@ export function CommandPalette() {
     }
   }, [open]);
 
+  useEffect(() => {
+    if (!open) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    if (window.innerWidth < 768) {
+      window.history.pushState(null, '');
+    }
+    const onPopState = () => setOpen(false);
+    window.addEventListener('popstate', onPopState);
+    return () => {
+      document.body.style.overflow = prev;
+      window.removeEventListener('popstate', onPopState);
+    };
+  }, [open]);
+
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
       if (e.key === 'ArrowDown') {

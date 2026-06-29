@@ -243,7 +243,14 @@ export function FocusMode() {
   }, [currentTaskId, phase, secondsLeft, completedSessions, running, saveFocusSession, workMin]);
 
   useEffect(() => {
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    window.history.pushState(null, '');
+    const onPopState = () => handleExit();
+    window.addEventListener('popstate', onPopState);
     return () => {
+      document.body.style.overflow = prev;
+      window.removeEventListener('popstate', onPopState);
       if (intervalRef.current) clearInterval(intervalRef.current);
       if (ctxRef.current) {
         ctxRef.current.close().catch(() => {});
