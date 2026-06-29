@@ -53,8 +53,6 @@ export function TaskList() {
     const newId = addTask({ title: newTitle.trim(), priority: newPriority });
     if (window.innerWidth >= 768) {
       setActiveTaskId(newId);
-    } else {
-      document.querySelector<HTMLInputElement>('[data-task-input]')?.blur();
     }
     setNewTitle('');
   }

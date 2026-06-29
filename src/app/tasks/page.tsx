@@ -43,7 +43,7 @@ export default function TasksPage() {
     setActiveTaskId(null);
   }, [setActiveTaskId]);
 
-  const showAddPanel = !focusMode && isAdding && !activeTaskId;
+  const showAddPanel = !focusMode && isAdding && !activeTaskId && window.innerWidth >= 768;
   const showTaskView = !focusMode && !!activeTaskId;
 
   return (

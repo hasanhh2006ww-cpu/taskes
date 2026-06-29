@@ -49,10 +49,13 @@ export function TaskDetail({ onClose }: { onClose?: () => void }) {
   useEffect(() => {
     if (window.innerWidth >= 768) return;
     window.history.pushState(null, '');
-    const onPopState = () => handleDrawerClose();
+    const onPopState = () => {
+      if (onClose) onClose();
+      else setActiveTaskId(null);
+    };
     window.addEventListener('popstate', onPopState);
     return () => window.removeEventListener('popstate', onPopState);
-  }, [handleDrawerClose]);
+  }, [onClose]);
 
   if (!taskNotNull) {
     const today = new Date();
