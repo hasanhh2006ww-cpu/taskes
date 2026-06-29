@@ -514,18 +514,21 @@ export function FocusMode() {
             if (soundOn) try { sendYTCommand('pauseVideo'); } catch { /* silent */ }
           }}
           className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/10 text-white/70 backdrop-blur-sm transition-colors hover:bg-white/20 hover:text-white md:h-10 md:w-10"
+          aria-label={soundOn ? 'إيقاف الصوت' : 'تشغيل الصوت'}
         >
           {soundOn ? <Volume2 className="h-5 w-5" /> : <VolumeX className="h-5 w-5" />}
         </button>
         <button
           onClick={() => setShowSettings(true)}
           className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/10 text-white/70 backdrop-blur-sm transition-colors hover:bg-white/20 hover:text-white md:h-10 md:w-10"
+          aria-label="إعدادات التركيز"
         >
           <Settings className="h-5 w-5" />
         </button>
         <button
           onClick={handleExit}
           className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/10 text-white/70 backdrop-blur-sm transition-colors hover:bg-rose-500/20 hover:text-rose-400 md:h-10 md:w-10"
+          aria-label="خروج من وضع التركيز"
         >
           <X className="h-5 w-5" />
         </button>

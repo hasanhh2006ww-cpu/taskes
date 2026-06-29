@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { useHabitStore } from '@/store/useHabitStore';
 import type { Habit, DailyHabit, WeeklyHabit, MonthlyHabit } from '@/lib/types';
 import { Button } from '@/components/ui/Button';
@@ -65,11 +65,14 @@ export function HabitTrackerPro() {
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
-  const displayedHabits = isReordering
-    ? [...habits].sort((a, b) => a.order - b.order)
-    : habits
-        .filter((h) => activeTab === 'all' || h.type === activeTab)
-        .sort((a, b) => a.order - b.order);
+  const displayedHabits = useMemo(() => {
+    if (isReordering) {
+      return [...habits].sort((a, b) => a.order - b.order);
+    }
+    return habits
+      .filter((h) => activeTab === 'all' || h.type === activeTab)
+      .sort((a, b) => a.order - b.order);
+  }, [habits, activeTab, isReordering]);
 
   function handleModalSave(title: string, type: 'daily' | 'weekly' | 'monthly', options?: Record<string, unknown>) {
     addHabit(title, type, options as Partial<WeeklyHabit> | Partial<MonthlyHabit>);

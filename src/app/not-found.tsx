@@ -11,6 +11,7 @@ export default function NotFound() {
         <Link
           href="/"
           className="mt-6 inline-flex h-10 items-center justify-center rounded-lg bg-indigo-500 px-5 text-sm font-medium text-white transition-colors hover:bg-indigo-600"
+          aria-label="العودة إلى الرئيسية"
         >
           العودة إلى الرئيسية
         </Link>

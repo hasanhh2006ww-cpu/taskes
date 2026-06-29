@@ -233,14 +233,14 @@ export function CalendarView() {
         <div className="flex items-center gap-0.5">
           <button
             onClick={() => navigate(-1)}
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-600 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
+            className="flex h-10 w-10 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-600 dark:hover:bg-zinc-800 dark:hover:text-zinc-300 md:h-8 md:w-8"
             aria-label="السابق"
           >
             <ChevronRight className="h-4 w-4" />
           </button>
           <button
             onClick={() => navigate(1)}
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-600 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
+            className="flex h-10 w-10 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-600 dark:hover:bg-zinc-800 dark:hover:text-zinc-300 md:h-8 md:w-8"
             aria-label="التالي"
           >
             <ChevronLeft className="h-4 w-4" />

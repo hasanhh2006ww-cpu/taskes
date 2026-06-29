@@ -13,12 +13,13 @@ export default function Error({
         <p className="mt-4 text-lg text-zinc-600 dark:text-zinc-400">
           تعذر تحميل الصفحة. حاول مرة أخرى.
         </p>
-        <button
-          onClick={reset}
-          className="mt-6 inline-flex h-10 items-center justify-center rounded-lg bg-indigo-500 px-5 text-sm font-medium text-white transition-colors hover:bg-indigo-600"
-        >
-          إعادة المحاولة
-        </button>
+          <button
+            onClick={reset}
+            className="mt-6 inline-flex h-10 items-center justify-center rounded-lg bg-indigo-500 px-5 text-sm font-medium text-white transition-colors hover:bg-indigo-600"
+            aria-label="إعادة المحاولة"
+          >
+            إعادة المحاولة
+          </button>
       </div>
     </div>
   );

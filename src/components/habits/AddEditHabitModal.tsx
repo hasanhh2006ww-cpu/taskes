@@ -99,7 +99,8 @@ export function AddEditHabitModal({ open, mode, initialData, allHabits, onClose,
           </h2>
           <button
             onClick={onClose}
-            className="rounded-lg p-2 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-600 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
+            className="rounded-lg p-2.5 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-600 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
+            aria-label="إغلاق"
           >
             <X className="h-5 w-5" />
           </button>

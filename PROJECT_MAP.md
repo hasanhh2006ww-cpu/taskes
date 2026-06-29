@@ -231,6 +231,7 @@ User Input (keyboard/mouse/touch)
 | 80 | Supabase Client + Next.js env vars + NaN guards | تصحيح بيئة Supabase: (1) تغيير `.env` من `VITE_APP_*` (Vite) إلى `NEXT_PUBLIC_*` (Next.js). (2) إعادة كتابة `supabase.ts` باستخدام `process.env` مع التحقق من وجود المتغيرات ورسائل خطأ واضحة. (3) إضافة حواجز NaN في Dashboard: `ProgressRing` (`Number.isFinite` + clamp [0,100])، `AnimatedProgressBar` (`Number.isFinite` لـ value/max)، `WeekChart` (تعقيم جميع قيم total/done). (4) إزالة `import.meta.env` نهائياً. | ✅ |
 | 81 | Hydration mismatch + SSR localStorage fix | جميع الـ Zustand stores كانت تقرأ `localStorage` على مستوى الملف (module scope) → SSR ترجع `[]` و client ترجع البيانات الحقيقية → `isEmpty` تختلف → شجرتين مختلفتين بالكامل (Empty State vs Dashboard). الإصلاح: (1) إزالة `loadFromStorage` من module scope في كل الـ 4 stores واستبدالها بقيم افتراضية فارغة. (2) إضافة `rehydrate()` method لكل store تقرأ من localStorage وتحدث الحالة. (3) Dashboard تستدعي `rehydrate()` في `useEffect` بعد hydration. (4) Dashboard دائماً ترسم نفس الشجرة (بدون `isEmpty` conditional)، ويظهر الـ empty state كبطاقة داخل الـ dashboard عند عدم وجود بيانات. | ✅ |
 | 82 | Habit store rehydrate missing on /habits page | commit 1737f05 أزال module-level loadFromStorage وأضاف rehydrate() لكن `useHabitStore.rehydrate()` لم يُستدعَ إلا في Dashboard فقط. العادات تضاف في الجلسة لكنها تختفي عند التحديث. الإصلاح: إضافة `useEffect → useHabitStore.getState().rehydrate()` في HabitTrackerPro.tsx | ✅ |
+| 83 | Full Responsive + Production Readiness Audit | مراجعة شاملة لكل الصفحات والمكونات: globals.css, layout-client, Sidebar, Dashboard, TaskList, TaskItem, TaskDetail, CalendarView, SettingsView, FocusMode, CommandPalette, AddEditHabitModal, ConfirmDialog, IconPicker, ColorPicker, Button, Input, Badge, error, not-found, HabitTrackerPro, جميع الـ pages, جميع الـ stores. الإصلاحات: حذف HabitTracker.tsx الميت، إزالة فحص Supabase غير الضروري من dashboard/page.tsx، تكبير أزرار التنقل في CalendarView (h-10 w-10 md:h-8 md:w-8)، إضافة aria-labels لـ FocusMode/error/not-found/AddEditHabitModal، إضافة Escape handler + role dialog + aria-modal لـ ConfirmDialog، إضافة useMemo لـ displayedHabits في HabitTrackerPro | ✅ |
 
 ## [ORPHANS & PENDING]
 
@@ -253,6 +254,7 @@ User Input (keyboard/mouse/touch)
 | `date-fns` dependency | Not used | installed but unused, kept for future |
 | Static build warning: localStorage | Fixed | removed module-level loadFromStorage calls, stores hydrate via rehydrate() in useEffect |
 | `public/ph.png` | Deprecated | replaced by `public/logo.svg` (can be deleted) |
+| `src/components/habits/HabitTracker.tsx` | Deleted | old habit tracker, replaced by HabitTrackerPro, no imports remained |
 | RTL animation direction | Done | TaskDetail slides from x:-20 (right in RTL) |
 | Daily habit completion with calendar selection | Done | HabitTracker now allows clicking any day in the 7-day calendar to toggle completion |
 | Responsive design | Done | Mobile sidebar overlay, full-screen detail, 44px touch targets |
