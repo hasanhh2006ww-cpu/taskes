@@ -65,7 +65,7 @@ export function TaskDetail({ onClose }: { onClose?: () => void }) {
           <h2 className="text-sm font-medium text-zinc-400 dark:text-zinc-500">التفاصيل</h2>
           <button
             onClick={handleDrawerClose}
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-600 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
+            className="flex h-11 w-11 md:h-8 md:w-8 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-600 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
             aria-label="إغلاق"
           >
             <X className="h-4 w-4" />
@@ -176,7 +176,7 @@ export function TaskDetail({ onClose }: { onClose?: () => void }) {
         initial={{ x: '100%' }}
         animate={{ x: 0 }}
         transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-        className="fixed inset-y-0 right-0 z-50 flex w-full flex-col bg-white shadow-2xl dark:bg-zinc-950 sm:w-[420px] lg:w-[460px]"
+        className="fixed inset-y-0 right-0 z-50 flex w-full flex-col bg-white shadow-2xl dark:bg-zinc-950 sm:w-[420px] lg:w-[460px] safe-area-top"
       >
         {/* Fixed Header */}
         <div className="shrink-0 border-b border-zinc-200/60 px-4 py-3 dark:border-zinc-800/60">
@@ -201,7 +201,7 @@ export function TaskDetail({ onClose }: { onClose?: () => void }) {
               </button>
               <button
                 onClick={handleDrawerClose}
-                className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-600 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
+                className="flex h-11 w-11 md:h-8 md:w-8 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-600 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
                 aria-label="إغلاق"
               >
                 <X className="h-4 w-4" />
