@@ -81,7 +81,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
         {sidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
       </button>
 
-      <main className="flex flex-1 overflow-hidden pt-14 md:pt-0">
+      <main className="flex min-w-0 flex-1 overflow-hidden pt-14 md:pt-0">
         {children}
       </main>
 

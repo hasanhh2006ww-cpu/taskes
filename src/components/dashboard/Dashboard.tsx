@@ -789,7 +789,7 @@ export function Dashboard() {
                   </motion.div>
 
                   {/* 4 Stat Cards */}
-                  <motion.div variants={itemVariants} className="grid grid-cols-2 gap-3">
+                  <motion.div variants={itemVariants} className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
                     {[
                       {
                         label: 'مهام اليوم', value: todayCount, icon: ListTodo,

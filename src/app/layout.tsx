@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Cairo, IBM_Plex_Sans_Arabic } from "next/font/google";
 import { Toaster } from "react-hot-toast";
+import { Analytics } from "@vercel/analytics/next";
 import ClientLayout from "./layout-client";
 import "./globals.css";
 
@@ -18,7 +19,8 @@ const ibmPlex = IBM_Plex_Sans_Arabic({
 
 export const metadata: Metadata = {
   title: "Stilldo — مدير المهام",
-  description: "A calm productivity app for managing tasks, habits and focus sessions.",
+  description:
+    "A calm productivity app for managing tasks, habits and focus sessions.",
 };
 
 export default function RootLayout({
@@ -33,15 +35,28 @@ export default function RootLayout({
       className={`${cairo.variable} ${ibmPlex.variable} h-full antialiased`}
       suppressHydrationWarning
     >
-      <body className="h-full" style={{ fontFamily: 'var(--font-ibm-plex), var(--font-cairo), system-ui, sans-serif' }}>
+      <body
+        className="h-full"
+        style={{
+          fontFamily:
+            "var(--font-ibm-plex), var(--font-cairo), system-ui, sans-serif",
+        }}
+      >
         <Toaster
           position="top-center"
           toastOptions={{
             duration: 3000,
-            style: { fontFamily: 'var(--font-ibm-plex), var(--font-cairo), sans-serif', fontSize: '14px' },
+            style: {
+              fontFamily:
+                "var(--font-ibm-plex), var(--font-cairo), sans-serif",
+              fontSize: "14px",
+            },
           }}
         />
+
         <ClientLayout>{children}</ClientLayout>
+
+        <Analytics />
       </body>
     </html>
   );
