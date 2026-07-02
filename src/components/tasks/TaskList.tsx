@@ -94,7 +94,7 @@ export function TaskList() {
           {PRIORITIES.map((p) => (
             <button
               key={p.value}
-              onClick={() => setnewPriority(p.value)}
+              onClick={() => setNewPriority(p.value)}
               className={cn(
                 'rounded-lg px-2.5 py-2 text-[11px] font-medium transition-all sm:py-1.5',
                 newPriority === p.value

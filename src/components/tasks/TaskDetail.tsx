@@ -9,6 +9,7 @@ import { PRIORITIES } from '@/lib/constants';
 import { Calendar, Trash2, Star, X, Plus, Timer, ListChecks } from 'lucide-react';
 import type { Priority, SubTask, ActivityLogEntry } from '@/lib/types';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { useUIStore } from '@/store/useUIStore';
 
 export function TaskDetail({ onClose }: { onClose?: () => void }) {
   const { tasks, activeTaskId, setActiveTaskId, updateTask, deleteTask, toggleComplete, toggleImportant, addSubtask, toggleSubtask, deleteSubtask, updateSubtask, addActivityLog, addFocusSession } =

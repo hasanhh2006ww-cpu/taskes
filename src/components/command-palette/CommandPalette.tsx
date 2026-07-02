@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { useTaskStore } from '@/store/useTaskStore';
 import { useProjectStore } from '@/store/useProjectStore';
 import { useUIStore } from '@/store/useUIStore';
+import { cn } from '@/lib/cn';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Search, ListTodo, Calendar, Star, Moon, Sun, Plus } from 'lucide-react';
 
