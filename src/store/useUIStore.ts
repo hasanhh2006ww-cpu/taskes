@@ -60,7 +60,11 @@ export const useUIStore = create<UIState>((set, get) => ({
 
   setActiveTaskId: (id) => set({ activeTaskId: id }),
 
-  toggleSidebarCollapsed: () => set((s) => ({ sidebarCollapsed: !s.sidebarCollapsed })),
+  toggleSidebarCollapsed: () => {
+    const next = !get().sidebarCollapsed;
+    set({ sidebarCollapsed: next });
+    saveToStorage('sidebar_collapsed', next);
+  },
 
   saveFocusSession: (session) => {
     set({ focusSession: session });
@@ -82,6 +86,12 @@ export const useUIStore = create<UIState>((set, get) => ({
     const stored = loadFromStorage<{ darkMode: boolean }>(STORAGE_KEYS.UI, { darkMode: false });
     const focusSession = loadFromStorage<FocusSession | null>(STORAGE_KEYS.FOCUS_SESSION, null);
     const focusSettings = loadFromStorage<FocusSettings>(STORAGE_KEYS.FOCUS_SETTINGS, defaultSettings);
-    set({ darkMode: stored.darkMode, focusSession, focusSettings });
+    const sidebarCollapsed = loadFromStorage<boolean>('sidebar_collapsed', false);
+    set({
+      darkMode: stored.darkMode,
+      focusSession,
+      focusSettings,
+      sidebarCollapsed,
+    });
   },
 }));

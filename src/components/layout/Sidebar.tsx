@@ -28,7 +28,7 @@ import {
 function NavTooltip({ label, show }: { label: string; show: boolean }) {
   if (!show) return null;
   return (
-    <div className="absolute start-full top-1/2 z-50 ms-3 -translate-y-1/2 rounded-lg bg-zinc-900 px-2.5 py-1.5 text-xs font-medium text-white shadow-lg dark:bg-zinc-700">
+    <div className="absolute start-full top-1/2 z-50 ms-3 -translate-y-1/2 rounded-lg bg-zinc-900 px-2.5 py-1.5 text-xs font-medium text-white  dark:bg-zinc-700">
       {label}
       <div className="absolute end-full top-1/2 -mt-1 -me-0.5 h-2 w-2 rotate-45 bg-zinc-900 dark:bg-zinc-700" />
     </div>
@@ -75,7 +75,7 @@ export function Sidebar() {
   return (
     <aside
       className={cn(
-        'flex h-full w-full flex-col overflow-hidden floating rounded-2xl',
+        'flex h-full w-full flex-col overflow-hidden  rounded-2xl',
         sidebarCollapsed ? 'items-center' : '',
         'glass-card'
       )}
@@ -94,7 +94,7 @@ export function Sidebar() {
             src="/v1.png"
             alt="Stilldo"
             className={cn(
-              'shrink-0 rounded-xl transition-all duration-200 group-hover:scale-105 group-hover:shadow-lg',
+              'shrink-0 rounded-xl transition-all duration-200 group-hover:scale-105 group-hover:',
               sidebarCollapsed ? 'h-9 w-9' : 'h-12 w-12'
             )}
           />
@@ -122,7 +122,7 @@ export function Sidebar() {
               'group flex w-full items-center gap-3 rounded-xl text-sm transition-all duration-200',
               sidebarCollapsed ? 'justify-center px-2 py-2.5' : 'px-3 py-2.5',
               isActivePath('/dashboard')
-                ? 'bg-emerald-50 text-emerald-600 shadow-sm dark:bg-emerald-950/40 dark:text-emerald-400'
+                ? 'bg-emerald-50 text-emerald-600  dark:bg-emerald-950/40 dark:text-emerald-400'
                 : 'text-zinc-500 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800/60'
             )}
           >
@@ -150,7 +150,7 @@ export function Sidebar() {
                 'group flex w-full items-center gap-3 rounded-xl text-sm transition-all duration-200',
                 sidebarCollapsed ? 'justify-center px-2 py-2.5' : 'px-3 py-2.5',
                 isFilterActive(item.filter)
-                  ? 'bg-emerald-50 text-emerald-600 shadow-sm dark:bg-emerald-950/40 dark:text-emerald-400'
+                  ? 'bg-emerald-50 text-emerald-600  dark:bg-emerald-950/40 dark:text-emerald-400'
                   : 'text-zinc-500 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800/60'
               )}
             >
@@ -203,7 +203,7 @@ export function Sidebar() {
                     ? 'justify-center px-2 py-2.5'
                     : 'flex-1 px-3 py-2.5',
                   activeProjectId === project.id
-                    ? 'bg-emerald-50 text-emerald-600 shadow-sm dark:bg-emerald-950/40 dark:text-emerald-400'
+                    ? 'bg-emerald-50 text-emerald-600  dark:bg-emerald-950/40 dark:text-emerald-400'
                     : 'text-zinc-500 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800/60'
                 )}
               >
@@ -245,7 +245,7 @@ export function Sidebar() {
               'group flex w-full items-center gap-3 rounded-xl text-sm transition-all duration-200',
               sidebarCollapsed ? 'justify-center px-2 py-2.5' : 'px-3 py-2.5',
               isActivePath('/calendar')
-                ? 'bg-emerald-50 text-emerald-600 shadow-sm dark:bg-emerald-950/40 dark:text-emerald-400'
+                ? 'bg-emerald-50 text-emerald-600  dark:bg-emerald-950/40 dark:text-emerald-400'
                 : 'text-zinc-500 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800/60'
             )}
           >
@@ -267,7 +267,7 @@ export function Sidebar() {
               'group flex w-full items-center gap-3 rounded-xl text-sm transition-all duration-200',
               sidebarCollapsed ? 'justify-center px-2 py-2.5' : 'px-3 py-2.5',
               isActivePath('/settings')
-                ? 'bg-emerald-50 text-emerald-600 shadow-sm dark:bg-emerald-950/40 dark:text-emerald-400'
+                ? 'bg-emerald-50 text-emerald-600  dark:bg-emerald-950/40 dark:text-emerald-400'
                 : 'text-zinc-500 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800/60'
             )}
           >
@@ -289,7 +289,7 @@ export function Sidebar() {
               'group flex w-full items-center gap-3 rounded-xl text-sm transition-all duration-200',
               sidebarCollapsed ? 'justify-center px-2 py-2.5' : 'px-3 py-2.5',
               isActivePath('/habits')
-                ? 'bg-emerald-50 text-emerald-600 shadow-sm dark:bg-emerald-950/40 dark:text-emerald-400'
+                ? 'bg-emerald-50 text-emerald-600  dark:bg-emerald-950/40 dark:text-emerald-400'
                 : 'text-zinc-500 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800/60'
             )}
           >

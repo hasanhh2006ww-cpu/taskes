@@ -144,7 +144,7 @@ function AnimatedProgressBar({ value, max, color = 'emerald' }: { value: number;
 function MainGoalCard({ goal }: { goal: { title: string; completed: number; total: number; remaining: number; deadline: string | null } | null }) {
   if (!goal) {
     return (
-      <motion.div variants={itemVariants} className="card-hover card-shadow relative overflow-hidden rounded-2xl border border-zinc-200/60 bg-white p-5 dark:border-zinc-800/40 dark:bg-zinc-900/60">
+      <motion.div variants={itemVariants} className="card-modern relative overflow-hidden rounded-2xl border border-zinc-200/60 bg-white p-5 dark:border-zinc-800/40 dark:bg-zinc-900/60">
         <div className="relative flex flex-col items-center py-6 text-center">
           <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-zinc-100 dark:bg-zinc-800">
             <Target className="h-6 w-6 text-zinc-400" />
@@ -157,7 +157,7 @@ function MainGoalCard({ goal }: { goal: { title: string; completed: number; tota
   }
   const pct = goal.total > 0 ? Math.round((goal.completed / goal.total) * 100) : 0;
   return (
-    <motion.div variants={itemVariants} className="card-hover card-shadow relative overflow-hidden rounded-2xl border border-zinc-200/60 bg-white p-5 dark:border-zinc-800/40 dark:bg-zinc-900/60">
+    <motion.div variants={itemVariants} className="card-modern relative overflow-hidden rounded-2xl border border-zinc-200/60 bg-white p-5 dark:border-zinc-800/40 dark:bg-zinc-900/60">
       <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/[0.02] to-transparent" />
       <div className="relative">
         <div className="mb-4 flex items-center gap-2">
@@ -196,7 +196,7 @@ function ProductivityHeatmap({ days }: { days: { date: string; completed: number
     weeks.push(days.slice(i, i + 7));
   }
   return (
-    <motion.div variants={itemVariants} className="card-hover card-shadow relative overflow-hidden rounded-2xl border border-zinc-200/60 bg-white p-5 dark:border-zinc-800/40 dark:bg-zinc-900/60">
+    <motion.div variants={itemVariants} className="card-modern relative overflow-hidden rounded-2xl border border-zinc-200/60 bg-white p-5 dark:border-zinc-800/40 dark:bg-zinc-900/60">
       <div className="relative">
         <div className="mb-3 flex items-center gap-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-500 to-emerald-600 shadow-sm shadow-emerald-500/20">
@@ -273,7 +273,7 @@ function ProductivityScoreCard({ score, maxScore = 100 }: { score: number; maxSc
   const ringColor = score >= 80 ? '#10b981' : score >= 50 ? '#f59e0b' : '#ef4444';
   const label = score >= 80 ? 'ممتاز' : score >= 50 ? 'جيد' : 'بحاجة للتحسين';
   return (
-    <motion.div variants={itemVariants} className="card-hover card-shadow relative overflow-hidden rounded-2xl border border-zinc-200/60 bg-white p-5 dark:border-zinc-800/40 dark:bg-zinc-900/60">
+    <motion.div variants={itemVariants} className="card-modern relative overflow-hidden rounded-2xl border border-zinc-200/60 bg-white p-5 dark:border-zinc-800/40 dark:bg-zinc-900/60">
       <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/[0.02] to-transparent" />
       <div className="relative">
         <div className="mb-3 flex items-center gap-2">
@@ -303,7 +303,7 @@ function ProductivityScoreCard({ score, maxScore = 100 }: { score: number; maxSc
 function WeeklyHeatmapView({ weeks }: { weeks: { label: string; days: { date: string; count: number; completed: number }[] }[] }) {
   const maxCount = Math.max(...weeks.flatMap(w => w.days.map(d => d.count)), 1);
   return (
-    <motion.div variants={itemVariants} className="card-hover card-shadow relative overflow-hidden rounded-2xl border border-zinc-200/60 bg-white p-5 dark:border-zinc-800/40 dark:bg-zinc-900/60">
+    <motion.div variants={itemVariants} className="card-modern relative overflow-hidden rounded-2xl border border-zinc-200/60 bg-white p-5 dark:border-zinc-800/40 dark:bg-zinc-900/60">
       <div className="relative">
         <div className="mb-3 flex items-center gap-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-amber-500 to-amber-600 shadow-sm shadow-amber-500/20">
@@ -352,7 +352,7 @@ function WeeklyHeatmapView({ weeks }: { weeks: { label: string; days: { date: st
 
 function FocusSummaryCard({ totalPomodoros, focusMinutes, todayPomodoros }: { totalPomodoros: number; focusMinutes: number; todayPomodoros: number }) {
   return (
-    <motion.div variants={itemVariants} className="card-hover card-shadow relative overflow-hidden rounded-2xl border border-zinc-200/60 bg-white p-5 dark:border-zinc-800/40 dark:bg-zinc-900/60">
+    <motion.div variants={itemVariants} className="card-modern relative overflow-hidden rounded-2xl border border-zinc-200/60 bg-white p-5 dark:border-zinc-800/40 dark:bg-zinc-900/60">
       <div className="relative">
         <div className="mb-3 flex items-center gap-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-violet-500 to-violet-600 shadow-sm shadow-violet-500/20">
@@ -382,7 +382,7 @@ function FocusSummaryCard({ totalPomodoros, focusMinutes, todayPomodoros }: { to
 function TodayTasksCard({ tasks, onToggle, onNavigate, goToTasks }: { tasks: { id: string; title: string; priority: string; completed: boolean }[]; onToggle: (id: string) => void; onNavigate: () => void; goToTasks: () => void }) {
   if (tasks.length === 0) {
     return (
-      <motion.div variants={itemVariants} className="card-shadow relative overflow-hidden rounded-2xl border border-zinc-200/60 bg-white p-5 dark:border-zinc-800/40 dark:bg-zinc-900/60">
+      <motion.div variants={itemVariants} className="card-modern relative overflow-hidden rounded-2xl border border-zinc-200/60 bg-white p-5 dark:border-zinc-800/40 dark:bg-zinc-900/60">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg"> <ClipboardList className="h-5 w-5 text-zinc-400" />
@@ -402,7 +402,7 @@ function TodayTasksCard({ tasks, onToggle, onNavigate, goToTasks }: { tasks: { i
     );
   }
   return (
-    <motion.div variants={itemVariants} className="card-hover card-shadow relative overflow-hidden rounded-2xl border border-zinc-200/60 bg-white p-5 dark:border-zinc-800/40 dark:bg-zinc-900/60">
+    <motion.div variants={itemVariants} className="card-modern relative overflow-hidden rounded-2xl border border-zinc-200/60 bg-white p-5 dark:border-zinc-800/40 dark:bg-zinc-900/60">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-sky-500 to-sky-600 shadow-sm shadow-sky-500/20">
@@ -707,7 +707,7 @@ export function Dashboard() {
                   <FocusSummaryCard totalPomodoros={totalPomodoros} focusMinutes={focusMinutes} todayPomodoros={todayPomodoros} />
 
                   {/* Recent Activity */}
-                  <motion.div variants={itemVariants} className="card-hover card-shadow relative overflow-hidden rounded-2xl border border-zinc-200/60 bg-white p-5 dark:border-zinc-800/40 dark:bg-zinc-900/60">
+                  <motion.div variants={itemVariants} className="card-modern relative overflow-hidden rounded-2xl border border-zinc-200/60 bg-white p-5 dark:border-zinc-800/40 dark:bg-zinc-900/60">
                     <div className="relative">
                       <div className="mb-4 flex items-center justify-between">
                         <div className="flex items-center gap-2">
@@ -827,7 +827,7 @@ export function Dashboard() {
                       <motion.div
                         key={card.label}
                         whileHover={{ scale: 1.02, y: -2, transition: { duration: 0.2 } }}
-                        className="card-hover card-shadow group relative overflow-hidden rounded-2xl border border-zinc-200/60 bg-white p-4 dark:border-zinc-800/40 dark:bg-zinc-900/60"
+                        className="card-modern group relative overflow-hidden rounded-2xl border border-zinc-200/60 bg-white p-4 dark:border-zinc-800/40 dark:bg-zinc-900/60"
                       >
                         <div className={cn('absolute inset-0 bg-gradient-to-br opacity-0 transition-opacity duration-300 group-hover:opacity-100', card.bgGlow)} />
                         <div className="relative">
@@ -857,7 +857,7 @@ export function Dashboard() {
                       initial={{ opacity: 0, scale: 0.95 }}
                       animate={{ opacity: 1, scale: 1 }}
                       transition={{ duration: 0.4 }}
-                      className="card-hover card-shadow relative overflow-hidden rounded-2xl border border-zinc-200/60 bg-white p-5 dark:border-zinc-800/40 dark:bg-zinc-900/60"
+                      className="card-modern relative overflow-hidden rounded-2xl border border-zinc-200/60 bg-white p-5 dark:border-zinc-800/40 dark:bg-zinc-900/60"
                     >
                       <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/[0.02] to-transparent" />
                       <div className="relative flex flex-col items-center">
@@ -902,7 +902,7 @@ export function Dashboard() {
                             whileHover={{ scale: 1.03, y: -2 }}
                             whileTap={{ scale: 0.97 }}
                             onClick={action.onClick}
-                            className="card-hover card-shadow group relative overflow-hidden rounded-2xl border border-zinc-200/60 bg-white/80 p-3 text-start backdrop-blur-sm dark:border-zinc-800/40 dark:bg-zinc-900/40"
+                            className="card-modern group relative overflow-hidden rounded-2xl border border-zinc-200/60 bg-white/80 p-3 text-start backdrop-blur-sm dark:border-zinc-800/40 dark:bg-zinc-900/40"
                           >
                             <div className="absolute inset-0 bg-gradient-to-br from-white/50 to-transparent opacity-0 transition-opacity group-hover:opacity-100 dark:from-white/5" />
                             <div className="relative">
@@ -923,7 +923,7 @@ export function Dashboard() {
                   {/* Overdue Alert */}
                   {overdue > 0 && (
                     <motion.div variants={itemVariants}>
-                      <div className="card-shadow rounded-2xl border border-rose-200/60 bg-gradient-to-r from-rose-50 to-rose-50/50 p-4 dark:border-rose-900/30 dark:from-rose-950/20 dark:to-rose-950/10">
+                      <div className="card-modern rounded-2xl border border-rose-200/60 bg-gradient-to-r from-rose-50 to-rose-50/50 p-4 dark:border-rose-900/30 dark:from-rose-950/20 dark:to-rose-950/10">
                         <div className="flex items-center gap-3">
                           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-rose-100 dark:bg-rose-900/30">
                             <Clock className="h-4 w-4 text-rose-500" />
@@ -942,7 +942,7 @@ export function Dashboard() {
                   {/* Weekly Chart + Stats */}
                   <motion.div variants={itemVariants} className="grid grid-cols-1 gap-5 md:grid-cols-2">
                     {/* Weekly Chart */}
-                    <div className="card-hover card-shadow rounded-2xl border border-zinc-200/60 bg-white p-5 dark:border-zinc-800/40 dark:bg-zinc-900/60">
+                    <div className="card-modern rounded-2xl border border-zinc-200/60 bg-white p-5 dark:border-zinc-800/40 dark:bg-zinc-900/60">
                       <div className="mb-4 flex items-center gap-2">
                         <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-50 dark:bg-emerald-900/30">
                           <BarChart3 className="h-3.5 w-3.5 text-emerald-500" />
@@ -963,7 +963,7 @@ export function Dashboard() {
                     </div>
 
                     {/* Statistics Summary */}
-                    <div id="stats-section" className="card-hover card-shadow rounded-2xl border border-zinc-200/60 bg-white p-5 dark:border-zinc-800/40 dark:bg-zinc-900/60">
+                    <div id="stats-section" className="card-modern rounded-2xl border border-zinc-200/60 bg-white p-5 dark:border-zinc-800/40 dark:bg-zinc-900/60">
                       <div className="mb-4 flex items-center gap-2">
                         <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-50 dark:bg-indigo-900/30">
                           <TrendingUp className="h-3.5 w-3.5 text-indigo-500" />
