@@ -10,6 +10,7 @@ import { getToday } from '@/lib/constants';
 import { useProjectStore } from '@/store/useProjectStore';
 import { TaskDetail } from '@/components/tasks/TaskDetail';
 import { getHabitIcon } from '@/lib/habitIcons';
+import { EmptyState } from '@/components/ui/EmptyState';
 import {
   ChevronLeft,
   ChevronRight,
@@ -614,7 +615,7 @@ function DayView({
         <div className="space-y-2">
           <h4 className="text-xs font-medium text-zinc-500 dark:text-zinc-400">المهام ({dayTasks.length})</h4>
           {dayTasks.length === 0 && (
-            <p className="text-xs text-zinc-400">لا توجد مهام في هذا اليوم</p>
+            <EmptyState icon={Calendar} title="لا توجد مهام في هذا اليوم" description="ستظهر المهام هنا عندما تضيفها" variant="compact" />
           )}
           {dayTasks.map((t: any) => (
             <div
@@ -634,7 +635,7 @@ function DayView({
         <div className="mt-4 space-y-2">
           <h4 className="text-xs font-medium text-zinc-500 dark:text-zinc-400">العادات ({dayHabits.length})</h4>
           {dayHabits.length === 0 && (
-            <p className="text-xs text-zinc-400">لا توجد عادات في هذا اليوم</p>
+            <EmptyState icon={Flame} title="لا توجد عادات في هذا اليوم" description="أضف عاداتك لتتبعها هنا" variant="compact" />
           )}
           {dayHabits.map((h: any) => {
             const HIcon = getHabitIcon(h.icon);
@@ -679,7 +680,7 @@ function AgendaView({
         {upcomingDays.length === 0 && (
           <div className="flex flex-col items-center justify-center py-16 text-center">
             <ListTodo className="mb-3 h-12 w-12 text-zinc-300 dark:text-zinc-600" />
-            <p className="text-sm text-zinc-400">لا توجد مهام قادمة</p>
+            <EmptyState icon={Calendar} title="لا توجد مهام قادمة" description="أضف مهام بتاريخ مستقبلي" variant="compact" />
             <p className="mt-1 text-xs text-zinc-400">أضف مهاماً جديدة لرؤيتها هنا</p>
           </div>
         )}
@@ -800,7 +801,7 @@ function CalendarRightPanel({
             </button>
           </div>
           {dayTasks.length === 0 && (
-            <p className="py-6 text-center text-xs text-zinc-400">لا توجد مهام في هذا اليوم</p>
+            <EmptyState icon={Calendar} title="لا توجد مهام في هذا اليوم" description="اختر يوماً آخر أو أضف مهمة جديدة" variant="compact" />
           )}
           <div className="space-y-1">
             {dayTasks.map((t: any) => (
@@ -902,7 +903,7 @@ function CalendarRightPanel({
             </div>
           )}
           {todayUpcoming.length === 0 && overdueTasks.length === 0 && (
-            <p className="py-3 text-center text-xs text-zinc-400">لا توجد مهام لليوم</p>
+            <EmptyState icon={Calendar} title="لا توجد مهام لليوم" description="ابدأ بإضافة مهامك اليومية" variant="compact" />
           )}
           <div className="space-y-1">
             {[...overdueTasks, ...todayUpcoming].slice(0, 6).map((t: any) => (
@@ -1137,3 +1138,4 @@ function CreateEventModal({
     </motion.div>
   );
 }
+

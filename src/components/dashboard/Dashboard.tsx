@@ -15,8 +15,9 @@ import {
   ArrowRight, Sprout, Target,
   Timer, Flame, TrendingUp,
   FolderKanban, Sparkles, SunDim, Moon,
-  Brain, Activity,
+  Brain, Activity, ClipboardList,
 } from 'lucide-react';
+import { EmptyState } from '@/components/ui/EmptyState';
 import toast from 'react-hot-toast';
 
 const DAY_NAMES_SHORT = ['ح', 'ن', 'ث', 'ر', 'خ', 'ج', 'س'];
@@ -169,7 +170,7 @@ function MainGoalCard({ goal }: { goal: { title: string; completed: number; tota
           </div>
         </div>
         <div className="mb-3 flex items-center justify-between">
-          <span className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">{pct}%</span>
+          <span className="text-2xl font-extrabold text-zinc-900 dark:text-zinc-100">{pct}%</span>
           <span className="text-xs text-zinc-500">{goal.completed}/{goal.total} مهام</span>
         </div>
         <AnimatedProgressBar value={goal.completed} max={goal.total} />
@@ -285,7 +286,7 @@ function ProductivityScoreCard({ score, maxScore = 100 }: { score: number; maxSc
           <div className="relative">
             <ProgressRing percent={score} size={72} strokeWidth={5} color={ringColor} />
             <div className="absolute inset-0 flex items-center justify-center">
-              <span className="text-lg font-bold text-zinc-900 dark:text-zinc-100">{score}</span>
+              <span className="text-lg font-extrabold text-zinc-900 dark:text-zinc-100">{score}</span>
             </div>
           </div>
           <div className="flex-1">
@@ -361,15 +362,15 @@ function FocusSummaryCard({ totalPomodoros, focusMinutes, todayPomodoros }: { to
         </div>
         <div className="grid grid-cols-3 gap-3">
           <div className="rounded-xl bg-zinc-50 p-3 text-center dark:bg-zinc-800/50">
-            <p className="text-lg font-bold text-zinc-900 dark:text-zinc-100">{totalPomodoros}</p>
+            <p className="text-lg font-extrabold text-zinc-900 dark:text-zinc-100">{totalPomodoros}</p>
             <p className="text-[10px] text-zinc-500 dark:text-zinc-400">إجمالي الجلسات</p>
           </div>
           <div className="rounded-xl bg-zinc-50 p-3 text-center dark:bg-zinc-800/50">
-            <p className="text-lg font-bold text-zinc-900 dark:text-zinc-100">{formatDuration(focusMinutes)}</p>
+            <p className="text-lg font-extrabold text-zinc-900 dark:text-zinc-100">{formatDuration(focusMinutes)}</p>
             <p className="text-[10px] text-zinc-500 dark:text-zinc-400">إجمالي الوقت</p>
           </div>
           <div className="rounded-xl bg-zinc-50 p-3 text-center dark:bg-zinc-800/50">
-            <p className="text-lg font-bold text-zinc-900 dark:text-zinc-100">{todayPomodoros}</p>
+            <p className="text-lg font-extrabold text-zinc-900 dark:text-zinc-100">{todayPomodoros}</p>
             <p className="text-[10px] text-zinc-500 dark:text-zinc-400">جلسات اليوم</p>
           </div>
         </div>
@@ -378,19 +379,25 @@ function FocusSummaryCard({ totalPomodoros, focusMinutes, todayPomodoros }: { to
   );
 }
 
-function TodayTasksCard({ tasks, onToggle, onNavigate }: { tasks: { id: string; title: string; priority: string; completed: boolean }[]; onToggle: (id: string) => void; onNavigate: () => void }) {
+function TodayTasksCard({ tasks, onToggle, onNavigate, goToTasks }: { tasks: { id: string; title: string; priority: string; completed: boolean }[]; onToggle: (id: string) => void; onNavigate: () => void; goToTasks: () => void }) {
   if (tasks.length === 0) {
     return (
       <motion.div variants={itemVariants} className="card-shadow relative overflow-hidden rounded-2xl border border-zinc-200/60 bg-white p-5 dark:border-zinc-800/40 dark:bg-zinc-900/60">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-zinc-100 dark:bg-zinc-800">
-              <ListTodo className="h-4 w-4 text-zinc-400" />
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg"> <ClipboardList className="h-5 w-5 text-zinc-400" />
             </div>
             <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">مهام اليوم</h3>
           </div>
         </div>
-        <p className="mt-3 text-center text-xs text-zinc-400">لا توجد مهام لليوم</p>
+        <EmptyState
+          icon={ClipboardList}
+          title="لا توجد مهام لهذا اليوم"
+          description="أضف مهامك الآن لتبدأ يومك بشكل منظم"
+          actionLabel="إضافة مهمة"
+          onAction={goToTasks}
+          variant="compact"
+        />
       </motion.div>
     );
   }
@@ -656,7 +663,7 @@ export function Dashboard() {
               >
                 <Sprout className="h-12 w-12 text-emerald-400" />
               </motion.div>
-              <h2 className="mb-2 text-xl font-bold text-zinc-900 dark:text-zinc-100">ابدأ رحلة الإنجاز</h2>
+              <h2 className="mb-2 text-xl font-extrabold text-zinc-900 dark:text-zinc-100">ابدأ رحلة الإنجاز</h2>
               <p className="mb-6 text-sm text-zinc-400">أنشئ أول مهمة لك وابدأ في تنظيم يومك</p>
               <motion.button
                 whileHover={{ scale: 1.03 }}
@@ -714,7 +721,12 @@ export function Dashboard() {
                         </button>
                       </div>
                       {recentTasks.length === 0 && projects.length === 0 ? (
-                        <p className="py-6 text-center text-xs text-zinc-400">لا يوجد نشاط بعد</p>
+                        <EmptyState
+                          icon={Clock}
+                          title="لا يوجد نشاط حتى الآن"
+                          description="ستظهر هنا آخر المهام والمشاريع التي قمت بها"
+                          variant="compact"
+                        />
                       ) : (
                         <div className="space-y-0">
                           {recentTasks.map((task, i) => (
@@ -777,7 +789,7 @@ export function Dashboard() {
                   {/* Greeting */}
                   <motion.div variants={itemVariants}>
                     <div className="flex flex-col gap-0.5">
-                      <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">
+                      <h1 className="text-2xl font-extrabold text-zinc-900 dark:text-zinc-100">
                         {greeting.text} <span className="inline-block">{greeting.icon}</span>
                       </h1>
                       <p className="text-sm text-zinc-400">{arabicDate}</p>
@@ -827,7 +839,7 @@ export function Dashboard() {
                               key={card.value}
                               initial={{ scale: 0.8, opacity: 0 }}
                               animate={{ scale: 1, opacity: 1 }}
-                              className="text-2xl font-bold text-zinc-900 dark:text-zinc-100"
+                              className="text-2xl font-extrabold text-zinc-900 dark:text-zinc-100"
                             >
                               {card.value}
                             </motion.span>
@@ -852,7 +864,7 @@ export function Dashboard() {
                         <div className="relative mb-3">
                           <ProgressRing percent={completionRate} size={90} strokeWidth={6} color="#10b981" />
                           <div className="absolute inset-0 flex flex-col items-center justify-center">
-                            <motion.span key={completionRate} initial={{ opacity: 0, scale: 0.5 }} animate={{ opacity: 1, scale: 1 }} className="text-xl font-bold text-zinc-900 dark:text-zinc-100">
+                            <motion.span key={completionRate} initial={{ opacity: 0, scale: 0.5 }} animate={{ opacity: 1, scale: 1 }} className="text-xl font-extrabold text-zinc-900 dark:text-zinc-100">
                               {completionRate}%
                             </motion.span>
                           </div>
@@ -906,7 +918,7 @@ export function Dashboard() {
                   </motion.div>
 
                   {/* Today's Tasks */}
-                  <TodayTasksCard tasks={todayTasks} onToggle={handleToggleTodayTask} onNavigate={goToTasks} />
+                  <TodayTasksCard tasks={todayTasks} onToggle={handleToggleTodayTask} onNavigate={goToTasks} goToTasks={goToTasks} />
 
                   {/* Overdue Alert */}
                   {overdue > 0 && (
@@ -969,7 +981,7 @@ export function Dashboard() {
                             <div className={cn('flex h-9 w-9 items-center justify-center rounded-xl', stat.bg)}>
                               <stat.icon className={cn('h-4 w-4', stat.color)} />
                             </div>
-                            <span className="text-lg font-bold text-zinc-900 dark:text-zinc-100">{stat.value}</span>
+                            <span className="text-lg font-extrabold text-zinc-900 dark:text-zinc-100">{stat.value}</span>
                             <span className="text-[10px] text-zinc-500 dark:text-zinc-400">{stat.label}</span>
                           </div>
                         ))}

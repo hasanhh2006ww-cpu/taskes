@@ -8,7 +8,7 @@ import { cn } from '@/lib/cn';
 import { PRIORITIES } from '@/lib/constants';
 import { Calendar, Trash2, Star, X, Plus, Timer, ListChecks } from 'lucide-react';
 import type { Priority, SubTask, ActivityLogEntry } from '@/lib/types';
-import { useUIStore } from '@/store/useUIStore';
+import { EmptyState } from '@/components/ui/EmptyState';
 
 export function TaskDetail({ onClose }: { onClose?: () => void }) {
   const { tasks, activeTaskId, setActiveTaskId, updateTask, deleteTask, toggleComplete, toggleImportant, addSubtask, toggleSubtask, deleteSubtask, updateSubtask, addActivityLog, addFocusSession } =
@@ -72,7 +72,7 @@ export function TaskDetail({ onClose }: { onClose?: () => void }) {
           </button>
         </div>
         <div className="flex flex-1 flex-col items-center justify-center gap-1 px-6">
-          <p className="text-3xl font-bold text-zinc-200 dark:text-zinc-700">
+          <p className="text-3xl font-extrabold text-zinc-200 dark:text-zinc-700">
             {today.getDate()}
           </p>
           <p className="text-sm text-zinc-400 dark:text-zinc-500">
@@ -283,7 +283,12 @@ export function TaskDetail({ onClose }: { onClose?: () => void }) {
             </div>
 
             {subtasks.length === 0 ? (
-              <p className="py-3 text-center text-xs text-zinc-400 dark:text-zinc-500">لا توجد مهام فرعية بعد</p>
+              <EmptyState
+                icon={ListChecks}
+                title="لا توجد مهام فرعية"
+                description="أضف مهام فرعية لتنظيم العمل بشكل أفضل"
+                variant="compact"
+              />
             ) : (
               <div className="space-y-1">
                 {subtasks
@@ -433,21 +438,21 @@ export function TaskDetail({ onClose }: { onClose?: () => void }) {
             <div className="mb-2 text-xs font-medium text-zinc-400 dark:text-zinc-500">الإحصائيات</div>
             <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
               <div className="rounded-xl border border-zinc-200/60 bg-white/30 p-3 text-center dark:border-zinc-800/40 dark:bg-zinc-900/30">
-                <div className="text-lg font-bold text-zinc-800 dark:text-zinc-200">
+                <div className="text-lg font-extrabold text-zinc-800 dark:text-zinc-200">
                   {subtasks.length > 0 ? subtaskProgress : t.completed ? 100 : 0}%
                 </div>
                 <div className="mt-0.5 text-[10px] text-zinc-400 dark:text-zinc-500">الإنجاز</div>
               </div>
               <div className="rounded-xl border border-zinc-200/60 bg-white/30 p-3 text-center dark:border-zinc-800/40 dark:bg-zinc-900/30">
-                <div className="text-lg font-bold text-zinc-800 dark:text-zinc-200">{completedSubtasks}/{subtasks.length}</div>
+                <div className="text-lg font-extrabold text-zinc-800 dark:text-zinc-200">{completedSubtasks}/{subtasks.length}</div>
                 <div className="mt-0.5 text-[10px] text-zinc-400 dark:text-zinc-500">مهام فرعية</div>
               </div>
               <div className="rounded-xl border border-zinc-200/60 bg-white/30 p-3 text-center dark:border-zinc-800/40 dark:bg-zinc-900/30">
-                <div className="text-lg font-bold text-indigo-500">{focusSessions}</div>
+                <div className="text-lg font-extrabold text-indigo-500">{focusSessions}</div>
                 <div className="mt-0.5 text-[10px] text-zinc-400 dark:text-zinc-500">جلسات تركيز</div>
               </div>
               <div className="rounded-xl border border-zinc-200/60 bg-white/30 p-3 text-center dark:border-zinc-800/40 dark:bg-zinc-900/30">
-                <div className="text-lg font-bold text-amber-500">{totalFocusTime}</div>
+                <div className="text-lg font-extrabold text-amber-500">{totalFocusTime}</div>
                 <div className="mt-0.5 text-[10px] text-zinc-400 dark:text-zinc-500">دقيقة تركيز</div>
               </div>
             </div>

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Cairo, IBM_Plex_Sans_Arabic } from "next/font/google";
+import { Cairo } from "next/font/google";
 import { Toaster } from "react-hot-toast";
 import { Analytics } from "@vercel/analytics/next";
 import ClientLayout from "./layout-client";
@@ -8,13 +8,7 @@ import "./globals.css";
 const cairo = Cairo({
   variable: "--font-cairo",
   subsets: ["arabic", "latin"],
-  weight: ["400", "500", "600", "700"],
-});
-
-const ibmPlex = IBM_Plex_Sans_Arabic({
-  variable: "--font-ibm-plex",
-  subsets: ["arabic"],
-  weight: ["400", "500", "600", "700"],
+  weight: ["400", "700", "800"],
 });
 
 export const metadata: Metadata = {
@@ -32,14 +26,14 @@ export default function RootLayout({
     <html
       lang="ar"
       dir="rtl"
-      className={`${cairo.variable} ${ibmPlex.variable} h-full antialiased`}
+      className={`${cairo.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <body
         className="h-full"
         style={{
           fontFamily:
-            "var(--font-ibm-plex), var(--font-cairo), system-ui, sans-serif",
+            "var(--font-cairo), system-ui, sans-serif",
         }}
       >
         <Toaster
@@ -48,7 +42,7 @@ export default function RootLayout({
             duration: 3000,
             style: {
               fontFamily:
-                "var(--font-ibm-plex), var(--font-cairo), sans-serif",
+                "var(--font-cairo), sans-serif",
               fontSize: "14px",
             },
           }}

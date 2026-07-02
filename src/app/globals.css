@@ -21,10 +21,30 @@
 }
 
 body {
-  font-family: var(--font-ibm-plex), var(--font-cairo), system-ui, sans-serif;
+  font-family: var(--font-cairo), system-ui, sans-serif;
   -webkit-tap-highlight-color: transparent;
   overscroll-behavior: none;
   background: #f8fafc;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+body h1,
+body h2,
+body h3,
+body h4,
+body h5,
+body h6,
+body p,
+body span,
+body button,
+body input,
+body select,
+body textarea,
+body label,
+body a,
+body div {
+  font-family: var(--font-cairo), system-ui, sans-serif;
 }
 
 .dark body {
@@ -42,8 +62,36 @@ img, svg, video, canvas, audio, iframe, embed, object {
   max-width: 100%;
 }
 
-input, select, textarea, button {
+h1 {
+  font-size: 24px;
+  font-weight: 700;
+}
+
+h2 {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+h3 {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+p {
   font-size: 16px;
+  font-weight: 400;
+}
+
+button {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+input,
+select,
+textarea {
+  font-size: 16px;
+  font-weight: 400;
 }
 
 @media (max-width: 767px) {

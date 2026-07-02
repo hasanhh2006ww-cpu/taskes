@@ -1,5 +1,6 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useUIStore } from '@/store/useUIStore';
@@ -25,7 +26,9 @@ import {
   Settings,
   Link,
   Lightbulb,
+  Target,
 } from 'lucide-react';
+import { EmptyState } from '@/components/ui/EmptyState';
 
 function extractYoutubeId(url: string): string | null {
   const patterns = [
@@ -627,7 +630,7 @@ export function FocusMode() {
             key={`${mm}:${ss}`}
             initial={{ opacity: 0.7, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="font-mono text-3xl font-bold tracking-wider text-white tabular-nums sm:text-4xl md:text-5xl"
+            className="font-mono text-3xl font-extrabold tracking-wider text-white tabular-nums sm:text-4xl md:text-5xl"
           >
             {mm}:{ss}
           </motion.span>
@@ -751,10 +754,14 @@ export function FocusMode() {
       </AnimatePresence>
 
       {!task && (
-        <div className="text-center text-white/30">
-          <p className="text-lg">لا توجد مهام حالياً</p>
-          <p className="mt-1 text-sm">أضف مهمة للبدء بالتركيز</p>
-        </div>
+        <EmptyState
+          icon={Target}
+          title="لا توجد مهام حالياً"
+          description="أضف مهمة للبدء بجلسة تركيز"
+          actionLabel="إضافة مهمة"
+          onAction={() => window.location.href = '/tasks'}
+          className="text-white"
+        />
       )}
     </motion.div>
   );

@@ -6,6 +6,7 @@ import type { Habit, DailyHabit, WeeklyHabit, MonthlyHabit } from '@/lib/types';
 import { Button } from '@/components/ui/Button';
 import { cn } from '@/lib/cn';
 import { Plus, Trash2, GripVertical, Download, Upload, Flame } from 'lucide-react';
+import { EmptyState } from '@/components/ui/EmptyState';
 import { getToday, getWeekKey, getMonthWeekKey } from '@/lib/constants';
 import { AddEditHabitModal } from './AddEditHabitModal';
 import { ConfirmDialog } from './ConfirmDialog';
@@ -348,17 +349,23 @@ export function HabitTrackerPro() {
       )}
 
       {activeTab !== 'stats' && habits.length === 0 && (
-        <div className="mt-16 flex flex-col items-center gap-2 text-center">
-          <p className="text-sm text-zinc-400 dark:text-zinc-500">لا توجد عادات بعد</p>
-          <p className="text-xs text-zinc-300 dark:text-zinc-600">اضغط على زر + لإضافة عادة جديدة</p>
-        </div>
+        <EmptyState
+          icon={Flame}
+          title="لا توجد عادات بعد"
+          description="ابدأ عادتك الأولى وابنِ روتيناً يومياً إيجابياً"
+          actionLabel="إضافة عادة"
+          onAction={() => setEditHabit({ id: '', title: '', type: 'daily', dummy: true } as any)}
+        />
       )}
 
       <div className="flex-1 overflow-y-auto px-4 pb-24 md:px-6">
         {activeTab !== 'stats' && activeTab !== 'all' && displayedHabits.length === 0 && habits.length > 0 && (
-          <div className="mt-8 text-center text-sm text-zinc-400 dark:text-zinc-500">
-            لا توجد عادات {activeTab === 'daily' ? 'يومية' : activeTab === 'weekly' ? 'أسبوعية' : 'شهرية'} بعد
-          </div>
+          <EmptyState
+            icon={Flame}
+            title={`لا توجد عادات ${activeTab === 'daily' ? 'يومية' : activeTab === 'weekly' ? 'أسبوعية' : 'شهرية'} بعد`}
+            description="اضغط على زر + لإضافة عادة جديدة"
+            variant="compact"
+          />
         )}
 
         {isReordering ? (
