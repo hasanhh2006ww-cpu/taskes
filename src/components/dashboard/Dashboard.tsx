@@ -7,15 +7,15 @@ import { useTaskStore } from '@/store/useTaskStore';
 import { useProjectStore } from '@/store/useProjectStore';
 import { useHabitStore } from '@/store/useHabitStore';
 import { useUIStore } from '@/store/useUIStore';
-import { getToday, getWeekKey, PRIORITIES } from '@/lib/constants';
+import { getToday, getWeekKey } from '@/lib/constants';
 import { cn } from '@/lib/cn';
 import {
   ListTodo, Calendar, CheckCircle2, Clock,
-  Search, Bell, Plus, BarChart3,
+  Plus, BarChart3,
   ArrowRight, Sprout, Target,
-  Timer, Flame, TrendingUp,
-  FolderKanban, Sparkles, SunDim, Moon,
-  Brain, Activity, ClipboardList,
+  Timer, Flame,
+  FolderKanban, Sparkles,
+  Activity, ClipboardList,
 } from 'lucide-react';
 import { EmptyState } from '@/components/ui/EmptyState';
 import toast from 'react-hot-toast';
@@ -29,6 +29,12 @@ const QUOTES = [
   'الانضباط هو الجسر بين الأهداف والإنجاز',
   'كل مهمة تنجزها هي خطوة نحو هدفك الأكبر',
   'ابدأ حيث أنت، واستخدم ما لديك، وافعل ما تستطيع',
+];
+
+const ANNOUNCEMENTS = [
+  { icon: Sparkles, title: 'نصيحة اليوم', message: 'قسّم مهامك الكبيرة إلى مهام صغيرة قابلة للتحقيق لتشعر بالتقدم يومياً', color: 'text-emerald-500', bg: 'bg-emerald-50 dark:bg-emerald-900/20' },
+  { icon: Target, title: 'تحدي الأسبوع', message: 'حقق 3 جلسات تركيز هذا الأسبوع لتعزيز إنتاجيتك', color: 'text-amber-500', bg: 'bg-amber-50 dark:bg-amber-900/20' },
+  { icon: Activity, title: 'الإنتاجية الجماعية', message: 'العادات اليومية الصغيرة تصنع فرقاً كبيراً على المدى الطويل', color: 'text-violet-500', bg: 'bg-violet-50 dark:bg-violet-900/20' },
 ];
 
 const priorityColor: Record<string, { dot: string; bg: string }> = {
@@ -50,10 +56,8 @@ function getGreeting(): { text: string; icon: string } {
 }
 
 function getArabicDate(): string {
-  const days = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
-  const months = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
   const d = new Date();
-  return `${days[d.getDay()]}، ${d.getDate()} ${months[d.getMonth()]}`;
+  return `${DAY_NAMES_LONG[d.getDay()]}، ${d.getDate()} ${MONTH_NAMES[d.getMonth()]}`;
 }
 
 function formatDuration(minutes: number): string {
@@ -141,252 +145,13 @@ function AnimatedProgressBar({ value, max, color = 'emerald' }: { value: number;
   );
 }
 
-function MainGoalCard({ goal }: { goal: { title: string; completed: number; total: number; remaining: number; deadline: string | null } | null }) {
-  if (!goal) {
+function TodayTasksCard({ isEmpty, tasks, onToggle, onNavigate, goToTasks }: { isEmpty: boolean; tasks: { id: string; title: string; priority: string; completed: boolean }[]; onToggle: (id: string) => void; onNavigate: () => void; goToTasks: () => void }) {
+  if (isEmpty) {
     return (
-      <motion.div variants={itemVariants} className="card-modern relative overflow-hidden rounded-2xl border border-zinc-200/60 bg-white p-5 dark:border-zinc-800/40 dark:bg-zinc-900/60">
-        <div className="relative flex flex-col items-center py-6 text-center">
-          <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-zinc-100 dark:bg-zinc-800">
-            <Target className="h-6 w-6 text-zinc-400" />
-          </div>
-          <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">الهدف الرئيسي</h3>
-          <p className="mt-1 text-xs text-zinc-400">أنشئ مشروعاً وابدأ في إضافة المهام</p>
-        </div>
-      </motion.div>
-    );
-  }
-  const pct = goal.total > 0 ? Math.round((goal.completed / goal.total) * 100) : 0;
-  return (
-    <motion.div variants={itemVariants} className="card-modern relative overflow-hidden rounded-2xl border border-zinc-200/60 bg-white p-5 dark:border-zinc-800/40 dark:bg-zinc-900/60">
-      <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/[0.02] to-transparent" />
-      <div className="relative">
-        <div className="mb-4 flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-500 to-emerald-600 shadow-sm shadow-emerald-500/20">
-            <Target className="h-4 w-4 text-white" />
-          </div>
-          <div>
-            <p className="text-[11px] font-medium text-zinc-400">الهدف الرئيسي</p>
-            <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">{goal.title}</h3>
-          </div>
-        </div>
-        <div className="mb-3 flex items-center justify-between">
-          <span className="text-2xl font-extrabold text-zinc-900 dark:text-zinc-100">{pct}%</span>
-          <span className="text-xs text-zinc-500">{goal.completed}/{goal.total} مهام</span>
-        </div>
-        <AnimatedProgressBar value={goal.completed} max={goal.total} />
-        <div className="mt-3 flex items-center justify-between text-xs">
-          <span className="text-zinc-500">
-            <span className="font-medium text-zinc-700 dark:text-zinc-300">{goal.remaining}</span> مهام متبقية
-          </span>
-          {goal.deadline && (
-            <span className="text-zinc-400">{getDateLabel(goal.deadline)}</span>
-          )}
-        </div>
-      </div>
-    </motion.div>
-  );
-}
-
-function ProductivityHeatmap({ days }: { days: { date: string; completed: number }[] }) {
-  const today = getToday();
-  const monthName = MONTH_NAMES[new Date().getMonth()];
-  const weekLabels = ['ح', 'ن', 'ث', 'ر', 'خ', 'ج', 'س'];
-  const weeks: { date: string; completed: number }[][] = [];
-  for (let i = 0; i < days.length; i += 7) {
-    weeks.push(days.slice(i, i + 7));
-  }
-  return (
-    <motion.div variants={itemVariants} className="card-modern relative overflow-hidden rounded-2xl border border-zinc-200/60 bg-white p-5 dark:border-zinc-800/40 dark:bg-zinc-900/60">
-      <div className="relative">
-        <div className="mb-3 flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-500 to-emerald-600 shadow-sm shadow-emerald-500/20">
-            <Activity className="h-4 w-4 text-white" />
-          </div>
-          <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
-            خريطة الإنتاجية — {monthName}
-          </h3>
-        </div>
-        <div className="flex gap-1">
-          <div className="flex flex-col gap-1 pt-5">
-            {weekLabels.map((l) => (
-              <div key={l} className="flex h-3 w-3 items-center justify-center">
-                <span className="text-[8px] text-zinc-400">{l}</span>
-              </div>
-            ))}
-          </div>
-          <div className="flex flex-1 gap-1 overflow-x-auto">
-            {weeks.map((week, wi) => (
-              <div key={wi} className="flex flex-1 flex-col gap-1">
-                {week.map((day) => {
-                  const level = day.completed === 0 ? 0 : day.completed <= 2 ? 1 : day.completed <= 5 ? 2 : 3;
-                  const bg = ['bg-zinc-100 dark:bg-zinc-800', 'bg-emerald-200', 'bg-emerald-400', 'bg-emerald-600'][level];
-                  const d = new Date(day.date);
-                  const isToday = day.date === today;
-                  return (
-                    <div
-                      key={day.date}
-                      className={cn(
-                        'group relative h-3 w-full rounded-sm transition-colors',
-                        bg,
-                        isToday && 'ring-2 ring-emerald-500 ring-offset-1 ring-offset-white dark:ring-offset-zinc-900'
-                      )}
-                    >
-                      <div className="pointer-events-none absolute bottom-full start-1/2 z-20 mb-1.5 -translate-x-1/2 whitespace-nowrap rounded-lg bg-zinc-900 px-2 py-1 text-[10px] text-white opacity-0 shadow-lg transition-opacity group-hover:opacity-100 dark:bg-zinc-700">
-                        {d.getDate()} {MONTH_NAMES[d.getMonth()]}
-                        <br />
-                        {day.completed > 0 ? `أنجزت ${day.completed} مهام` : 'لا مهام'}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            ))}
-          </div>
-        </div>
-        <div className="mt-3 flex items-center justify-end gap-1.5 text-[10px] text-zinc-400">
-          <span>أقل</span>
-          <div className="h-2.5 w-2.5 rounded-sm bg-zinc-100 dark:bg-zinc-800" />
-          <div className="h-2.5 w-2.5 rounded-sm bg-emerald-200" />
-          <div className="h-2.5 w-2.5 rounded-sm bg-emerald-400" />
-          <div className="h-2.5 w-2.5 rounded-sm bg-emerald-600" />
-          <span>أكثر</span>
-        </div>
-      </div>
-    </motion.div>
-  );
-}
-
-const containerVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { staggerChildren: 0.05 },
-  },
-};
-
-const itemVariants: Variants = {
-  hidden: { opacity: 0, y: 16 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.35, ease: 'easeOut' } },
-};
-
-function ProductivityScoreCard({ score, maxScore = 100 }: { score: number; maxScore?: number }) {
-  const ringColor = score >= 80 ? '#10b981' : score >= 50 ? '#f59e0b' : '#ef4444';
-  const label = score >= 80 ? 'ممتاز' : score >= 50 ? 'جيد' : 'بحاجة للتحسين';
-  return (
-    <motion.div variants={itemVariants} className="card-modern relative overflow-hidden rounded-2xl border border-zinc-200/60 bg-white p-5 dark:border-zinc-800/40 dark:bg-zinc-900/60">
-      <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/[0.02] to-transparent" />
-      <div className="relative">
-        <div className="mb-3 flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-500 to-emerald-600 shadow-sm shadow-emerald-500/20">
-            <Brain className="h-4 w-4 text-white" />
-          </div>
-          <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">معدل الإنتاجية</h3>
-        </div>
-        <div className="flex items-center gap-4">
-          <div className="relative">
-            <ProgressRing percent={score} size={72} strokeWidth={5} color={ringColor} />
-            <div className="absolute inset-0 flex items-center justify-center">
-              <span className="text-lg font-extrabold text-zinc-900 dark:text-zinc-100">{score}</span>
-            </div>
-          </div>
-          <div className="flex-1">
-            <p className="text-sm font-medium text-zinc-800 dark:text-zinc-200">{label}</p>
-            <p className="mt-0.5 text-[11px] text-zinc-400">من أصل {maxScore} نقطة</p>
-            <AnimatedProgressBar value={score} max={maxScore} />
-          </div>
-        </div>
-      </div>
-    </motion.div>
-  );
-}
-
-function WeeklyHeatmapView({ weeks }: { weeks: { label: string; days: { date: string; count: number; completed: number }[] }[] }) {
-  const maxCount = Math.max(...weeks.flatMap(w => w.days.map(d => d.count)), 1);
-  return (
-    <motion.div variants={itemVariants} className="card-modern relative overflow-hidden rounded-2xl border border-zinc-200/60 bg-white p-5 dark:border-zinc-800/40 dark:bg-zinc-900/60">
-      <div className="relative">
-        <div className="mb-3 flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-amber-500 to-amber-600 shadow-sm shadow-amber-500/20">
-            <Activity className="h-4 w-4 text-white" />
-          </div>
-          <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">خريطة النشاط الأسبوعي</h3>
-        </div>
-        <div className="flex gap-1.5">
-          {weeks.map((week) => (
-            <div key={week.label} className="flex flex-1 flex-col gap-1">
-              {week.days.map((day) => {
-                const intensity = maxCount > 0 ? day.count / maxCount : 0;
-                const bg = day.count === 0
-                  ? 'bg-zinc-100 dark:bg-zinc-800'
-                  : day.completed === day.count
-                    ? 'bg-emerald-500'
-                    : intensity > 0.66
-                      ? 'bg-emerald-400'
-                      : intensity > 0.33
-                        ? 'bg-emerald-300'
-                        : 'bg-emerald-200';
-                return (
-                  <div
-                    key={day.date}
-                    className={cn('h-3 w-full rounded-sm transition-colors', bg)}
-                    title={`${day.date}: ${day.completed}/${day.count}`}
-                  />
-                );
-              })}
-            </div>
-          ))}
-        </div>
-        <div className="mt-3 flex items-center justify-end gap-1.5 text-[10px] text-zinc-400">
-          <span>أقل</span>
-          <div className="h-2.5 w-2.5 rounded-sm bg-zinc-100 dark:bg-zinc-800" />
-          <div className="h-2.5 w-2.5 rounded-sm bg-emerald-200" />
-          <div className="h-2.5 w-2.5 rounded-sm bg-emerald-300" />
-          <div className="h-2.5 w-2.5 rounded-sm bg-emerald-400" />
-          <div className="h-2.5 w-2.5 rounded-sm bg-emerald-500" />
-          <span>أكثر</span>
-        </div>
-      </div>
-    </motion.div>
-  );
-}
-
-function FocusSummaryCard({ totalPomodoros, focusMinutes, todayPomodoros }: { totalPomodoros: number; focusMinutes: number; todayPomodoros: number }) {
-  return (
-    <motion.div variants={itemVariants} className="card-modern relative overflow-hidden rounded-2xl border border-zinc-200/60 bg-white p-5 dark:border-zinc-800/40 dark:bg-zinc-900/60">
-      <div className="relative">
-        <div className="mb-3 flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-violet-500 to-violet-600 shadow-sm shadow-violet-500/20">
-            <Timer className="h-4 w-4 text-white" />
-          </div>
-          <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">ملخص التركيز</h3>
-        </div>
-        <div className="grid grid-cols-3 gap-3">
-          <div className="rounded-xl bg-zinc-50 p-3 text-center dark:bg-zinc-800/50">
-            <p className="text-lg font-extrabold text-zinc-900 dark:text-zinc-100">{totalPomodoros}</p>
-            <p className="text-[10px] text-zinc-500 dark:text-zinc-400">إجمالي الجلسات</p>
-          </div>
-          <div className="rounded-xl bg-zinc-50 p-3 text-center dark:bg-zinc-800/50">
-            <p className="text-lg font-extrabold text-zinc-900 dark:text-zinc-100">{formatDuration(focusMinutes)}</p>
-            <p className="text-[10px] text-zinc-500 dark:text-zinc-400">إجمالي الوقت</p>
-          </div>
-          <div className="rounded-xl bg-zinc-50 p-3 text-center dark:bg-zinc-800/50">
-            <p className="text-lg font-extrabold text-zinc-900 dark:text-zinc-100">{todayPomodoros}</p>
-            <p className="text-[10px] text-zinc-500 dark:text-zinc-400">جلسات اليوم</p>
-          </div>
-        </div>
-      </div>
-    </motion.div>
-  );
-}
-
-function TodayTasksCard({ tasks, onToggle, onNavigate, goToTasks }: { tasks: { id: string; title: string; priority: string; completed: boolean }[]; onToggle: (id: string) => void; onNavigate: () => void; goToTasks: () => void }) {
-  if (tasks.length === 0) {
-    return (
-      <motion.div variants={itemVariants} className="card-modern relative overflow-hidden rounded-2xl border border-zinc-200/60 bg-white p-5 dark:border-zinc-800/40 dark:bg-zinc-900/60">
+      <motion.div variants={itemVariants} className="card-base p-5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg"> <ClipboardList className="h-5 w-5 text-zinc-400" />
-            </div>
+            <ClipboardList className="h-5 w-5 text-zinc-400" />
             <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">مهام اليوم</h3>
           </div>
         </div>
@@ -402,16 +167,14 @@ function TodayTasksCard({ tasks, onToggle, onNavigate, goToTasks }: { tasks: { i
     );
   }
   return (
-    <motion.div variants={itemVariants} className="card-modern relative overflow-hidden rounded-2xl border border-zinc-200/60 bg-white p-5 dark:border-zinc-800/40 dark:bg-zinc-900/60">
+    <motion.div variants={itemVariants} className="card-base p-5">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-sky-500 to-sky-600 shadow-sm shadow-sky-500/20">
-            <ListTodo className="h-4 w-4 text-white" />
-          </div>
+          <ListTodo className="h-5 w-5 text-emerald-500" />
           <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">مهام اليوم</h3>
-          <span className="rounded-full bg-sky-100 px-2 py-0.5 text-[10px] font-medium text-sky-600 dark:bg-sky-900/30 dark:text-sky-400">{tasks.length}</span>
+          <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-medium text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400">{tasks.length}</span>
         </div>
-        <button onClick={onNavigate} className="text-[10px] font-medium text-sky-600 transition-colors hover:text-sky-700 cursor-pointer">
+        <button onClick={onNavigate} className="text-[10px] font-medium text-emerald-600 transition-colors hover:text-emerald-700 cursor-pointer">
           عرض الكل <ArrowRight className="me-0.5 inline h-3 w-3" />
         </button>
       </div>
@@ -446,6 +209,58 @@ function TodayTasksCard({ tasks, onToggle, onNavigate, goToTasks }: { tasks: { i
   );
 }
 
+function MiniCalendar() {
+  const today = new Date();
+  const currentMonth = today.getMonth();
+  const currentYear = today.getFullYear();
+  const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+  const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+  const todayNum = today.getDate();
+
+  const days: (number | null)[] = [];
+  for (let i = 0; i < firstDay; i++) days.push(null);
+  for (let i = 1; i <= daysInMonth; i++) days.push(i);
+
+  return (
+    <div className="card-base p-5">
+      <div className="mb-3 flex items-center gap-2">
+        <Calendar className="h-5 w-5 text-emerald-500" />
+        <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">{MONTH_NAMES[currentMonth]} {currentYear}</h3>
+      </div>
+      <div className="grid grid-cols-7 gap-1 text-center">
+        {DAY_NAMES_SHORT.map((d) => (
+          <div key={d} className="text-[10px] font-medium text-zinc-400 py-1">{d}</div>
+        ))}
+        {days.map((d, i) => (
+          <div
+            key={i}
+            className={cn(
+              'rounded-lg py-1.5 text-xs transition-colors',
+              d === null ? 'invisible' : 'text-zinc-600 dark:text-zinc-400',
+              d === todayNum ? 'bg-emerald-500 font-bold text-white' : 'hover:bg-zinc-100 dark:hover:bg-zinc-800'
+            )}
+          >
+            {d}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+const containerVariants: Variants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.05 },
+  },
+};
+
+const itemVariants: Variants = {
+  hidden: { opacity: 0, y: 16 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.35, ease: 'easeOut' } },
+};
+
 export function Dashboard() {
   const router = useRouter();
   const tasks = useTaskStore((s) => s.tasks);
@@ -453,7 +268,7 @@ export function Dashboard() {
   const { setActiveProjectId, toggleComplete } = useTaskStore();
 
   const habits = useHabitStore((s) => s.habits);
-  const { toggleFocusMode, darkMode, toggleDarkMode } = useUIStore();
+  const { toggleFocusMode } = useUIStore();
 
   const today = getToday();
   const total = tasks.length;
@@ -480,28 +295,12 @@ export function Dashboard() {
     }).length;
   }, [habits, today]);
 
-  const focusMinutes = useMemo(() => totalPomodoros * 25, [totalPomodoros]);
-
-  const productivityScore = useMemo(() => {
-    const taskScore = total > 0 ? (completed / total) * 40 : 0;
-    const habitScore = habits.length > 0 ? (todayHabitCompletions / habits.length) * 30 : 0;
-    const focusScore = Math.min(totalPomodoros * 2, 30);
-    return Math.round(taskScore + habitScore + focusScore);
-  }, [total, completed, habits.length, todayHabitCompletions, totalPomodoros]);
-
   const habitStreak = useMemo(() => {
     if (habits.length === 0) return 0;
     return Math.max(...habits.map((h) => h.streak || 0));
   }, [habits]);
 
-  const habitCompletionRate = useMemo(() => {
-    if (habits.length === 0) return 0;
-    const completedHabits = habits.filter((h) => {
-      if (h.type === 'daily') return h.completions?.[today] === true;
-      return false;
-    });
-    return Math.round((completedHabits.length / Math.max(habits.length, 1)) * 100);
-  }, [habits]);
+  const focusMinutes = useMemo(() => totalPomodoros * 25, [totalPomodoros]);
 
   const recentTasks = useMemo(() =>
     [...tasks].sort((a, b) => b.createdAt - a.createdAt).slice(0, 5),
@@ -524,60 +323,9 @@ export function Dashboard() {
     return days;
   }, [tasks]);
 
-  const heatmapWeeks = useMemo(() => {
-    const weeks: { label: string; days: { date: string; count: number; completed: number }[] }[] = [];
-    for (let w = 3; w >= 0; w--) {
-      const days: { date: string; count: number; completed: number }[] = [];
-      for (let d = 6; d >= 0; d--) {
-        const date = new Date();
-        date.setDate(date.getDate() - (w * 7 + d));
-        const dateStr = date.toISOString().split('T')[0];
-        const dayTasks = tasks.filter(t => t.dueDate === dateStr);
-        days.push({
-          date: dateStr,
-          count: dayTasks.length,
-          completed: dayTasks.filter(t => t.completed).length,
-        });
-      }
-      weeks.push({ label: `أسبوع ${w + 1}`, days });
-    }
-    return weeks;
-  }, [tasks]);
-
   const todayPomodoros = useMemo(() => {
     return tasks.filter(t => t.dueDate === today).reduce((sum, t) => sum + (t.pomodoroCount ?? 0), 0);
   }, [tasks, today]);
-
-  const mainGoal = useMemo(() => {
-    const projectStats = projects.map(p => {
-      const projectTasks = tasks.filter(t => t.projectId === p.id);
-      return { project: p, tasks: projectTasks, count: projectTasks.length };
-    }).filter(ps => ps.count > 0).sort((a, b) => b.count - a.count);
-    if (projectStats.length === 0) return null;
-    const { project, tasks: projectTasks } = projectStats[0];
-    const completed = projectTasks.filter(t => t.completed).length;
-    const total = projectTasks.length;
-    const deadlines = projectTasks.filter(t => t.dueDate).map(t => t.dueDate!).sort();
-    return {
-      title: project.name,
-      completed,
-      total,
-      remaining: total - completed,
-      deadline: deadlines.length > 0 ? deadlines[deadlines.length - 1] : null,
-    };
-  }, [projects, tasks]);
-
-  const heatmap30Days = useMemo(() => {
-    const days: { date: string; completed: number }[] = [];
-    for (let i = 29; i >= 0; i--) {
-      const d = new Date();
-      d.setDate(d.getDate() - i);
-      const dateStr = d.toISOString().split('T')[0];
-      const completed = tasks.filter(t => t.dueDate === dateStr && t.completed).length;
-      days.push({ date: dateStr, completed });
-    }
-    return days;
-  }, [tasks]);
 
   const goToTasks = useCallback(() => {
     router.push('/tasks');
@@ -613,46 +361,8 @@ export function Dashboard() {
 
   return (
     <div className="flex h-full flex-col bg-zinc-50 dark:bg-transparent">
-      <div className="sticky top-0 z-10 border-b border-zinc-200/60 bg-white/80 backdrop-blur-md dark:border-zinc-800/40 dark:bg-zinc-950/60">
-        <div className="flex items-center gap-3 px-4 py-3 md:px-6">
-          <div className="relative flex-1">
-            <Search className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
-            <input
-              placeholder="ابحث عن مهمة..."
-              className="w-full rounded-xl border border-zinc-200 bg-zinc-50 py-2 pe-4 ps-9 text-sm text-zinc-900 placeholder-zinc-400 outline-none transition-colors focus:border-emerald-300 focus:bg-white focus:ring-2 focus:ring-emerald-500/10 dark:border-zinc-700 dark:bg-zinc-900/50 dark:text-zinc-100 dark:placeholder-zinc-500 dark:focus:border-emerald-600"
-            />
-          </div>
-          <div className="flex items-center gap-1.5">
-            <button
-              onClick={toggleDarkMode}
-              className="flex h-9 w-9 items-center justify-center rounded-xl text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-600 dark:hover:bg-zinc-800"
-              aria-label={darkMode ? 'الوضع الفاتح' : 'الوضع الليلي'}
-            >
-              {darkMode ? <SunDim className="h-[18px] w-[18px]" /> : <Moon className="h-[18px] w-[18px]" />}
-            </button>
-            <button
-              onClick={() => toast.success('🔔 لا توجد إشعارات جديدة')}
-              className="relative flex h-9 w-9 items-center justify-center rounded-xl text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-600 dark:hover:bg-zinc-800"
-            >
-              <Bell className="h-[18px] w-[18px]" />
-              <span className="absolute -top-0.5 -end-0.5 h-2 w-2 rounded-full bg-emerald-500 ring-2 ring-white dark:ring-zinc-900" />
-            </button>
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 text-[13px] font-bold text-white shadow-sm">
-              <span>م</span>
-            </div>
-            <button
-              onClick={goToTasks}
-              className="flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 px-3 py-2 text-xs font-semibold text-white shadow-sm shadow-emerald-500/20 transition-all hover:shadow-md hover:shadow-emerald-500/30 active:scale-95"
-            >
-              <Plus className="h-3.5 w-3.5" />
-              <span className="hidden sm:inline">إضافة مهمة</span>
-            </button>
-          </div>
-        </div>
-      </div>
-
       <div className="flex-1 overflow-y-auto">
-        <div className="w-full p-4 md:p-6">
+        <div className="w-full p-4 md:p-6 max-w-7xl mx-auto">
           {isEmpty && (
             <motion.div variants={itemVariants} className="mb-5 flex flex-col items-center justify-center py-12 text-center rounded-2xl border border-zinc-200/60 bg-white dark:border-zinc-800/40 dark:bg-zinc-900/60">
               <motion.div
@@ -690,308 +400,246 @@ export function Dashboard() {
               </motion.div>
             </motion.div>
           )}
-          <motion.div variants={containerVariants} initial="hidden" animate="visible" className="w-full">
-              {/* Row 1: Main Goal + Productivity Heatmap */}
-              <motion.div variants={itemVariants} className="mb-5 grid grid-cols-1 gap-5 md:grid-cols-2">
-                <MainGoalCard goal={mainGoal} />
-                <ProductivityHeatmap days={heatmap30Days} />
-              </motion.div>
 
-              {/* Row 2-3: Existing 2-column grid */}
-              <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+          <motion.div variants={containerVariants} initial="hidden" animate="visible" className="w-full space-y-5">
 
-                {/* --- LEFT COLUMN --- */}
-                <div className="space-y-5">
-                  <ProductivityScoreCard score={productivityScore} />
-                  <WeeklyHeatmapView weeks={heatmapWeeks} />
-                  <FocusSummaryCard totalPomodoros={totalPomodoros} focusMinutes={focusMinutes} todayPomodoros={todayPomodoros} />
-
-                  {/* Recent Activity */}
-                  <motion.div variants={itemVariants} className="card-modern relative overflow-hidden rounded-2xl border border-zinc-200/60 bg-white p-5 dark:border-zinc-800/40 dark:bg-zinc-900/60">
-                    <div className="relative">
-                      <div className="mb-4 flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-500 to-emerald-600 shadow-sm shadow-emerald-500/20">
-                            <Clock className="h-4 w-4 text-white" />
-                          </div>
-                          <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">النشاط الأخير</h3>
-                        </div>
-                        <button onClick={goToTasks} className="text-[10px] font-medium text-emerald-600 transition-colors hover:text-emerald-700 cursor-pointer">
-                          عرض الكل <ArrowRight className="me-0.5 inline h-3 w-3" />
-                        </button>
-                      </div>
-                      {recentTasks.length === 0 && projects.length === 0 ? (
-                        <EmptyState
-                          icon={Clock}
-                          title="لا يوجد نشاط حتى الآن"
-                          description="ستظهر هنا آخر المهام والمشاريع التي قمت بها"
-                          variant="compact"
-                        />
-                      ) : (
-                        <div className="space-y-0">
-                          {recentTasks.map((task, i) => (
-                            <motion.div
-                              key={task.id}
-                              initial={{ opacity: 0, x: -10 }}
-                              animate={{ opacity: 1, x: 0 }}
-                              transition={{ delay: i * 0.05, duration: 0.25 }}
-                              className="relative flex items-start gap-3 pb-4"
-                            >
-                              <div className="flex flex-col items-center">
-                                <div className={cn('h-2.5 w-2.5 rounded-full ring-2 ring-white dark:ring-zinc-900', task.completed ? 'bg-emerald-500' : priorityColor[task.priority]?.dot || 'bg-zinc-300')} />
-                                {i < recentTasks.length - 1 && <div className="mt-1 h-full w-px bg-zinc-100 dark:bg-zinc-800" />}
-                              </div>
-                              <div className="min-w-0 flex-1">
-                                <p className={cn('text-sm leading-snug', task.completed ? 'text-zinc-400 line-through' : 'text-zinc-800 dark:text-zinc-200')}>{task.title}</p>
-                                <div className="mt-0.5 flex items-center gap-2">
-                                  <span className="text-[10px] text-zinc-400">{getDateLabel(task.dueDate || today)}</span>
-                                  {task.completed && <span className="rounded-md bg-emerald-50 px-1.5 py-0.5 text-[10px] font-medium text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400">تم</span>}
-                                </div>
-                              </div>
-                            </motion.div>
-                          ))}
-                          {projects.map((p) => {
-                            const count = tasks.filter((t) => t.projectId === p.id).length;
-                            const done = tasks.filter((t) => t.projectId === p.id && t.completed).length;
-                            const pct = count > 0 ? Math.round((done / count) * 100) : 0;
-                            return (
-                              <motion.button
-                                key={p.id}
-                                onClick={() => goToTasksWithProject(p.id)}
-                                initial={{ opacity: 0, x: -10 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                className="relative flex items-center gap-3 pb-3 w-full text-start"
-                              >
-                                <div className="flex flex-col items-center">
-                                  <div className="h-2.5 w-2.5 rounded-full ring-2 ring-white dark:ring-zinc-900" style={{ backgroundColor: p.color }} />
-                                  <div className="mt-1 h-full w-px bg-zinc-100 dark:bg-zinc-800" />
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                  <p className="text-sm font-medium text-zinc-800 dark:text-zinc-200">{p.name}</p>
-                                  <div className="mt-1 flex items-center gap-2">
-                                    <div className="flex-1 h-1.5 overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800">
-                                      <div className="h-full rounded-full transition-all duration-500" style={{ width: `${pct}%`, backgroundColor: p.color }} />
-                                    </div>
-                                    <span className="text-[10px] text-zinc-400 shrink-0">{done}/{count}</span>
-                                  </div>
-                                </div>
-                              </motion.button>
-                            );
-                          })}
-                        </div>
-                      )}
-                    </div>
-                  </motion.div>
+            {/* 1. Welcome Section */}
+            <motion.div variants={itemVariants} className="card-base p-5">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div>
+                  <h1 className="text-2xl font-extrabold text-zinc-900 dark:text-zinc-100">
+                    {greeting.text} {greeting.icon}
+                  </h1>
+                  <p className="text-sm text-zinc-400 mt-0.5">{arabicDate}</p>
                 </div>
-
-                {/* --- RIGHT COLUMN --- */}
-                <div className="space-y-5">
-                  {/* Greeting */}
-                  <motion.div variants={itemVariants}>
-                    <div className="flex flex-col gap-0.5">
-                      <h1 className="text-2xl font-extrabold text-zinc-900 dark:text-zinc-100">
-                        {greeting.text} <span className="inline-block">{greeting.icon}</span>
-                      </h1>
-                      <p className="text-sm text-zinc-400">{arabicDate}</p>
-                      <p className="mt-1.5 max-w-xl rounded-xl bg-emerald-50/50 px-3 py-2 text-xs italic text-zinc-500 dark:bg-emerald-900/10 dark:text-zinc-400">
-                        <Sparkles className="me-1 inline h-3 w-3 text-emerald-400" />
-                        {dailyQuote}
-                      </p>
-                    </div>
-                  </motion.div>
-
-                  {/* 4 Stat Cards */}
-                  <motion.div variants={itemVariants} className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                    {[
-                      {
-                        label: 'مهام اليوم', value: todayCount, icon: ListTodo,
-                        gradient: 'from-emerald-500 to-emerald-400', shadow: 'shadow-emerald-500/20',
-                        bgGlow: 'from-emerald-500/10 to-transparent',
-                      },
-                      {
-                        label: 'مكتملة اليوم', value: todayCompleted, icon: CheckCircle2,
-                        gradient: 'from-green-500 to-green-400', shadow: 'shadow-green-500/20',
-                        bgGlow: 'from-green-500/10 to-transparent',
-                      },
-                      {
-                        label: 'جلسات التركيز', value: totalPomodoros, icon: Timer,
-                        gradient: 'from-amber-500 to-amber-400', shadow: 'shadow-amber-500/20',
-                        bgGlow: 'from-amber-500/10 to-transparent',
-                      },
-                      {
-                        label: 'أيام العادات', value: habitStreak, icon: Flame,
-                        gradient: 'from-rose-500 to-rose-400', shadow: 'shadow-rose-500/20',
-                        bgGlow: 'from-rose-500/10 to-transparent',
-                      },
-                    ].map((card) => (
-                      <motion.div
-                        key={card.label}
-                        whileHover={{ scale: 1.02, y: -2, transition: { duration: 0.2 } }}
-                        className="card-modern group relative overflow-hidden rounded-2xl border border-zinc-200/60 bg-white p-4 dark:border-zinc-800/40 dark:bg-zinc-900/60"
-                      >
-                        <div className={cn('absolute inset-0 bg-gradient-to-br opacity-0 transition-opacity duration-300 group-hover:opacity-100', card.bgGlow)} />
-                        <div className="relative">
-                          <div className="mb-3 flex items-center justify-between">
-                            <div className={cn('flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br shadow-sm', card.gradient, card.shadow)}>
-                              <card.icon className="h-5 w-5 text-white" />
-                            </div>
-                            <motion.span
-                              key={card.value}
-                              initial={{ scale: 0.8, opacity: 0 }}
-                              animate={{ scale: 1, opacity: 1 }}
-                              className="text-2xl font-extrabold text-zinc-900 dark:text-zinc-100"
-                            >
-                              {card.value}
-                            </motion.span>
-                          </div>
-                          <span className="text-xs font-medium text-zinc-500 dark:text-zinc-400">{card.label}</span>
-                        </div>
-                      </motion.div>
-                    ))}
-                  </motion.div>
-
-                  {/* Progress Ring + Quick Actions side by side */}
-                  <motion.div variants={itemVariants} className="grid grid-cols-1 gap-5 md:grid-cols-2">
-                    {/* Productivity Ring */}
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0.95 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ duration: 0.4 }}
-                      className="card-modern relative overflow-hidden rounded-2xl border border-zinc-200/60 bg-white p-5 dark:border-zinc-800/40 dark:bg-zinc-900/60"
-                    >
-                      <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/[0.02] to-transparent" />
-                      <div className="relative flex flex-col items-center">
-                        <div className="relative mb-3">
-                          <ProgressRing percent={completionRate} size={90} strokeWidth={6} color="#10b981" />
-                          <div className="absolute inset-0 flex flex-col items-center justify-center">
-                            <motion.span key={completionRate} initial={{ opacity: 0, scale: 0.5 }} animate={{ opacity: 1, scale: 1 }} className="text-xl font-extrabold text-zinc-900 dark:text-zinc-100">
-                              {completionRate}%
-                            </motion.span>
-                          </div>
-                        </div>
-                        <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">إنجاز المهام</h3>
-                        <p className="mt-0.5 text-xs text-zinc-400">{completed} من {total} مهام</p>
-                        <div className="mt-3 w-full">
-                          <div className="mb-1 flex items-center justify-between text-xs">
-                            <span className="text-zinc-500">هدف اليوم</span>
-                            <span className={cn('font-medium', completionRate >= 80 ? 'text-emerald-600' : completionRate >= 40 ? 'text-amber-600' : 'text-zinc-500')}>
-                              {todayCount > 0 ? `${todayCompleted}/${todayCount}` : '—'}
-                            </span>
-                          </div>
-                          <AnimatedProgressBar value={todayCompleted} max={todayCount || 1} />
-                        </div>
-                        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }} className="mt-3 text-xs text-zinc-400">
-                          {completionRate >= 80 ? '🎉 أداء رائع، استمر!' : pending <= 2 ? `💪 بقيت ${pending} ${pending === 1 ? 'مهمة' : 'مهام'} فقط` : '🌟 استمر في الإنجاز'}
-                        </motion.p>
-                      </div>
-                    </motion.div>
-
-                    {/* Quick Actions */}
-                    <div>
-                      <div className="grid grid-cols-2 gap-2.5">
-                        {[
-                          { icon: Plus, label: 'إضافة مهمة', onClick: goToTasks, color: 'from-emerald-500 to-emerald-600', shadow: 'shadow-emerald-500/20' },
-                          { icon: FolderKanban, label: 'مشروع جديد', onClick: () => router.push('/tasks'), color: 'from-violet-500 to-violet-600', shadow: 'shadow-violet-500/20' },
-                          { icon: Timer, label: 'جلسة تركيز', onClick: () => toggleFocusMode(), color: 'from-amber-500 to-amber-600', shadow: 'shadow-amber-500/20' },
-                          { icon: Calendar, label: 'التقويم', onClick: () => router.push('/calendar'), color: 'from-sky-500 to-sky-600', shadow: 'shadow-sky-500/20' },
-                          { icon: BarChart3, label: 'الإحصائيات', onClick: () => document.getElementById('stats-section')?.scrollIntoView({ behavior: 'smooth' }), color: 'from-indigo-500 to-indigo-600', shadow: 'shadow-indigo-500/20' },
-                          { icon: Flame, label: 'العادات', onClick: () => router.push('/habits'), color: 'from-rose-500 to-rose-600', shadow: 'shadow-rose-500/20' },
-                        ].map((action) => (
-                          <motion.button
-                            key={action.label}
-                            whileHover={{ scale: 1.03, y: -2 }}
-                            whileTap={{ scale: 0.97 }}
-                            onClick={action.onClick}
-                            className="card-modern group relative overflow-hidden rounded-2xl border border-zinc-200/60 bg-white/80 p-3 text-start backdrop-blur-sm dark:border-zinc-800/40 dark:bg-zinc-900/40"
-                          >
-                            <div className="absolute inset-0 bg-gradient-to-br from-white/50 to-transparent opacity-0 transition-opacity group-hover:opacity-100 dark:from-white/5" />
-                            <div className="relative">
-                              <div className={cn('mb-2 flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br shadow-sm transition-transform duration-200 group-hover:scale-110', action.color, action.shadow)}>
-                                <action.icon className="h-5 w-5 text-white" />
-                              </div>
-                              <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">{action.label}</span>
-                            </div>
-                          </motion.button>
-                        ))}
-                      </div>
-                    </div>
-                  </motion.div>
-
-                  {/* Today's Tasks */}
-                  <TodayTasksCard tasks={todayTasks} onToggle={handleToggleTodayTask} onNavigate={goToTasks} goToTasks={goToTasks} />
-
-                  {/* Overdue Alert */}
-                  {overdue > 0 && (
-                    <motion.div variants={itemVariants}>
-                      <div className="card-modern rounded-2xl border border-rose-200/60 bg-gradient-to-r from-rose-50 to-rose-50/50 p-4 dark:border-rose-900/30 dark:from-rose-950/20 dark:to-rose-950/10">
-                        <div className="flex items-center gap-3">
-                          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-rose-100 dark:bg-rose-900/30">
-                            <Clock className="h-4 w-4 text-rose-500" />
-                          </div>
-                          <div>
-                            <p className="text-sm font-semibold text-rose-700 dark:text-rose-300">
-                              {overdue} {overdue === 1 ? 'مهمة متأخرة' : 'مهام متأخرة'}
-                            </p>
-                            <p className="text-xs text-rose-500">تحتاج إلى مراجعة فورية</p>
-                          </div>
-                        </div>
-                      </div>
-                    </motion.div>
-                  )}
-
-                  {/* Weekly Chart + Stats */}
-                  <motion.div variants={itemVariants} className="grid grid-cols-1 gap-5 md:grid-cols-2">
-                    {/* Weekly Chart */}
-                    <div className="card-modern rounded-2xl border border-zinc-200/60 bg-white p-5 dark:border-zinc-800/40 dark:bg-zinc-900/60">
-                      <div className="mb-4 flex items-center gap-2">
-                        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-50 dark:bg-emerald-900/30">
-                          <BarChart3 className="h-3.5 w-3.5 text-emerald-500" />
-                        </div>
-                        <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">النشاط الأسبوعي</h3>
-                      </div>
-                      <WeekChart days={weekDays} />
-                      <div className="mt-3 flex items-center justify-center gap-4 text-[10px] text-zinc-400">
-                        <div className="flex items-center gap-1.5">
-                          <div className="h-2.5 w-2.5 rounded-sm bg-emerald-200" />
-                          <span>المهام المجدولة</span>
-                        </div>
-                        <div className="flex items-center gap-1.5">
-                          <div className="h-2.5 w-2.5 rounded-sm bg-emerald-500" />
-                          <span>المكتملة</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Statistics Summary */}
-                    <div id="stats-section" className="card-modern rounded-2xl border border-zinc-200/60 bg-white p-5 dark:border-zinc-800/40 dark:bg-zinc-900/60">
-                      <div className="mb-4 flex items-center gap-2">
-                        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-50 dark:bg-indigo-900/30">
-                          <TrendingUp className="h-3.5 w-3.5 text-indigo-500" />
-                        </div>
-                        <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">ملخص الإنتاجية</h3>
-                      </div>
-                      <div className="grid grid-cols-2 gap-3">
-                        {[
-                          { icon: CheckCircle2, value: `${completionRate}%`, label: 'معدل الإنجاز', color: 'text-emerald-500', bg: 'bg-emerald-50 dark:bg-emerald-900/20' },
-                          { icon: ListTodo, value: completed, label: 'مهام مكتملة', color: 'text-emerald-500', bg: 'bg-emerald-50 dark:bg-emerald-900/20' },
-                          { icon: Timer, value: totalPomodoros, label: 'جلسات تركيز', color: 'text-amber-500', bg: 'bg-amber-50 dark:bg-amber-900/20' },
-                          { icon: Flame, value: `${habitStreak} يوم`, label: 'أفضل ستريك', color: 'text-rose-500', bg: 'bg-rose-50 dark:bg-rose-900/20' },
-                        ].map((stat) => (
-                          <div key={stat.label} className="flex flex-col items-center gap-1.5 rounded-xl p-3 transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/30">
-                            <div className={cn('flex h-9 w-9 items-center justify-center rounded-xl', stat.bg)}>
-                              <stat.icon className={cn('h-4 w-4', stat.color)} />
-                            </div>
-                            <span className="text-lg font-extrabold text-zinc-900 dark:text-zinc-100">{stat.value}</span>
-                            <span className="text-[10px] text-zinc-500 dark:text-zinc-400">{stat.label}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </motion.div>
-                </div>
-
+                <p className="rounded-xl bg-emerald-50/50 px-4 py-2 text-xs italic text-zinc-500 dark:bg-emerald-900/10 dark:text-zinc-400 max-w-md">
+                  <Sparkles className="ms-1 inline h-3 w-3 text-emerald-400" />
+                  {dailyQuote}
+                </p>
               </div>
             </motion.div>
+
+            {/* 2. Quick Actions */}
+            <motion.div variants={itemVariants}>
+              <div className="grid grid-cols-3 sm:grid-cols-6 gap-2.5">
+                {[
+                  { icon: Plus, label: 'إضافة مهمة', onClick: goToTasks, color: 'from-emerald-500 to-emerald-600' },
+                  { icon: FolderKanban, label: 'مشروع جديد', onClick: () => router.push('/tasks'), color: 'from-violet-500 to-violet-600' },
+                  { icon: Timer, label: 'جلسة تركيز', onClick: () => toggleFocusMode(), color: 'from-amber-500 to-amber-600' },
+                  { icon: Calendar, label: 'التقويم', onClick: () => router.push('/calendar'), color: 'from-sky-500 to-sky-600' },
+                  { icon: BarChart3, label: 'الإحصائيات', onClick: () => router.push('/tasks'), color: 'from-indigo-500 to-indigo-600' },
+                  { icon: Flame, label: 'العادات', onClick: () => router.push('/habits'), color: 'from-rose-500 to-rose-600' },
+                ].map((action) => (
+                  <motion.button
+                    key={action.label}
+                    whileHover={{ scale: 1.03, y: -2 }}
+                    whileTap={{ scale: 0.97 }}
+                    onClick={action.onClick}
+                    className="card-base group flex flex-col items-center gap-2 p-3 sm:p-4 text-center hover:border-emerald-200 dark:hover:border-emerald-800"
+                  >
+                    <div className={cn('flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br shadow-sm transition-transform group-hover:scale-110', action.color)}>
+                      <action.icon className="h-5 w-5 text-white" />
+                    </div>
+                    <span className="text-xs font-medium text-zinc-600 dark:text-zinc-400">{action.label}</span>
+                  </motion.button>
+                ))}
+              </div>
+            </motion.div>
+
+            {/* 3. Statistics — 4 Stat Cards */}
+            <motion.div variants={itemVariants} className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {[
+                { label: 'مهام اليوم', value: todayCount, icon: ListTodo, gradient: 'from-emerald-500 to-emerald-400' },
+                { label: 'مكتملة اليوم', value: todayCompleted, icon: CheckCircle2, gradient: 'from-green-500 to-green-400' },
+                { label: 'جلسات التركيز', value: totalPomodoros, icon: Timer, gradient: 'from-amber-500 to-amber-400' },
+                { label: 'أيام العادات', value: habitStreak, icon: Flame, gradient: 'from-rose-500 to-rose-400' },
+              ].map((card) => (
+                <motion.div
+                  key={card.label}
+                  whileHover={{ scale: 1.02, y: -2, transition: { duration: 0.2 } }}
+                  className="card-base p-4"
+                >
+                  <div className="mb-3 flex items-center justify-between">
+                    <div className={cn('flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br shadow-sm', card.gradient)}>
+                      <card.icon className="h-5 w-5 text-white" />
+                    </div>
+                    <span className="text-2xl font-extrabold text-zinc-900 dark:text-zinc-100">{card.value}</span>
+                  </div>
+                  <span className="text-xs font-medium text-zinc-500 dark:text-zinc-400">{card.label}</span>
+                </motion.div>
+              ))}
+            </motion.div>
+
+            {/* 4. Charts — Progress Ring + Weekly Chart */}
+            <motion.div id="stats-section" variants={itemVariants} className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              {/* Progress Ring */}
+              <div className="card-base p-5">
+                <div className="flex flex-col items-center">
+                  <div className="relative mb-3">
+                    <ProgressRing percent={completionRate} size={90} strokeWidth={6} color="#10b981" />
+                    <div className="absolute inset-0 flex flex-col items-center justify-center">
+                      <span className="text-xl font-extrabold text-zinc-900 dark:text-zinc-100">{completionRate}%</span>
+                    </div>
+                  </div>
+                  <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">إنجاز المهام</h3>
+                  <p className="mt-0.5 text-xs text-zinc-400">{completed} من {total} مهام</p>
+                  <div className="mt-3 w-full">
+                    <div className="mb-1 flex items-center justify-between text-xs">
+                      <span className="text-zinc-500">هدف اليوم</span>
+                      <span className={cn('font-medium', completionRate >= 80 ? 'text-emerald-600' : completionRate >= 40 ? 'text-amber-600' : 'text-zinc-500')}>
+                        {todayCount > 0 ? `${todayCompleted}/${todayCount}` : '—'}
+                      </span>
+                    </div>
+                    <AnimatedProgressBar value={todayCompleted} max={todayCount || 1} />
+                  </div>
+                  <p className="mt-3 text-xs text-zinc-400">
+                    {completionRate >= 80 ? '🎉 أداء رائع، استمر!' : pending <= 2 ? `💪 بقيت ${pending} ${pending === 1 ? 'مهمة' : 'مهام'} فقط` : '🌟 استمر في الإنجاز'}
+                  </p>
+                </div>
+              </div>
+
+              {/* Weekly Chart */}
+              <div className="card-base p-5">
+                <div className="mb-4 flex items-center gap-2">
+                  <BarChart3 className="h-5 w-5 text-emerald-500" />
+                  <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">النشاط الأسبوعي</h3>
+                </div>
+                <WeekChart days={weekDays} />
+                <div className="mt-3 flex items-center justify-center gap-4 text-[10px] text-zinc-400">
+                  <div className="flex items-center gap-1.5">
+                    <div className="h-2.5 w-2.5 rounded-sm bg-emerald-200" />
+                    <span>المهام المجدولة</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <div className="h-2.5 w-2.5 rounded-sm bg-emerald-500" />
+                    <span>المكتملة</span>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* 5. Today's Tasks */}
+            <TodayTasksCard
+              isEmpty={todayTasks.length === 0}
+              tasks={todayTasks}
+              onToggle={handleToggleTodayTask}
+              onNavigate={goToTasks}
+              goToTasks={goToTasks}
+            />
+
+            {/* Overdue Alert */}
+            {overdue > 0 && (
+              <motion.div variants={itemVariants}>
+                <div className="card-base border-rose-200/60 bg-gradient-to-r from-rose-50 to-rose-50/50 p-4 dark:border-rose-900/30 dark:from-rose-950/20 dark:to-rose-950/10">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-rose-100 dark:bg-rose-900/30">
+                      <Clock className="h-4 w-4 text-rose-500" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-rose-700 dark:text-rose-300">
+                        {overdue} {overdue === 1 ? 'مهمة متأخرة' : 'مهام متأخرة'}
+                      </p>
+                      <p className="text-xs text-rose-500">تحتاج إلى مراجعة فورية</p>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
+            {/* 6. Recent Activity */}
+            <motion.div variants={itemVariants} className="card-base p-5">
+              <div className="mb-4 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Clock className="h-5 w-5 text-emerald-500" />
+                  <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">النشاط الأخير</h3>
+                </div>
+                <button onClick={goToTasks} className="text-[10px] font-medium text-emerald-600 transition-colors hover:text-emerald-700 cursor-pointer">
+                  عرض الكل <ArrowRight className="me-0.5 inline h-3 w-3" />
+                </button>
+              </div>
+              {recentTasks.length === 0 && projects.length === 0 ? (
+                <EmptyState
+                  icon={Clock}
+                  title="لا يوجد نشاط حتى الآن"
+                  description="ستظهر هنا آخر المهام والمشاريع التي قمت بها"
+                  variant="compact"
+                />
+              ) : (
+                <div className="space-y-0">
+                  {recentTasks.map((task, i) => (
+                    <motion.div
+                      key={task.id}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: i * 0.05, duration: 0.25 }}
+                      className="relative flex items-start gap-3 pb-4"
+                    >
+                      <div className="flex flex-col items-center">
+                        <div className={cn('h-2.5 w-2.5 rounded-full ring-2 ring-white dark:ring-zinc-900', task.completed ? 'bg-emerald-500' : priorityColor[task.priority]?.dot || 'bg-zinc-300')} />
+                        {i < recentTasks.length - 1 && <div className="mt-1 h-full w-px bg-zinc-100 dark:bg-zinc-800" />}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className={cn('text-sm leading-snug', task.completed ? 'text-zinc-400 line-through' : 'text-zinc-800 dark:text-zinc-200')}>{task.title}</p>
+                        <div className="mt-0.5 flex items-center gap-2">
+                          <span className="text-[10px] text-zinc-400">{getDateLabel(task.dueDate || today)}</span>
+                          {task.completed && <span className="rounded-md bg-emerald-50 px-1.5 py-0.5 text-[10px] font-medium text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400">تم</span>}
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))}
+                  {projects.map((p) => {
+                    const count = tasks.filter((t) => t.projectId === p.id).length;
+                    const done = tasks.filter((t) => t.projectId === p.id && t.completed).length;
+                    const pct = count > 0 ? Math.round((done / count) * 100) : 0;
+                    return (
+                      <motion.button
+                        key={p.id}
+                        onClick={() => goToTasksWithProject(p.id)}
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        className="relative flex items-center gap-3 pb-3 w-full text-start"
+                      >
+                        <div className="flex flex-col items-center">
+                          <div className="h-2.5 w-2.5 rounded-full ring-2 ring-white dark:ring-zinc-900" style={{ backgroundColor: p.color }} />
+                          <div className="mt-1 h-full w-px bg-zinc-100 dark:bg-zinc-800" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-zinc-800 dark:text-zinc-200">{p.name}</p>
+                          <div className="mt-1 flex items-center gap-2">
+                            <div className="flex-1 h-1.5 overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800">
+                              <div className="h-full rounded-full transition-all duration-500" style={{ width: `${pct}%`, backgroundColor: p.color }} />
+                            </div>
+                            <span className="text-[10px] text-zinc-400 shrink-0">{done}/{count}</span>
+                          </div>
+                        </div>
+                      </motion.button>
+                    );
+                  })}
+                </div>
+              )}
+            </motion.div>
+
+            {/* 7. Announcements */}
+            <motion.div variants={itemVariants} className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {ANNOUNCEMENTS.map((item) => (
+                <div key={item.title} className="card-base p-4 flex items-start gap-3">
+                  <div className={cn('flex h-9 w-9 shrink-0 items-center justify-center rounded-xl', item.bg)}>
+                    <item.icon className={cn('h-4 w-4', item.color)} />
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-semibold text-zinc-900 dark:text-zinc-100">{item.title}</h4>
+                    <p className="mt-0.5 text-[11px] text-zinc-500 dark:text-zinc-400 leading-relaxed">{item.message}</p>
+                  </div>
+                </div>
+              ))}
+            </motion.div>
+
+            {/* 8. Mini Calendar */}
+            <motion.div variants={itemVariants}>
+              <MiniCalendar />
+            </motion.div>
+
+          </motion.div>
         </div>
       </div>
     </div>

@@ -23,6 +23,9 @@ import {
   Flame,
   ChevronLeft,
   Settings,
+  Sun,
+  Moon,
+  Monitor,
 } from 'lucide-react';
 
 function NavTooltip({ label, show }: { label: string; show: boolean }) {
@@ -39,7 +42,7 @@ export function Sidebar() {
   const pathname = usePathname();
   const { filter, setFilter, setActiveProjectId, activeProjectId, tasks } = useTaskStore();
   const { projects, addProject, deleteProject } = useProjectStore();
-  const { darkMode, toggleDarkMode, toggleFocusMode, setSidebarOpen, sidebarCollapsed, toggleSidebarCollapsed } = useUIStore();
+  const { darkMode, themeMode, toggleDarkMode, toggleFocusMode, setSidebarOpen, sidebarCollapsed, toggleSidebarCollapsed } = useUIStore();
   const { habits } = useHabitStore();
 
   const todayStr = getToday();
@@ -338,9 +341,10 @@ export function Sidebar() {
               'text-zinc-500 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800/60'
             )}
           >
-            {sidebarCollapsed ? (darkMode ? '☀️' : '🌙') : (darkMode ? '☀️ فاتح' : '🌙 ليلي')}
+            {themeMode === 'dark' ? <Moon className="h-4 w-4 shrink-0" /> : themeMode === 'auto' ? <Monitor className="h-4 w-4 shrink-0" /> : <Sun className="h-4 w-4 shrink-0" />}
+            {!sidebarCollapsed && <span>{themeMode === 'dark' ? 'داكن' : themeMode === 'auto' ? 'تلقائي' : 'فاتح'}</span>}
           </button>
-          <NavTooltip label={darkMode ? 'الوضع الفاتح' : 'الوضع الليلي'} show={sidebarCollapsed && hoveredItem === 'theme'} />
+          <NavTooltip label={themeMode === 'dark' ? 'الوضع الداكن' : themeMode === 'auto' ? 'الوضع التلقائي' : 'الوضع الفاتح'} show={sidebarCollapsed && hoveredItem === 'theme'} />
         </div>
       </div>
     </aside>

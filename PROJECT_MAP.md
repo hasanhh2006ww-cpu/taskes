@@ -49,9 +49,13 @@ my-taske/
 │   │   │   ├── HabitPreview.tsx      # بطاقة معاينة حية للأيقونة واللون والاسم والنوع
 │   │   │   └── ConfirmDialog.tsx     # نافذة تأكيد قابلة لإعادة الاستخدام: title + message + نعم/إلغاء
 │   │   ├── ui/
-│   │   │   ├── Button.tsx         # ghost/primary/danger + sm/md/icon (44px touch on mobile)
-│   │   │   ├── Badge.tsx          # Priority badge
-│   │   │   └── Input.tsx          # Styled text input
+│   │   │   ├── Button.tsx         # primary/secondary/ghost/danger + sm/md/lg/icon + loading spinner
+│   │   │   ├── Badge.tsx          # default/success/warning/danger/info variants
+│   │   │   ├── Input.tsx          # Input + Textarea with label, error, focus states
+│   │   │   ├── Alert.tsx          # info/success/warning/danger with icon + close
+│   │   │   ├── Select.tsx         # Styled select with label, error, chevron
+│   │   │   ├── Skeleton.tsx       # Skeleton + SkeletonCard + SkeletonTable (animate-pulse)
+│   │   │   └── EmptyState.tsx      # Icon + title + description + optional action button
 │   │   ├── dashboard/
 │   │   │   └── Dashboard.tsx      # Nature Inspired Green UI: Top Nav (باحث/🔔/🌿/➕→تنقل), 4 stats cards (emerald/green gradients + progress bars), recent tasks + project cards (قابلة للنقر→فلترة), weekly chart (SVG emerald bars), empty state (Sprout), Framer Motion, all buttons functional
 │   │   ├── command-palette/
@@ -233,7 +237,18 @@ User Input (keyboard/mouse/touch)
 | 82 | Habit store rehydrate missing on /habits page | commit 1737f05 أزال module-level loadFromStorage وأضاف rehydrate() لكن `useHabitStore.rehydrate()` لم يُستدعَ إلا في Dashboard فقط. العادات تضاف في الجلسة لكنها تختفي عند التحديث. الإصلاح: إضافة `useEffect → useHabitStore.getState().rehydrate()` في HabitTrackerPro.tsx | ✅ |
 | 84 | RTL Mobile Sidebar Drawer Fix | استبدال `style={{ width }}` بـ Tailwind classes + تصحيح اتجاه translate-x في RTL + ثلاث وضعيات (موبايل/تابلت/ديسكتوب) | ✅ |
 | 85 | Mobile TaskDetail Auto-Open Fix — لا تفتح تفاصيل المهمة تلقائيًا على الهاتف | إزالة `activeTaskId` من `addTask` في useTaskStore + إضافة return `newTask.id`. في TaskList: بعد الإضافة، سطح المكتب يفتح `setActiveTaskId`، الموبايل يطمس الإدخال (`blur`). في TaskItem: الضغط على نص المهمة يوسعها بدلاً من فتح التفاصيل، وزر "التفاصيل" يظهر فقط على الموبايل. إضافة `onBlur` handler لـ `isAdding` في page.tsx. CalendarView: إضافة `setActiveTaskId` بعد `addTask` للحفاظ على سلوك سطح المكتب. | ✅ |
-| 83 | Full Responsive + Production Readiness Audit | مراجعة شاملة لكل الصفحات والمكونات: globals.css, layout-client, Sidebar, Dashboard, TaskList, TaskItem, TaskDetail, CalendarView, SettingsView, FocusMode, CommandPalette, AddEditHabitModal, ConfirmDialog, IconPicker, ColorPicker, Button, Input, Badge, error, not-found, HabitTrackerPro, جميع الـ pages, جميع الـ stores. الإصلاحات: حذف HabitTracker.tsx الميت، إزالة فحص Supabase غير الضروري من dashboard/page.tsx، تكبير أزرار التنقل في CalendarView (h-10 w-10 md:h-8 md:w-8)، إضافة aria-labels لـ FocusMode/error/not-found/AddEditHabitModal، إضافة Escape handler + role dialog + aria-modal لـ ConfirmDialog، إضافة useMemo لـ displayedHabits في HabitTrackerPro | ✅ |
+| 86 | Design System v2 — unified tokens & simplified CSS | تحديث `design-tokens.ts`: توحيد الألوان (primary #16A34A, success/warning/error/info مع dark/light)، تبسيط shadows إلى 3 (small/medium/large)، إزالة tokens غير المستخدمة. تحديث `globals.css`: إضافة CSS custom properties (--ds-primary, --ds-surface, --ds-border, --ds-shadow-*), دمج 4 أنظمة كروت في نظام واحد (card-base)، استخدام primary بدلاً من indigo في selection/focus, الحفاظ على backward compatibility للـ card-modern. | ✅ |
+| 87 | Layout Restructure — Topbar مشترك لكل الصفحات | نقل Topbar من كونه جزءاً من Dashboard فقط إلى `layout-client.tsx` ليكون مشتركاً عبر جميع الصفحات (dashboard, tasks, calendar, habits, settings). إزالة الـ TopNav المكرر من Dashboard.tsx (search, bell, theme, avatar, +). تعديل layout: إضافة `<Topbar />` + `<main>` داخل flex container مع `flex-1`. | ✅ |
+| 88 | Dashboard Redesign — إعادة هيكلة كاملة | إعادة ترتيب Dashboard حسب المواصفات: Welcome → Quick Actions → Statistics → Charts → Today's Tasks → Recent Activity → Announcements → Calendar Mini. إزالة الـ widgets المكررة (MainGoalCard, ProductivityHeatmap, ProductivityScoreCard, WeeklyHeatmapView, FocusSummaryCard). إضافة Announcements (3 بطاقات: نصيحة اليوم/تحدي الأسبوع/إنتاجية جماعية). إضافة MiniCalendar. استخدام `card-base` بدلاً من `card-modern` في الأماكن الجديدة. | ✅ |
+
+| 89 | Phase 5 — Button enhancement | إضافة variant `secondary` (bg-zinc-100/dark:bg-zinc-800) + size `lg` + خاصية `loading` (spinner SVG مع animate-spin + تعطيل تلقائي). تغيير التركيز الافتراضي من indigo إلى emerald (primary). | ✅ |
+| 90 | Phase 5 — Badge enhancement | إضافة 5 variants (`default`/`success`/`warning`/`danger`/`info`) مع ألوان مخصصة لكل منها في الوضعين الفاتح والمظلم. | ✅ |
+| 91 | Phase 5 — Input + Textarea enhancement | تحويل Input إلى `forwardRef` مع label + error + border + focus ring (emerald). إضافة `Textarea` component (resize-y, min-h-[80px]). تحسين التباين في dark mode. | ✅ |
+| 92 | Phase 5 — Alert component | إنشاء `Alert.tsx`: 4 variants (info/success/warning/danger) مع أيقونة Lucide مناسبة + عنوان + وصف + زر إغلاق اختياري. | ✅ |
+| 93 | Phase 5 — Select component | إنشاء `Select.tsx`: `forwardRef` مع label + error + placeholder + خيارات + أيقونة ChevronDown مخصصة + border/focus ring. | ✅ |
+| 94 | Phase 5 — Skeleton loading | إنشاء `Skeleton.tsx`: `Skeleton` (animate-pulse + rounded-md)، `SkeletonCard` (border + p-4 + 3 أسطر)، `SkeletonTable` (5 صفوف قابلة للتخصيص). | ✅ |
+| 95 | Phase 9 — Auto dark mode (system preference) | إضافة `themeMode: 'light' | 'dark' | 'auto'` إلى useUIStore. `toggleDarkMode` يدور بين light→dark→auto. `applyTheme()` تستخدم `window.matchMedia('prefers-color-scheme: dark')` في الوضع auto. Topbar و Sidebar يعرضان أيقونة Monitor للوضع auto مع نص "تلقائي". layout-client يستمع لتغييرات system preference عبر addEventListener('change'). | ✅ |
+| 96 | Phase 11 — Accessibility improvements | تغيير focus-visible ring من indigo-500 إلى emerald-500 في Button و Input و Select و Topbar و Sidebar. إضافة `aria-invalid` + `aria-describedby` لـ Input/Textarea/Select. إضافة `role="alert"` في Alert ورسائل الخطأ. توحيد `aria-label` لجميع الأزرار. | ✅ |
 
 ## [ORPHANS & PENDING]
 

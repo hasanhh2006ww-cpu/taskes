@@ -7,13 +7,37 @@
   --font-mono: var(--font-cairo);
 }
 
+:root {
+  --ds-primary: #16A34A;
+  --ds-primary-light: #22C55E;
+  --ds-primary-dark: #15803D;
+  --ds-surface: #FFFFFF;
+  --ds-background: #F7F8FA;
+  --ds-border: #E8E8E8;
+  --ds-secondary: #52525B;
+  --ds-shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.08), 0 1px 2px -1px rgb(0 0 0 / 0.08);
+  --ds-shadow-md: 0 4px 12px 0 rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.08);
+  --ds-shadow-lg: 0 10px 30px -8px rgb(0 0 0 / 0.15), 0 4px 12px -4px rgb(0 0 0 / 0.1);
+  --ds-radius: 0.75rem;
+  --ds-radius-card: 1.125rem;
+}
+
+.dark {
+  --ds-surface: #18181B;
+  --ds-background: #0A0E17;
+  --ds-border: #27272A;
+  --ds-shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.3), 0 1px 2px -1px rgb(0 0 0 / 0.3);
+  --ds-shadow-md: 0 4px 12px 0 rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.3);
+  --ds-shadow-lg: 0 10px 30px -8px rgb(0 0 0 / 0.5), 0 4px 12px -4px rgb(0 0 0 / 0.4);
+}
+
 *, *::before, *::after {
   box-sizing: border-box;
 }
 
 * {
   scrollbar-width: thin;
-  scrollbar-color: theme('colors.zinc.200') transparent;
+  scrollbar-color: var(--ds-border) transparent;
 }
 
 .dark * {
@@ -24,26 +48,14 @@ body {
   font-family: var(--font-cairo), system-ui, sans-serif;
   -webkit-tap-highlight-color: transparent;
   overscroll-behavior: none;
-  background: #f8fafc;
+  background: var(--ds-background);
   font-size: 16px;
   line-height: 1.5;
 }
 
-body h1,
-body h2,
-body h3,
-body h4,
-body h5,
-body h6,
-body p,
-body span,
-body button,
-body input,
-body select,
-body textarea,
-body label,
-body a,
-body div {
+body h1, body h2, body h3, body h4, body h5, body h6,
+body p, body span, body button, body input, body select,
+body textarea, body label, body a, body div {
   font-family: var(--font-cairo), system-ui, sans-serif;
 }
 
@@ -62,42 +74,18 @@ img, svg, video, canvas, audio, iframe, embed, object {
   max-width: 100%;
 }
 
-h1 {
-  font-size: 24px;
-  font-weight: 700;
-}
-
-h2 {
-  font-size: 20px;
-  font-weight: 700;
-}
-
-h3 {
-  font-size: 18px;
-  font-weight: 700;
-}
-
-p {
-  font-size: 16px;
-  font-weight: 400;
-}
-
-button {
-  font-size: 14px;
-  font-weight: 500;
-}
-
-input,
-select,
-textarea {
+h1 { font-size: 24px; font-weight: 700; }
+h2 { font-size: 20px; font-weight: 700; }
+h3 { font-size: 18px; font-weight: 700; }
+p { font-size: 16px; font-weight: 400; }
+button { font-size: 14px; font-weight: 500; }
+input, select, textarea {
   font-size: 16px;
   font-weight: 400;
 }
 
 @media (max-width: 767px) {
-  input, select, textarea {
-    font-size: 16px !important;
-  }
+  input, select, textarea { font-size: 16px !important; }
 }
 
 button, a, input, select, textarea {
@@ -105,32 +93,24 @@ button, a, input, select, textarea {
 }
 
 @supports (padding-top: env(safe-area-inset-top)) {
-  .safe-area-top {
-    padding-top: env(safe-area-inset-top);
-  }
-  .safe-area-bottom {
-    padding-bottom: env(safe-area-inset-bottom);
-  }
-  .safe-area-left {
-    padding-left: env(safe-area-inset-left);
-  }
-  .safe-area-right {
-    padding-right: env(safe-area-inset-right);
-  }
+  .safe-area-top { padding-top: env(safe-area-inset-top); }
+  .safe-area-bottom { padding-bottom: env(safe-area-inset-bottom); }
+  .safe-area-left { padding-left: env(safe-area-inset-left); }
+  .safe-area-right { padding-right: env(safe-area-inset-right); }
 }
 
 ::selection {
-  background-color: theme('colors.indigo.200/40');
+  background-color: theme('colors.emerald.200/40');
 }
 
 .dark ::selection {
-  background-color: theme('colors.indigo.700/40');
+  background-color: theme('colors.emerald.700/40');
 }
 
 button:focus-visible,
 [role="button"]:focus-visible,
 [tabindex="0"]:focus-visible {
-  outline: 2px solid theme('colors.emerald.500');
+  outline: 2px solid var(--ds-primary);
   outline-offset: 2px;
 }
 
@@ -148,8 +128,8 @@ button:focus-visible,
 
 .glass-card {
   background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
@@ -158,21 +138,24 @@ button:focus-visible,
   border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
-.floating {
-  box-shadow: none;
+.card-base {
+  background: var(--ds-surface);
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-card);
+  transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.dark .floating {
-  box-shadow: none;
+.card-base:hover {
+  border-color: #D1D5DB;
 }
 
-/* Card shadows disabled for flat design - using borders instead */
-.card-shadow {
-  box-shadow: none;
+.dark .card-base {
+  background: #18181B;
+  border-color: #27272A;
 }
 
-.dark .card-shadow {
-  box-shadow: none;
+.dark .card-base:hover {
+  border-color: #3F3F46;
 }
 
 .card-hover {
@@ -180,28 +163,20 @@ button:focus-visible,
 }
 
 .card-hover:hover {
-  box-shadow: none;
-  transform: none;
+  border-color: #9CA3AF;
+  transform: translateY(-2px);
+  box-shadow: var(--ds-shadow-md);
 }
 
 .dark .card-hover:hover {
-  box-shadow: none;
+  border-color: #52525B;
 }
 
-@keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-6px); }
-}
-
-.animate-float {
-  animation: float 3s ease-in-out infinite;
-}
-
-/* Flat card design with subtle border */
+/* Backward compat: card-modern alias for card-base */
 .card-modern {
-  background: #ffffff;
-  border: 1px solid #E5E7EB;
-  border-radius: 12px;
+  background: var(--ds-surface);
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-card);
   transition: border-color 0.2s ease, transform 0.2s ease;
 }
 
@@ -218,27 +193,11 @@ button:focus-visible,
   border-color: #3F3F46;
 }
 
-/* Card hover - simple border color change (no shadow) */
-.card-hover-flat {
-  transition: border-color 0.2s ease, background-color 0.2s ease, transform 0.2s ease;
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-6px); }
 }
 
-.card-hover-flat:hover {
-  border-color: #9CA3AF;
-  transform: translateY(-2px);
-}
-
-.dark .card-hover-flat:hover {
-  border-color: #52525B;
-}
-
-/* Active card state */
-.card-active {
-  border-color: #D1D5DB !important;
-  background-color: #F9FAFB;
-}
-
-.dark .card-active {
-  border-color: #52525B !important;
-  background-color: #27272A;
+.animate-float {
+  animation: float 3s ease-in-out infinite;
 }

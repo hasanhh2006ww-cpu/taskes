@@ -6,6 +6,7 @@ import { useKeyboard } from '@/hooks/useKeyboard';
 import { useHabitStore } from '@/store/useHabitStore';
 import { AnimatePresence } from 'framer-motion';
 import { Sidebar } from '@/components/layout/Sidebar';
+import { Topbar } from '@/components/layout/Topbar';
 import { CommandPalette } from '@/components/command-palette/CommandPalette';
 import { FocusMode } from '@/components/focus/FocusMode';
 import { cn } from '@/lib/cn';
@@ -29,9 +30,15 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
   ]);
 
   useEffect(() => {
-    const stored = loadFromStorage<{ darkMode: boolean }>(STORAGE_KEYS.UI, { darkMode: false });
-    if (stored.darkMode) {
-      document.documentElement.classList.add('dark');
+    const stored = loadFromStorage<{ themeMode?: string }>(STORAGE_KEYS.UI, { themeMode: 'light' });
+    const mode = stored.themeMode || 'light';
+    const isDark = mode === 'dark' || (mode === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    document.documentElement.classList.toggle('dark', isDark);
+    if (mode === 'auto') {
+      const mq = window.matchMedia('(prefers-color-scheme: dark)');
+      const handler = (e: MediaQueryListEvent) => document.documentElement.classList.toggle('dark', e.matches);
+      mq.addEventListener('change', handler);
+      return () => mq.removeEventListener('change', handler);
     }
   }, []);
 
@@ -59,12 +66,9 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
 
       <div
         className={cn(
-          // Mobile: fixed drawer anchored to start (right in RTL)
           'fixed inset-y-0 start-0 z-40',
           sidebarOpen ? 'translate-x-0' : 'translate-x-full',
-          // Tablet+: normal document flow, not fixed
           'md:relative md:inset-auto md:z-0 md:shrink-0 md:translate-x-0',
-          // Width: mobile drawer = 280px, tablet+ = 268px, lg+ collapsed = 78px
           'w-[280px] md:w-[268px]',
           sidebarCollapsed && 'lg:w-[78px]'
         )}
@@ -85,9 +89,12 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
         {sidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
       </button>
 
-      <main className="flex min-w-0 flex-1 overflow-hidden pt-14 md:pt-0">
-        {children}
-      </main>
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+        <Topbar />
+        <main className="flex min-w-0 flex-1 overflow-hidden">
+          {children}
+        </main>
+      </div>
 
       <CommandPalette />
 

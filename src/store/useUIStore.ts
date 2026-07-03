@@ -17,8 +17,11 @@ export interface FocusSettings {
   endSoundUrl: string;
 }
 
+type ThemeMode = 'light' | 'dark' | 'auto';
+
 interface UIState {
   darkMode: boolean;
+  themeMode: ThemeMode;
   focusMode: boolean;
   sidebarOpen: boolean;
   activeTaskId: string | null;
@@ -26,6 +29,7 @@ interface UIState {
   focusSettings: FocusSettings;
   sidebarCollapsed: boolean;
   toggleDarkMode: () => void;
+  setThemeMode: (mode: ThemeMode) => void;
   toggleFocusMode: () => void;
   setSidebarOpen: (open: boolean) => void;
   setActiveTaskId: (id: string | null) => void;
@@ -38,8 +42,14 @@ interface UIState {
 
 const defaultSettings: FocusSettings = { workMin: 25, breakMin: 5, youtubeUrl: '', endSound: 'chime', endSoundUrl: '' };
 
+function applyTheme(mode: ThemeMode) {
+  const isDark = mode === 'dark' || (mode === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+  document.documentElement.classList.toggle('dark', isDark);
+}
+
 export const useUIStore = create<UIState>((set, get) => ({
   darkMode: false,
+  themeMode: 'light',
   focusMode: false,
   sidebarOpen: true,
   sidebarCollapsed: false,
@@ -48,10 +58,17 @@ export const useUIStore = create<UIState>((set, get) => ({
   focusSettings: defaultSettings,
 
   toggleDarkMode: () => {
-    const next = !get().darkMode;
-    set({ darkMode: next });
-    saveToStorage(STORAGE_KEYS.UI, { darkMode: next });
-    document.documentElement.classList.toggle('dark', next);
+    const cycle: ThemeMode[] = ['light', 'dark', 'auto'];
+    const next = cycle[(cycle.indexOf(get().themeMode) + 1) % cycle.length];
+    set({ themeMode: next, darkMode: next === 'dark' || (next === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches) });
+    saveToStorage(STORAGE_KEYS.UI, { themeMode: next });
+    applyTheme(next);
+  },
+
+  setThemeMode: (mode) => {
+    set({ themeMode: mode, darkMode: mode === 'dark' || (mode === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches) });
+    saveToStorage(STORAGE_KEYS.UI, { themeMode: mode });
+    applyTheme(mode);
   },
 
   toggleFocusMode: () => set((s) => ({ focusMode: !s.focusMode })),
@@ -83,15 +100,19 @@ export const useUIStore = create<UIState>((set, get) => ({
   },
 
   rehydrate: () => {
-    const stored = loadFromStorage<{ darkMode: boolean }>(STORAGE_KEYS.UI, { darkMode: false });
+    const stored = loadFromStorage<{ themeMode?: ThemeMode }>(STORAGE_KEYS.UI, { themeMode: 'light' });
+    const themeMode = stored.themeMode || 'light';
     const focusSession = loadFromStorage<FocusSession | null>(STORAGE_KEYS.FOCUS_SESSION, null);
     const focusSettings = loadFromStorage<FocusSettings>(STORAGE_KEYS.FOCUS_SETTINGS, defaultSettings);
     const sidebarCollapsed = loadFromStorage<boolean>('sidebar_collapsed', false);
+    const isDark = themeMode === 'dark' || (themeMode === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches);
     set({
-      darkMode: stored.darkMode,
+      darkMode: isDark,
+      themeMode,
       focusSession,
       focusSettings,
       sidebarCollapsed,
     });
+    applyTheme(themeMode);
   },
 }));
