@@ -252,6 +252,7 @@ User Input (keyboard/mouse/touch)
 | 103 | حذف أيقونة البريد من شريط التنقل (Topbar) | إزالة زر `<button>` الخاص بـ Mail (Inbox) مع البadge "3" من Topbar. إزالة استيراد `Mail` من lucide-react. Flexbox gap-1.5 يغلق الفراغ تلقائياً. No regression. | ✅ |
 | 104 | إصلاح تموضع نافذة الإشعارات (Notifications Dropdown) في RTL | تغيير `right-0` إلى `end-0` (خاصية CSS logical property `inset-inline-end: 0`) لتنعكس تلقائياً مع RTL/LTR. تغيير عرض النافذة إلى `w-[340px] md:w-[380px]`. تغيير أقصى ارتفاع إلى `max-h-[500px]` مع `overflow-y-auto`. الهوامش الآمنة 16px محققة عبر `px-4` للأب. | ✅ |
 | 105 | إصلاح تموضع قائمة المستخدم (Profile Dropdown) في RTL + حذف تسجيل الخروج | تغيير `right-0` إلى `end-0` لخاصية CSS logical. تغيير العرض من `w-56` (224px) إلى `w-[300px] md:w-[340px]`. حذف قسم "تسجيل الخروج" بالكامل (`<hr>` + زر LogOut). إزالة استيراد `LogOut` من lucide-react. | ✅ |
+| 106 | إعادة تصميم Header التقويم (Calendar Header Redesign) | إعادة هيكلة كاملة للـ Header في `CalendarView.tsx`: أزرار تنقل دائرية (`rounded-full`)، اسم الشهر/السنة في المنتصف (`flex-1 text-center text-lg font-bold`)، Segmented Control محدّث مع `shadow-sm` و `py-1.5`، زر "+" أخضر دائري (`rounded-full bg-emerald-500`) يستدعي `openCreateModal`، توحيد ارتفاع الأزرار (`h-9`)، padding محسّن (`px-4 py-3`)، هوامش `gap-3` و `gap-1.5`. | ✅ |
 
 ## [ORPHANS & PENDING]
 
@@ -294,3 +295,16 @@ User Input (keyboard/mouse/touch)
 | TaskItem Green Refresh | Done | emerald active border/ring, emerald hover states, emerald check icon |
 | Sidebar Layout Fix | Done | inline style width (70/260px) for smooth animation, shrink-0, md:translate-x-0, md:relative, handleNavClick desktop-safe |
 | Professional Dashboard | Done | Smart greeting (time-aware), 4 stat cards (today/completed/focus/habits), animated progress card, quick actions grid, productivity summary, enhanced empty state with feature highlights |
+| Calendar Header Redesign (Stage 1) | Done | professional header: circular nav buttons, centered title, SegmentedControl view switcher, green circular "+" FAB, unified h-9 height |
+| Calendar Sidebar Redesign (Stage 2) | Done | merged Today's Tasks + Habits into single "ملخص اليوم" section, better spacing, cleaner layout, improved empty state |
+| Calendar Mini Calendar (Stage 3) | Done | larger day cells (rounded-lg), improved today highlight with shadow, better nav button hit areas, smoother hover |
+| Calendar Grid Improvements (Stage 4) | Done | MonthView: better day cell padding (p-1.5), rounded-lg event cards with shadow-sm, cleaner borders. WeekView: hover:shadow-md on event cards |
+| Calendar Event Cards (Stage 5) | Done | unified emerald color scheme across all views (month/week/day/agenda/right-panel), shadow-sm on all cards, hover:shadow-md, rounded-lg consistently, better padding |
+| Phase 6: Event Color System | Done | `TaskCategory` type (`task`/`meeting`/`focus`/`project`/`cancelled`), `CATEGORY_COLORS` map (emerald/sky/amber/violet/zinc), `getCategoryColors()` + `categoryCardBase()` helpers, category selector in CreateEventModal, all event cards use dynamic category colors, overdue badge across views, task dots in MonthView cells |
+| Phase 7: Event Details Panel | Done | right-panel event cards show category dot + overdue badge, existing TaskDetail works as side drawer, enhanced event card info (project/priority visible) |
+| Phase 8: Tooltips | Done | `title` attributes on all navigation buttons (`T`, `←`, `→`, `N`), hover tooltips on events via `title` |
+| Phase 9: Keyboard Navigation | Done | ArrowLeft/Right for navigation, `T` for today, `M/W/D/A` for view switching, `N` for new event, ref-based handler (no re-registration), modal-aware guard |
+| Phase 10: Interaction Polish | Done | `active:scale-95` on buttons/segments, `active:scale-90` on FAB, consistent hover states, shadow transitions |
+| Phase 12: UI Polish | Done | normalized `rounded-lg` across all cards, unified `shadow-sm`/`shadow-md`, consistent `border-r-2` (was `border-r-4`), unified button heights (`h-9`), consistent border opacity (`/60`, `/30`) |
+| Phase 13: UX Improvements | Done | task category dots in MonthView cells, task count dots in mini-calendar, "+" day-cell button always semi-visible (`opacity-70`), overdue badge on right-panel cards, keyboard shortcuts for all views |
+| Phase 14: Professional Features | Partial | keyboard shortcuts fully implemented, task dots + counts, category filtering via color system — drag-drop/search/filters/print planned |

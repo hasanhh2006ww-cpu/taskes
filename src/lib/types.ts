@@ -1,5 +1,7 @@
 export type Priority = 'low' | 'medium' | 'high';
 
+export type TaskCategory = 'task' | 'meeting' | 'focus' | 'project' | 'cancelled';
+
 export type FilterType = 'all' | 'today' | 'important' | 'completed';
 
 export type HabitType = 'daily' | 'weekly' | 'monthly';
@@ -27,6 +29,7 @@ export interface Task {
   title: string;
   description?: string;
   priority: Priority;
+  category?: TaskCategory;
   dueDate?: string;
   completed: boolean;
   projectId?: string;

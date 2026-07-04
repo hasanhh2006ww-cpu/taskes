@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { v4 as uuid } from 'uuid';
-import type { Task, SubTask, ActivityLogEntry, FilterType, Priority } from '@/lib/types';
+import type { Task, TaskCategory, SubTask, ActivityLogEntry, FilterType, Priority } from '@/lib/types';
 import { loadFromStorage, saveToStorage } from '@/lib/storage';
 import { STORAGE_KEYS, getToday } from '@/lib/constants';
 import { logger } from '@/lib/logger';
@@ -14,7 +14,7 @@ interface TaskState {
   setFilter: (filter: FilterType) => void;
   setActiveProjectId: (id: string | null) => void;
   setActiveTaskId: (id: string | null) => void;
-  addTask: (task: { title: string; priority?: Priority; projectId?: string; dueDate?: string }) => string;
+  addTask: (task: { title: string; priority?: Priority; category?: string; projectId?: string; dueDate?: string }) => string;
   updateTask: (id: string, updates: Partial<Task>) => void;
   deleteTask: (id: string) => void;
   toggleComplete: (id: string) => void;
@@ -50,12 +50,13 @@ export const useTaskStore = create<TaskState>((set, get) => ({
 
   setActiveTaskId: (id) => set({ activeTaskId: id }),
 
-  addTask: ({ title, priority = 'medium', projectId, dueDate }) => {
+  addTask: ({ title, priority = 'medium', category, projectId, dueDate }) => {
     const { tasks, activeProjectId } = get();
     const newTask: Task = {
       id: uuid(),
       title,
       priority,
+      category: category as TaskCategory | undefined,
       projectId: projectId ?? activeProjectId ?? undefined,
       dueDate,
       completed: false,

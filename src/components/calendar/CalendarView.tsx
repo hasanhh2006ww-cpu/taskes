@@ -38,6 +38,27 @@ const PRIORITY_LABELS: Record<string, string> = {
   high: 'عالي',
 };
 
+const CATEGORY_COLORS: Record<string, { border: string; bg: string; text: string; dot: string; darkBorder: string; darkBg: string; darkText: string }> = {
+  task:     { border: 'border-emerald-400', bg: 'bg-emerald-50',   text: 'text-emerald-700',   dot: 'bg-emerald-500',   darkBorder: 'dark:border-emerald-500', darkBg: 'dark:bg-emerald-950/30', darkText: 'dark:text-emerald-300' },
+  meeting:  { border: 'border-sky-400',     bg: 'bg-sky-50',       text: 'text-sky-700',       dot: 'bg-sky-500',       darkBorder: 'dark:border-sky-500',     darkBg: 'dark:bg-sky-950/30',     darkText: 'dark:text-sky-300' },
+  focus:    { border: 'border-amber-400',   bg: 'bg-amber-50',     text: 'text-amber-700',     dot: 'bg-amber-500',     darkBorder: 'dark:border-amber-500',   darkBg: 'dark:bg-amber-950/30',   darkText: 'dark:text-amber-300' },
+  project:  { border: 'border-violet-400',  bg: 'bg-violet-50',    text: 'text-violet-700',    dot: 'bg-violet-500',    darkBorder: 'dark:border-violet-500',  darkBg: 'dark:bg-violet-950/30',  darkText: 'dark:text-violet-300' },
+  cancelled:{ border: 'border-zinc-300',    bg: 'bg-zinc-100',     text: 'text-zinc-500',      dot: 'bg-zinc-400',      darkBorder: 'dark:border-zinc-600',    darkBg: 'dark:bg-zinc-800/40',    darkText: 'dark:text-zinc-500' },
+};
+
+function getCategoryColors(task: any) {
+  if (task.completed) return { border: 'border-zinc-300', bg: 'bg-zinc-50', text: 'text-zinc-400', dot: 'bg-zinc-300', darkBorder: 'dark:border-zinc-700', darkBg: 'dark:bg-zinc-800/30', darkText: 'dark:text-zinc-500' };
+  return CATEGORY_COLORS[task.category] || CATEGORY_COLORS.task;
+}
+
+function categoryCardBase(task: any): string {
+  if (task.completed) return 'border-zinc-300 bg-zinc-50 text-zinc-400 line-through dark:border-zinc-700 dark:bg-zinc-800/30 dark:text-zinc-500';
+  const c = getCategoryColors(task);
+  return `${c.border} ${c.bg} ${c.text} ${c.darkBorder} ${c.darkBg} ${c.darkText}`;
+}
+
+
+
 function getWeekDays(date: Date): Date[] {
   const start = new Date(date);
   start.setDate(start.getDate() - start.getDay());
@@ -74,15 +95,36 @@ export function CalendarView() {
   const [newTitle, setNewTitle] = useState('');
   const [newPriority, setNewPriority] = useState<'low' | 'medium' | 'high'>('medium');
   const [newProjectId, setNewProjectId] = useState<string | undefined>(undefined);
+  const [newCategory, setNewCategory] = useState('task');
   const [newStartTime, setNewStartTime] = useState('09:00');
   const [newEndTime, setNewEndTime] = useState('10:00');
   const modalInputRef = useRef<HTMLInputElement>(null);
+  const showModalRef = useRef(showModal);
+  const navRef = useRef({ navigate, goToToday, handleViewChange, openCreateModal });
+  useEffect(() => { showModalRef.current = showModal; });
+  useEffect(() => { navRef.current = { navigate, goToToday, handleViewChange, openCreateModal }; });
 
   useEffect(() => {
     if (showModal && modalInputRef.current) {
       setTimeout(() => modalInputRef.current?.focus(), 50);
     }
   }, [showModal]);
+
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (showModalRef.current) return;
+      if (e.key === 'ArrowRight') { e.preventDefault(); navRef.current.navigate(1); }
+      if (e.key === 'ArrowLeft') { e.preventDefault(); navRef.current.navigate(-1); }
+      if (e.key === 't' && !e.ctrlKey && !e.metaKey) { e.preventDefault(); navRef.current.goToToday(); }
+      if (e.key === 'm') { e.preventDefault(); navRef.current.handleViewChange('month'); }
+      if (e.key === 'w') { e.preventDefault(); navRef.current.handleViewChange('week'); }
+      if (e.key === 'd') { e.preventDefault(); navRef.current.handleViewChange('day'); }
+      if (e.key === 'a') { e.preventDefault(); navRef.current.handleViewChange('agenda'); }
+      if (e.key === 'n' && !e.ctrlKey && !e.metaKey) { e.preventDefault(); navRef.current.openCreateModal(getToday()); }
+    }
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
@@ -171,6 +213,7 @@ export function CalendarView() {
     setModalDate(dateStr);
     setNewTitle('');
     setNewPriority('medium');
+    setNewCategory('task');
     setNewProjectId(undefined);
     setNewStartTime('09:00');
     setNewEndTime('10:00');
@@ -182,6 +225,7 @@ export function CalendarView() {
     const newId = addTask({
       title: newTitle.trim(),
       priority: newPriority,
+      category: newCategory,
       projectId: newProjectId,
       dueDate: modalDate,
     });
@@ -225,47 +269,62 @@ export function CalendarView() {
   return (
     <div className="flex h-full flex-col bg-zinc-50 dark:bg-zinc-950">
       {/* Header */}
-      <div className="flex flex-wrap items-center gap-2 border-b border-zinc-200/60 bg-white/80 px-3 py-2 backdrop-blur-md dark:border-zinc-800/40 dark:bg-zinc-950/80 md:px-4">
-        <button
-          onClick={goToToday}
-          className="rounded-lg border border-zinc-200/60 px-3 py-1.5 text-xs font-medium text-zinc-600 transition-colors hover:bg-zinc-100 dark:border-zinc-700/60 dark:text-zinc-400 dark:hover:bg-zinc-800 md:text-sm"
-        >
-          اليوم
-        </button>
-        <div className="flex items-center gap-0.5">
-          <button
-            onClick={() => navigate(-1)}
-            className="flex h-10 w-10 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-600 dark:hover:bg-zinc-800 dark:hover:text-zinc-300 md:h-8 md:w-8"
-            aria-label="السابق"
+      <div className="flex items-center gap-3 border-b border-zinc-200/60 bg-white/80 px-4 py-3 backdrop-blur-md dark:border-zinc-800/40 dark:bg-zinc-950/60">
+        <div className="flex items-center gap-1.5">
+            <button
+              onClick={goToToday}
+              title="العودة إلى اليوم (T)"
+              className="flex h-9 items-center rounded-lg border border-zinc-200/60 px-3 text-xs font-medium text-zinc-600 shadow-sm transition-all hover:bg-zinc-100 hover:shadow-md active:scale-95 dark:border-zinc-700/60 dark:text-zinc-400 dark:hover:bg-zinc-800"
           >
-            <ChevronRight className="h-4 w-4" />
+            اليوم
           </button>
-          <button
-            onClick={() => navigate(1)}
-            className="flex h-10 w-10 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-600 dark:hover:bg-zinc-800 dark:hover:text-zinc-300 md:h-8 md:w-8"
-            aria-label="التالي"
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </button>
+          <div className="flex items-center">
+              <button
+                onClick={() => navigate(-1)}
+                title="السابق (←)"
+                className="flex h-9 w-9 items-center justify-center rounded-full text-zinc-400 transition-all hover:bg-zinc-100 hover:text-zinc-600 active:scale-90 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
+                aria-label="السابق"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </button>
+              <button
+                onClick={() => navigate(1)}
+                title="التالي (→)"
+                className="flex h-9 w-9 items-center justify-center rounded-full text-zinc-400 transition-all hover:bg-zinc-100 hover:text-zinc-600 active:scale-90 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
+                aria-label="التالي"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </button>
+          </div>
         </div>
-        <h2 className="min-w-0 flex-1 text-base font-semibold text-zinc-800 dark:text-zinc-200 md:text-lg">
+        <h2 className="flex-1 text-center text-lg font-bold text-zinc-800 dark:text-zinc-100">
           {headerTitle}
         </h2>
-        <div className="flex items-center gap-1 rounded-lg border border-zinc-200/60 bg-zinc-50 p-0.5 dark:border-zinc-700/60 dark:bg-zinc-900">
-          {(['month', 'week', 'day', 'agenda'] as ViewMode[]).map((view) => (
-            <button
-              key={view}
-              onClick={() => handleViewChange(view)}
-              className={cn(
-                'rounded-md px-2.5 py-1 text-xs font-medium transition-all md:px-3 md:text-sm',
-                viewMode === view
-                  ? 'bg-white text-zinc-900 shadow-sm dark:bg-zinc-700 dark:text-zinc-100'
-                  : 'text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200'
-              )}
-            >
-              {view === 'month' ? 'شهر' : view === 'week' ? 'أسبوع' : view === 'day' ? 'يوم' : 'جدول'}
-            </button>
-          ))}
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-0.5 rounded-lg border border-zinc-200/60 bg-zinc-50 p-0.5 shadow-sm dark:border-zinc-700/60 dark:bg-zinc-900">
+            {(['month', 'week', 'day', 'agenda'] as ViewMode[]).map((view) => (
+              <button
+                key={view}
+                onClick={() => handleViewChange(view)}
+                className={cn(
+                  'rounded-lg px-3 py-1.5 text-xs font-medium transition-all active:scale-95',
+                  viewMode === view
+                    ? 'bg-white text-zinc-900 shadow-sm dark:bg-zinc-700 dark:text-zinc-100'
+                    : 'text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200'
+                )}
+              >
+                {view === 'month' ? 'شهر' : view === 'week' ? 'أسبوع' : view === 'day' ? 'يوم' : 'جدول'}
+              </button>
+            ))}
+          </div>
+          <button
+            onClick={() => openCreateModal(getToday())}
+            className="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-500 text-white shadow-sm transition-all hover:bg-emerald-600 hover:shadow-md active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
+            title="إضافة حدث (N)"
+            aria-label="إضافة حدث"
+          >
+            <Plus className="h-4 w-4" />
+          </button>
         </div>
       </div>
 
@@ -354,6 +413,8 @@ export function CalendarView() {
             setNewTitle={setNewTitle}
             newPriority={newPriority}
             setNewPriority={setNewPriority}
+            newCategory={newCategory}
+            setNewCategory={setNewCategory}
             newStartTime={newStartTime}
             setNewStartTime={setNewStartTime}
             newEndTime={newEndTime}
@@ -403,7 +464,7 @@ function MonthView({
                   onClick={() => onDayClick(dateStr)}
                   onDoubleClick={() => onDayDoubleClick(dateStr)}
                   className={cn(
-                    'group relative flex flex-1 flex-col border-e border-zinc-100/60 p-1 text-start transition-colors last:border-e-0 dark:border-zinc-800/30',
+                    'group relative flex flex-1 flex-col border-e border-zinc-100/60 p-1.5 text-start transition-colors last:border-e-0 dark:border-zinc-800/30',
                     isSelected && 'bg-emerald-50/60 dark:bg-emerald-900/20',
                     isToday && 'bg-emerald-50/30 dark:bg-emerald-900/10',
                     !isSelected && !isToday && 'hover:bg-zinc-50 dark:hover:bg-zinc-800/20',
@@ -424,7 +485,7 @@ function MonthView({
                       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.stopPropagation(); onDayDoubleClick(dateStr); } }}
                       role="button"
                       tabIndex={0}
-                      className="flex h-5 w-5 cursor-pointer items-center justify-center rounded-full opacity-0 transition-opacity hover:bg-zinc-200 group-hover:opacity-100 dark:hover:bg-zinc-700"
+                      className="flex h-5 w-5 cursor-pointer items-center justify-center rounded-full opacity-70 transition-all hover:bg-zinc-200 hover:opacity-100 group-hover:opacity-100 dark:hover:bg-zinc-700"
                     >
                       <Plus className="h-3 w-3 text-zinc-400" />
                     </span>
@@ -434,23 +495,29 @@ function MonthView({
                       <div
                         key={t.id}
                         onClick={(e) => { e.stopPropagation(); onTaskClick(t.id); }}
-                        className={cn(
-                          'flex cursor-pointer items-center gap-1 rounded-md border-r-4 px-1.5 py-0.5 text-[10px] font-medium leading-tight transition-all duration-200 md:text-xs',
-                          t.completed
-                            ? 'border-zinc-300 bg-zinc-50 text-zinc-400 line-through dark:border-zinc-700 dark:bg-zinc-800/30 dark:text-zinc-500'
-                            : 'border-teal-500 bg-teal-50 text-teal-700 hover:brightness-95 dark:border-teal-400 dark:bg-teal-950/40 dark:text-teal-300 dark:hover:brightness-125',
-                          activeTaskId === t.id && 'ring-2 ring-emerald-400 dark:ring-emerald-500'
-                        )}
-                      >
-                        <span className="truncate">{t.title}</span>
-                      </div>
+                          className={cn(
+                            'flex cursor-pointer items-center gap-1 rounded-lg border-r-2 px-1.5 py-1 text-[10px] font-medium leading-tight shadow-sm transition-all duration-200 md:text-xs',
+                            categoryCardBase(t),
+                            activeTaskId === t.id && 'ring-2 ring-emerald-400 dark:ring-emerald-500'
+                          )}
+                        >
+                          <span className={cn('h-1.5 w-1.5 shrink-0 rounded-full', getCategoryColors(t).dot)} />
+                          <span className="truncate">{t.title}</span>
+                        </div>
                     ))}
                     {dayTasks.length > 3 && (
                       <div className="px-1 text-[10px] font-medium text-zinc-400 dark:text-zinc-500">
                         +{dayTasks.length - 3} أكثر
                       </div>
                     )}
-                    {dayTasks.length === 0 && dayHabits.length === 0 && (
+                      {dayTasks.length > 0 && dayTasks.length <= 3 && (
+                        <div className="flex gap-0.5 pt-0.5">
+                          {dayTasks.slice(0, 4).map((t: any) => (
+                            <span key={t.id} className={cn('h-1.5 w-1.5 rounded-full', getCategoryColors(t).dot, getCategoryColors(t).darkBorder)} />
+                          ))}
+                        </div>
+                      )}
+                      {dayTasks.length === 0 && dayHabits.length === 0 && (
                       <div className="h-4" />
                     )}
                   </div>
@@ -527,10 +594,8 @@ function WeekView({
                     <div
                       key={t.id}
                       className={cn(
-                        'absolute start-1 end-1 overflow-hidden rounded-md border-r-4 px-1.5 py-1 text-xs font-medium leading-tight shadow-sm transition-all duration-200 md:start-1.5 md:end-1.5',
-                        t.completed
-                          ? 'border-zinc-300 bg-zinc-50 text-zinc-400 line-through dark:border-zinc-700 dark:bg-zinc-800/30 dark:text-zinc-500'
-                          : 'border-teal-500 bg-teal-50 text-teal-700 hover:brightness-95 dark:border-teal-400 dark:bg-teal-950/40 dark:text-teal-300 dark:hover:brightness-125'
+                        'absolute start-1 end-1 overflow-hidden rounded-lg border-r-2 px-1.5 py-1 text-xs font-medium leading-tight shadow-sm transition-all duration-200 hover:shadow-md md:start-1.5 md:end-1.5',
+                        categoryCardBase(t)
                       )}
                       style={{ top: `${topOffset}px`, height: '60px' }}
                     >
@@ -583,10 +648,8 @@ function DayView({
                 key={t.id}
                 onClick={(e) => { e.stopPropagation(); onTaskClick(t.id); }}
                 className={cn(
-                  'absolute start-2 end-2 cursor-pointer overflow-hidden rounded-md border-r-4 px-3 py-2 shadow-sm transition-all duration-200 hover:shadow-md',
-                  t.completed
-                    ? 'border-zinc-300 bg-zinc-50 text-zinc-400 line-through dark:border-zinc-700 dark:bg-zinc-800/30 dark:text-zinc-500'
-                    : 'border-teal-500 bg-teal-50 text-teal-700 hover:brightness-95 dark:border-teal-400 dark:bg-teal-950/40 dark:text-teal-300 dark:hover:brightness-125'
+                  'absolute start-2 end-2 cursor-pointer overflow-hidden rounded-lg border-r-2 px-3 py-2 shadow-sm transition-all duration-200 hover:shadow-md',
+                  categoryCardBase(t)
                 )}
                 style={{ top: `${topOffset}px`, minHeight: '56px' }}
               >
@@ -622,10 +685,8 @@ function DayView({
               key={t.id}
               onClick={(e) => { e.stopPropagation(); onTaskClick(t.id); }}
               className={cn(
-                'flex cursor-pointer items-center gap-2 rounded-md border-r-4 px-2 py-1.5 text-xs font-medium transition-all duration-200',
-                t.completed
-                  ? 'border-zinc-300 bg-zinc-50 text-zinc-400 line-through dark:border-zinc-700 dark:bg-zinc-800/30 dark:text-zinc-500'
-                  : 'border-teal-500 bg-teal-50 text-teal-700 hover:brightness-95 dark:border-teal-400 dark:bg-teal-950/40 dark:text-teal-300 dark:hover:brightness-125'
+                'flex cursor-pointer items-center gap-2 rounded-lg border-r-2 px-2.5 py-2 text-xs font-medium shadow-sm transition-all duration-200',
+                categoryCardBase(t)
               )}
             >
               <span className="flex-1 truncate">{t.title}</span>
@@ -701,27 +762,27 @@ function AgendaView({
                   {dayTasks.map((t: any) => (
                     <div
                       key={t.id}
-                      onClick={(e) => { e.stopPropagation(); onTaskClick(t.id); }}
-                      className={cn(
-                        'flex cursor-pointer items-center gap-3 rounded-xl border-r-4 px-3 py-2.5 shadow-sm transition-all duration-200',
-                        t.completed
-                          ? 'border-zinc-300 bg-zinc-50 text-zinc-400 line-through dark:border-zinc-700 dark:bg-zinc-800/30'
-                          : 'border-teal-500 bg-teal-50 text-teal-700 hover:brightness-95 dark:border-teal-400 dark:bg-teal-950/40 dark:text-teal-300 dark:hover:brightness-125',
-                        activeTaskId === t.id && 'ring-2 ring-emerald-400 dark:ring-emerald-500'
-                      )}
-                    >
-                      <input
-                        type="checkbox"
-                        checked={t.completed}
-                        onChange={(e) => { e.stopPropagation(); toggleComplete(t.id); }}
-                        onClick={(e) => e.stopPropagation()}
-                        className="h-4 w-4 cursor-pointer rounded border-zinc-300"
-                      />
-                      <span className="flex-1 text-sm font-medium">{t.title}</span>
-                      <span className="rounded bg-teal-100/60 px-1.5 py-0.5 text-[10px] font-medium text-teal-600 dark:bg-teal-900/30 dark:text-teal-400">
-                        {PRIORITY_LABELS[t.priority] || t.priority}
-                      </span>
-                    </div>
+                onClick={(e) => { e.stopPropagation(); onTaskClick(t.id); }}
+                  className={cn(
+                    'flex cursor-pointer items-center gap-3 rounded-xl border-r-2 px-3 py-2.5 shadow-sm transition-all duration-200 hover:shadow-md',
+                    categoryCardBase(t),
+                    activeTaskId === t.id && 'ring-2 ring-emerald-400 dark:ring-emerald-500'
+                  )}
+                >
+                  <input
+                    type="checkbox"
+                    checked={t.completed}
+                    onChange={(e) => { e.stopPropagation(); toggleComplete(t.id); }}
+                    onClick={(e) => e.stopPropagation()}
+                    className="h-4 w-4 cursor-pointer rounded border-zinc-300"
+                  />
+                  <span className="flex-1 text-sm font-medium">{t.title}</span>
+                  {!t.completed && (
+                    <span className={cn('rounded-md px-1.5 py-0.5 text-[10px] font-medium', getCategoryColors(t).text, getCategoryColors(t).darkText, getCategoryColors(t).bg, getCategoryColors(t).darkBg)}>
+                      {PRIORITY_LABELS[t.priority] || t.priority}
+                    </span>
+                  )}
+                </div>
                   ))}
                 </div>
               </div>
@@ -809,10 +870,8 @@ function CalendarRightPanel({
                 key={t.id}
                 onClick={() => onTaskClick(t.id)}
                 className={cn(
-                  'flex cursor-pointer items-center gap-2 rounded-md border-r-4 px-2 py-1.5 text-xs font-medium transition-all duration-200',
-                  t.completed
-                    ? 'border-zinc-300 bg-zinc-50 text-zinc-400 line-through dark:border-zinc-700 dark:bg-zinc-800/30 dark:text-zinc-500'
-                    : 'border-teal-500 bg-teal-50 text-teal-700 hover:brightness-95 dark:border-teal-400 dark:bg-teal-950/40 dark:text-teal-300 dark:hover:brightness-125'
+                  'flex cursor-pointer items-center gap-2 rounded-lg border-r-2 px-2.5 py-2 text-xs font-medium shadow-sm transition-all duration-200',
+                  categoryCardBase(t)
                 )}
               >
                 <input
@@ -822,7 +881,11 @@ function CalendarRightPanel({
                   onClick={(e) => e.stopPropagation()}
                   className="h-3.5 w-3.5 shrink-0 cursor-pointer rounded border-zinc-300"
                 />
+                <span className={cn('h-2 w-2 shrink-0 rounded-full', getCategoryColors(t).dot)} />
                 <span className="flex-1 truncate">{t.title}</span>
+                {!t.completed && t.dueDate && t.dueDate < getToday() && (
+                  <span className="shrink-0 rounded bg-rose-100 px-1.5 py-0.5 text-[9px] font-medium text-rose-600 dark:bg-rose-900/30 dark:text-rose-400">متأخر</span>
+                )}
               </div>
             ))}
           </div>
@@ -889,69 +952,79 @@ function CalendarRightPanel({
       transition={{ duration: 0.2 }}
       className="hidden overflow-y-auto border-s border-zinc-200/60 bg-white dark:border-zinc-800/40 dark:bg-zinc-900/60 md:block"
     >
-      <div className="space-y-6 p-4">
-        {/* Today's Tasks */}
+      <div className="space-y-5 p-4">
+        {/* Today's Summary — merged tasks + habits */}
         <div>
-          <div className="mb-3 flex items-center gap-2">
+          <div className="mb-2.5 flex items-center gap-2">
             <CheckCircle2 className="h-4 w-4 text-emerald-500" />
-            <h4 className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">مهام اليوم</h4>
-            <span className="me-auto text-[10px] text-zinc-400">{todayStr}</span>
+            <h4 className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">ملخص اليوم</h4>
+            <span className="me-auto text-[10px] text-zinc-400 dark:text-zinc-500">{todayStr}</span>
           </div>
           {overdueTasks.length > 0 && (
-            <div className="mb-2 rounded-lg bg-red-50 px-3 py-2 dark:bg-red-950/20">
-              <p className="text-[10px] font-medium text-red-500 dark:text-red-400">{overdueTasks.length} مهام متأخرة</p>
+            <div className="mb-2 rounded-lg bg-rose-50 px-3 py-2 dark:bg-rose-950/20">
+              <p className="text-[10px] font-medium text-rose-500">{overdueTasks.length} مهام متأخرة</p>
             </div>
           )}
-          {todayUpcoming.length === 0 && overdueTasks.length === 0 && (
-            <EmptyState icon={Calendar} title="لا توجد مهام لليوم" description="ابدأ بإضافة مهامك اليومية" variant="compact" />
+          {todayUpcoming.length === 0 && overdueTasks.length === 0 && todayHabits.length === 0 && (
+            <EmptyState icon={Calendar} title="يوم هادئ" description="أضف مهامك لبدء الإنتاجية" variant="compact" />
           )}
           <div className="space-y-1">
-            {[...overdueTasks, ...todayUpcoming].slice(0, 6).map((t: any) => (
+            {[...overdueTasks, ...todayUpcoming].slice(0, 5).map((t: any) => (
               <div
                 key={t.id}
                 onClick={() => onTaskClick(t.id)}
                 className={cn(
-                  'flex cursor-pointer items-center gap-2 rounded-md border-r-4 px-2 py-1.5 text-xs font-medium transition-all',
-                  t.completed
-                    ? 'border-zinc-300 bg-zinc-50 text-zinc-400 line-through dark:border-zinc-700 dark:bg-zinc-800/30 dark:text-zinc-500'
-                    : 'border-teal-500 bg-teal-50 text-teal-700 hover:brightness-95 dark:border-teal-400 dark:bg-teal-950/40 dark:text-teal-300 dark:hover:brightness-125'
+                  'flex cursor-pointer items-center gap-2 rounded-lg border-e-2 px-2.5 py-2 text-xs font-medium shadow-sm transition-all hover:shadow-md',
+                  categoryCardBase(t)
                 )}
               >
                 <span className="flex-1 truncate">{t.title}</span>
                 {t.date && t.date < todayStr && !t.completed && (
-                  <span className="shrink-0 rounded bg-red-100 px-1 py-0.5 text-[9px] text-red-500 dark:bg-red-900/30 dark:text-red-400">متأخر</span>
+                  <span className="shrink-0 rounded bg-rose-100 px-1.5 py-0.5 text-[9px] font-medium text-rose-600 dark:bg-rose-900/30 dark:text-rose-400">متأخر</span>
                 )}
               </div>
             ))}
+            {todayHabits.slice(0, 3).map((h: any) => {
+              const HIcon = getHabitIcon(h.icon);
+              const hColor = h.color || '#f59e0b';
+              return (
+                <div key={h.id} className="flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs text-zinc-500 dark:text-zinc-400">
+                  <HIcon className="h-3 w-3 shrink-0" style={{ color: hColor }} />
+                  <span className="flex-1 truncate">{h.title}</span>
+                </div>
+              );
+            })}
           </div>
         </div>
 
         {/* Mini Calendar */}
         <div>
           <div className="mb-2 flex items-center justify-between">
-            <button onClick={handlePrevMonth} className="flex h-6 w-6 items-center justify-center rounded text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800">
+            <button onClick={handlePrevMonth} className="flex h-7 w-7 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-zinc-100 dark:hover:bg-zinc-800" aria-label="الشهر السابق">
               <ChevronRight className="h-3.5 w-3.5" />
             </button>
             <span className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
               {MONTH_NAMES[mcMonth]} {mcYear}
             </span>
-            <button onClick={handleNextMonth} className="flex h-6 w-6 items-center justify-center rounded text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800">
+            <button onClick={handleNextMonth} className="flex h-7 w-7 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-zinc-100 dark:hover:bg-zinc-800" aria-label="الشهر التالي">
               <ChevronLeft className="h-3.5 w-3.5" />
             </button>
           </div>
-          <div className="grid grid-cols-7 gap-0 text-center">
+          <div className="grid grid-cols-7 gap-0.5 text-center">
             {DAY_NAMES_SHORT.map((dn) => (
-              <div key={dn} className="py-1 text-[9px] font-medium text-zinc-400">{dn}</div>
+              <div key={dn} className="py-1 text-[10px] font-medium text-zinc-400 dark:text-zinc-500">{dn}</div>
             ))}
             {mcWeeks.flat().map((d, i) => {
               const isTodayCell = d !== null && d === mcToday.getDate() && mcMonth === mcToday.getMonth() && mcYear === mcToday.getFullYear();
+              const mcDateStr = d !== null ? `${mcYear}-${String(mcMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}` : '';
+              const mcDayTasks = mcDateStr ? getTasksForDate(mcDateStr) : [];
               return (
                 <div
                   key={i}
                   className={cn(
-                    'py-1 text-[11px] transition-colors',
-                    d === null ? '' : 'cursor-pointer rounded hover:bg-zinc-100 dark:hover:bg-zinc-800',
-                    isTodayCell ? 'rounded bg-emerald-500 font-semibold text-white' : 'text-zinc-600 dark:text-zinc-400'
+                    'relative py-1 text-xs transition-all rounded-lg',
+                    d === null ? '' : 'cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-800',
+                    isTodayCell ? 'bg-emerald-500 font-semibold text-white shadow-sm' : 'text-zinc-600 dark:text-zinc-400'
                   )}
                   onClick={() => {
                     if (d !== null) {
@@ -962,6 +1035,13 @@ function CalendarRightPanel({
                   }}
                 >
                   {d}
+                  {mcDayTasks.length > 0 && (
+                    <span className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 flex gap-[2px]">
+                      {mcDayTasks.slice(0, 3).map((t: any) => (
+                        <span key={t.id} className={cn('h-1 w-1 rounded-full', getCategoryColors(t).dot, t.completed && 'bg-zinc-300 dark:bg-zinc-600')} />
+                      ))}
+                    </span>
+                  )}
                 </div>
               );
             })}
@@ -970,56 +1050,34 @@ function CalendarRightPanel({
 
         {/* Quick Actions */}
         <div>
-          <div className="mb-3 flex items-center gap-2">
+          <div className="mb-2.5 flex items-center gap-2">
             <Target className="h-4 w-4 text-emerald-500" />
             <h4 className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">إجراءات سريعة</h4>
           </div>
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             <button
               onClick={onQuickAddTask}
-              className="flex w-full items-center gap-2 rounded-lg bg-emerald-50 px-3 py-2 text-xs font-medium text-emerald-600 transition-colors hover:bg-emerald-100 dark:bg-emerald-900/20 dark:text-emerald-400 dark:hover:bg-emerald-900/30"
+              className="flex w-full items-center gap-2.5 rounded-lg bg-emerald-50 px-3 py-2.5 text-xs font-medium text-emerald-600 transition-all hover:bg-emerald-100 hover:shadow-sm dark:bg-emerald-900/20 dark:text-emerald-400 dark:hover:bg-emerald-900/30"
             >
-              <Plus className="h-3.5 w-3.5" />
+              <Plus className="h-4 w-4" />
               إضافة مهمة
             </button>
             <button
               onClick={onQuickViewDay}
-              className="flex w-full items-center gap-2 rounded-lg bg-zinc-50 px-3 py-2 text-xs font-medium text-zinc-600 transition-colors hover:bg-zinc-100 dark:bg-zinc-800/30 dark:text-zinc-400 dark:hover:bg-zinc-800/50"
+              className="flex w-full items-center gap-2.5 rounded-lg bg-zinc-50 px-3 py-2.5 text-xs font-medium text-zinc-600 transition-all hover:bg-zinc-100 hover:shadow-sm dark:bg-zinc-800/30 dark:text-zinc-400 dark:hover:bg-zinc-800/50"
             >
-              <Calendar className="h-3.5 w-3.5" />
+              <Calendar className="h-4 w-4" />
               عرض اليوم
             </button>
-            <div className="flex items-center gap-2 rounded-lg bg-zinc-50 px-3 py-2 text-xs text-zinc-500 dark:bg-zinc-800/30 dark:text-zinc-400">
-              <FolderKanban className="h-3.5 w-3.5 shrink-0" />
+            <div className="flex items-center gap-2.5 rounded-lg bg-zinc-50 px-3 py-2.5 text-xs text-zinc-500 dark:bg-zinc-800/30 dark:text-zinc-400">
+              <FolderKanban className="h-4 w-4 shrink-0 text-zinc-400" />
               <span className="flex-1">مشاريع نشطة</span>
-              <span className="rounded bg-zinc-200 px-1.5 py-0.5 text-[10px] font-medium text-zinc-600 dark:bg-zinc-700 dark:text-zinc-300">
+              <span className="rounded-md bg-zinc-200 px-1.5 py-0.5 text-[10px] font-medium text-zinc-600 dark:bg-zinc-700 dark:text-zinc-300">
                 {projects.filter((p: any) => p.isActive !== false).length}
               </span>
             </div>
           </div>
         </div>
-
-        {/* Today's Habits summary */}
-        {todayHabits.length > 0 && (
-          <div>
-            <div className="mb-3 flex items-center gap-2">
-              <Flame className="h-4 w-4 text-amber-500" />
-              <h4 className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">عادات اليوم</h4>
-            </div>
-            <div className="space-y-1">
-              {todayHabits.slice(0, 4).map((h: any) => {
-                const HIcon = getHabitIcon(h.icon);
-                const hColor = h.color || '#f59e0b';
-                return (
-                  <div key={h.id} className="flex items-center gap-2 rounded-lg px-2 py-1.5">
-                    <HIcon className="h-3 w-3 shrink-0" style={{ color: hColor }} />
-                    <span className="flex-1 truncate text-xs">{h.title}</span>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
       </div>
     </motion.div>
   );
@@ -1027,15 +1085,23 @@ function CalendarRightPanel({
 
 function CreateEventModal({
   modalDate, newTitle, setNewTitle, newPriority, setNewPriority,
+  newCategory, setNewCategory,
   newStartTime, setNewStartTime, newEndTime, setNewEndTime,
   handleCreateTask, onClose, inputRef,
 }: {
   modalDate: string; newTitle: string; setNewTitle: (v: string) => void;
   newPriority: 'low' | 'medium' | 'high'; setNewPriority: (v: 'low' | 'medium' | 'high') => void;
+  newCategory: string; setNewCategory: (v: string) => void;
   newStartTime: string; setNewStartTime: (v: string) => void;
   newEndTime: string; setNewEndTime: (v: string) => void;
   handleCreateTask: () => void; onClose: () => void; inputRef: React.RefObject<HTMLInputElement | null>;
 }) {
+  const CATEGORY_OPTIONS = [
+    { value: 'task', label: 'مهمة', icon: '🟢' },
+    { value: 'meeting', label: 'اجتماع', icon: '🔵' },
+    { value: 'focus', label: 'جلسة تركيز', icon: '🟠' },
+    { value: 'project', label: 'مشروع', icon: '🟣' },
+  ];
   const d = new Date(modalDate);
 
   return (
@@ -1075,6 +1141,27 @@ function CreateEventModal({
             className="w-full rounded-xl border border-zinc-200 bg-zinc-50 px-3.5 py-2.5 text-sm text-zinc-900 outline-none transition-colors placeholder:text-zinc-400 focus:border-emerald-400 focus:ring-1 focus:ring-emerald-400 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:placeholder:text-zinc-500 dark:focus:border-emerald-500"
             onKeyDown={(e) => { if (e.key === 'Enter') handleCreateTask(); }}
           />
+
+          <div>
+            <label className="mb-1.5 block text-xs font-medium text-zinc-500 dark:text-zinc-400">التصنيف</label>
+            <div className="flex gap-1.5">
+              {CATEGORY_OPTIONS.map((c) => (
+                <button
+                  key={c.value}
+                  onClick={() => setNewCategory(c.value)}
+                  className={cn(
+                    'flex items-center gap-1 rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-all',
+                    newCategory === c.value
+                      ? 'border-emerald-400 bg-emerald-50 text-emerald-600 dark:border-emerald-500 dark:bg-emerald-900/20 dark:text-emerald-400'
+                      : 'border-zinc-200 text-zinc-500 hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-400 dark:hover:bg-zinc-800'
+                  )}
+                >
+                  <span>{c.icon}</span>
+                  <span>{c.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
