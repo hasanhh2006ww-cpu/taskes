@@ -10,7 +10,7 @@ const pageVariants = {
 
 export default function CalendarPage() {
   return (
-    <motion.div {...pageVariants} className="flex w-full flex-1 overflow-hidden">
+    <motion.div {...pageVariants} className="flex h-full w-full flex-1 overflow-hidden">
       <CalendarView />
     </motion.div>
   );

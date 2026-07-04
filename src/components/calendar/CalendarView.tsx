@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useEffect, useRef } from 'react';
+import { useState, useMemo, useEffect, useRef, memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTaskStore } from '@/store/useTaskStore';
 import { useHabitStore } from '@/store/useHabitStore';
@@ -274,7 +274,7 @@ export function CalendarView() {
             <button
               onClick={goToToday}
               title="العودة إلى اليوم (T)"
-              className="flex h-9 items-center rounded-lg border border-zinc-200/60 px-3 text-xs font-medium text-zinc-600 shadow-sm transition-all hover:bg-zinc-100 hover:shadow-md active:scale-95 dark:border-zinc-700/60 dark:text-zinc-400 dark:hover:bg-zinc-800"
+              className="flex h-9 cursor-pointer items-center rounded-lg border border-zinc-200/60 px-3 text-xs font-medium text-zinc-600 shadow-sm transition-all duration-150 hover:bg-zinc-100 hover:shadow-md active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 dark:border-zinc-700/60 dark:text-zinc-400 dark:hover:bg-zinc-800"
           >
             اليوم
           </button>
@@ -282,7 +282,7 @@ export function CalendarView() {
               <button
                 onClick={() => navigate(-1)}
                 title="السابق (←)"
-                className="flex h-9 w-9 items-center justify-center rounded-full text-zinc-400 transition-all hover:bg-zinc-100 hover:text-zinc-600 active:scale-90 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
+                className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full text-zinc-400 transition-all duration-150 hover:bg-zinc-100 hover:text-zinc-600 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
                 aria-label="السابق"
             >
               <ChevronRight className="h-4 w-4" />
@@ -290,14 +290,14 @@ export function CalendarView() {
               <button
                 onClick={() => navigate(1)}
                 title="التالي (→)"
-                className="flex h-9 w-9 items-center justify-center rounded-full text-zinc-400 transition-all hover:bg-zinc-100 hover:text-zinc-600 active:scale-90 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
+                className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full text-zinc-400 transition-all duration-150 hover:bg-zinc-100 hover:text-zinc-600 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
                 aria-label="التالي"
             >
               <ChevronLeft className="h-4 w-4" />
             </button>
           </div>
         </div>
-        <h2 className="flex-1 text-center text-lg font-bold text-zinc-800 dark:text-zinc-100">
+        <h2 className="flex-1 text-center text-xl font-extrabold tracking-tight text-zinc-800 dark:text-zinc-100">
           {headerTitle}
         </h2>
         <div className="flex items-center gap-2">
@@ -307,7 +307,7 @@ export function CalendarView() {
                 key={view}
                 onClick={() => handleViewChange(view)}
                 className={cn(
-                  'rounded-lg px-3 py-1.5 text-xs font-medium transition-all active:scale-95',
+                  'cursor-pointer rounded-lg px-3 py-1.5 text-xs font-medium transition-all duration-150 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500',
                   viewMode === view
                     ? 'bg-white text-zinc-900 shadow-sm dark:bg-zinc-700 dark:text-zinc-100'
                     : 'text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200'
@@ -319,7 +319,7 @@ export function CalendarView() {
           </div>
           <button
             onClick={() => openCreateModal(getToday())}
-            className="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-500 text-white shadow-sm transition-all hover:bg-emerald-600 hover:shadow-md active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
+            className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-emerald-500 text-white shadow-sm transition-all duration-150 hover:bg-emerald-600 hover:shadow-md active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2"
             title="إضافة حدث (N)"
             aria-label="إضافة حدث"
           >
@@ -328,60 +328,122 @@ export function CalendarView() {
         </div>
       </div>
 
+      {/* Monthly Stats Bar */}
+      {(() => {
+        const mTasks = tasks.filter((t: any) => {
+          if (!t.dueDate) return false;
+          const d = new Date(t.dueDate);
+          return d.getMonth() === month && d.getFullYear() === year;
+        });
+        const mTotal = mTasks.length;
+        const mCompleted = mTasks.filter((t: any) => t.completed).length;
+        const mOverdue = mTasks.filter((t: any) => !t.completed && t.dueDate && t.dueDate < getToday()).length;
+        const mPct = mTotal > 0 ? Math.round((mCompleted / mTotal) * 100) : 0;
+        return (
+          <div className="flex items-center gap-4 border-b border-zinc-200/40 bg-white/50 px-4 py-1.5 text-[10px] dark:border-zinc-800/30 dark:bg-zinc-950/30">
+            <span className="text-zinc-500 dark:text-zinc-500">إجمالي الشهر: <strong className="text-zinc-700 dark:text-zinc-300">{mTotal}</strong></span>
+            <span className="text-zinc-400">|</span>
+            <span className="text-zinc-500">مكتمل: <strong className="text-emerald-600 dark:text-emerald-400">{mCompleted}</strong></span>
+            <span className="text-zinc-400">|</span>
+            <span className="text-zinc-500">متأخر: <strong className={mOverdue > 0 ? 'text-rose-500' : 'text-zinc-700 dark:text-zinc-300'}>{mOverdue}</strong></span>
+            <span className="text-zinc-400">|</span>
+            <span className="text-zinc-500">الإنجاز: <strong className="text-zinc-700 dark:text-zinc-300">{mPct}%</strong></span>
+          </div>
+        );
+      })()}
+
       {/* Calendar Content */}
       <div className="flex flex-1 overflow-hidden">
         <div className="flex flex-1 flex-col overflow-hidden">
-          {viewMode === 'month' && (
-            <MonthView
-              year={year}
-              month={month}
-              weeks={weeks}
-              todayStr={todayStr}
-              selectedDate={selectedDate}
-              activeTaskId={activeTaskId}
-              getTasksForDate={getTasksForDate}
-              getHabitsForDate={getHabitsForDate}
-              onDayClick={handleDayClick}
-              onDayDoubleClick={handleDayDoubleClick}
-              onTaskClick={handleTaskClick}
-              formatDateStr={formatDateStr}
-            />
-          )}
-          {viewMode === 'week' && (
-            <WeekView
-              weekDays={weekDays}
-              todayStr={todayStr}
-              selectedDate={selectedDate}
-              activeTaskId={activeTaskId}
-              getTasksForDate={getTasksForDate}
-              getHabitsForDate={getHabitsForDate}
-              onDayClick={handleDayClick}
-              onDayDoubleClick={handleDayDoubleClick}
-              onTaskClick={handleTaskClick}
-            />
-          )}
-          {viewMode === 'day' && (
-            <DayView
-              currentDate={currentDate}
-              todayStr={todayStr}
-              getTasksForDate={getTasksForDate}
-              getHabitsForDate={getHabitsForDate}
-              onDayDoubleClick={handleDayDoubleClick}
-              toggleComplete={toggleComplete}
-              onTaskClick={handleTaskClick}
-              tasks={tasks}
-            />
-          )}
-          {viewMode === 'agenda' && (
-            <AgendaView
-              tasks={tasks}
-              todayStr={todayStr}
-              getTasksForDate={getTasksForDate}
-              toggleComplete={toggleComplete}
-              onTaskClick={handleTaskClick}
-              activeTaskId={activeTaskId}
-            />
-          )}
+          <AnimatePresence mode="wait">
+            {viewMode === 'month' && (
+              <motion.div
+                key="month"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.2 }}
+                className="flex flex-1 flex-col overflow-hidden"
+              >
+                <MonthView
+                  year={year}
+                  month={month}
+                  weeks={weeks}
+                  todayStr={todayStr}
+                  selectedDate={selectedDate}
+                  activeTaskId={activeTaskId}
+                  getTasksForDate={getTasksForDate}
+                  getHabitsForDate={getHabitsForDate}
+                  onDayClick={handleDayClick}
+                  onDayDoubleClick={handleDayDoubleClick}
+                  onTaskClick={handleTaskClick}
+                  formatDateStr={formatDateStr}
+                />
+              </motion.div>
+            )}
+            {viewMode === 'week' && (
+              <motion.div
+                key="week"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.2 }}
+                className="flex flex-1 flex-col overflow-hidden"
+              >
+                <WeekView
+                  weekDays={weekDays}
+                  todayStr={todayStr}
+                  selectedDate={selectedDate}
+                  activeTaskId={activeTaskId}
+                  getTasksForDate={getTasksForDate}
+                  getHabitsForDate={getHabitsForDate}
+                  onDayClick={handleDayClick}
+                  onDayDoubleClick={handleDayDoubleClick}
+                  onTaskClick={handleTaskClick}
+                />
+              </motion.div>
+            )}
+            {viewMode === 'day' && (
+              <motion.div
+                key="day"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.2 }}
+                className="flex flex-1 flex-col overflow-hidden"
+              >
+                <DayView
+                  currentDate={currentDate}
+                  todayStr={todayStr}
+                  getTasksForDate={getTasksForDate}
+                  getHabitsForDate={getHabitsForDate}
+                  onDayDoubleClick={handleDayDoubleClick}
+                  toggleComplete={toggleComplete}
+                  onTaskClick={handleTaskClick}
+                  tasks={tasks}
+                />
+              </motion.div>
+            )}
+            {viewMode === 'agenda' && (
+              <motion.div
+                key="agenda"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.2 }}
+                className="flex flex-1 flex-col overflow-hidden"
+              >
+                <AgendaView
+                  tasks={tasks}
+                  todayStr={todayStr}
+                  getTasksForDate={getTasksForDate}
+                  toggleComplete={toggleComplete}
+                  onTaskClick={handleTaskClick}
+                  activeTaskId={activeTaskId}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
         {/* Right panel: task detail, day summary, or default content */}
         <CalendarRightPanel
@@ -429,7 +491,7 @@ export function CalendarView() {
   );
 }
 
-function MonthView({
+const MonthView = memo(function MonthView({
   year, month, weeks, todayStr, selectedDate, activeTaskId, getTasksForDate, getHabitsForDate, onDayClick, onDayDoubleClick, onTaskClick, formatDateStr,
 }: {
   year: number; month: number; weeks: (number | null)[][]; todayStr: string; selectedDate: string | null; activeTaskId: string | null;
@@ -437,11 +499,12 @@ function MonthView({
   onDayClick: (d: string) => void; onDayDoubleClick: (d: string) => void; onTaskClick: (id: string) => void;
   formatDateStr: (y: number, m: number, d: number) => string;
 }) {
+  const [dragOverDate, setDragOverDate] = useState<string | null>(null);
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
-      <div className="grid grid-cols-7 border-b border-zinc-200/60 bg-zinc-50/80 dark:border-zinc-800/40 dark:bg-zinc-900/80">
+      <div className="grid grid-cols-7 border-b border-zinc-200/50 bg-zinc-50/80 dark:border-zinc-800/30 dark:bg-zinc-900/80">
         {DAY_NAMES.map((d, i) => (
-          <div key={d} className="py-2 text-center text-xs font-medium text-zinc-500 dark:text-zinc-400 md:py-2.5 md:text-sm">
+          <div key={d} className="py-2.5 text-center text-xs font-semibold text-zinc-600 dark:text-zinc-300 md:py-3 md:text-sm">
             <span className="hidden md:inline">{d}</span>
             <span className="md:hidden">{DAY_NAMES_SHORT[i]}</span>
           </div>
@@ -449,9 +512,9 @@ function MonthView({
       </div>
       <div className="flex flex-1 flex-col overflow-hidden">
         {weeks.map((week, wi) => (
-          <div key={wi} className="flex flex-1 border-b border-zinc-100/60 last:border-b-0 dark:border-zinc-800/30">
+          <div key={wi} className="flex flex-1 border-b border-zinc-100/40 last:border-b-0 dark:border-zinc-800/20">
             {week.map((day, di) => {
-              if (!day) return <div key={`e-${wi}-${di}`} className="flex-1 border-e border-zinc-100/60 last:border-e-0 dark:border-zinc-800/30" />;
+              if (!day) return <div key={`e-${wi}-${di}`} className="flex-1 border-e border-zinc-100/40 last:border-e-0 dark:border-zinc-800/20" />;
               const dateStr = formatDateStr(year, month, day);
               const dayTasks = getTasksForDate(dateStr);
               const dayHabits = getHabitsForDate(dateStr);
@@ -463,40 +526,78 @@ function MonthView({
                   key={day}
                   onClick={() => onDayClick(dateStr)}
                   onDoubleClick={() => onDayDoubleClick(dateStr)}
+                  onDragOver={(e) => { e.preventDefault(); if (dragOverDate !== dateStr) setDragOverDate(dateStr); }}
+                  onDragLeave={(e) => { if (!e.currentTarget.contains(e.relatedTarget as Node)) setDragOverDate(null); }}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    const taskId = e.dataTransfer.getData('text/plain');
+                    if (taskId && dateStr) {
+                      useTaskStore.getState().updateTask(taskId, { dueDate: dateStr });
+                      logger.info(`Calendar: dragged task ${taskId} to ${dateStr}`);
+                    }
+                    setDragOverDate(null);
+                  }}
                   className={cn(
-                    'group relative flex flex-1 flex-col border-e border-zinc-100/60 p-1.5 text-start transition-colors last:border-e-0 dark:border-zinc-800/30',
+                    'group relative flex flex-1 flex-col border-e border-zinc-100/40 p-2 text-start transition-all duration-150 last:border-e-0 dark:border-zinc-800/20',
                     isSelected && 'bg-emerald-50/60 dark:bg-emerald-900/20',
-                    isToday && 'bg-emerald-50/30 dark:bg-emerald-900/10',
-                    !isSelected && !isToday && 'hover:bg-zinc-50 dark:hover:bg-zinc-800/20',
-                    isWeekend && 'bg-zinc-50/50 dark:bg-zinc-900/30'
+                    isToday && 'bg-emerald-50/30 ring-1 ring-emerald-200/60 dark:bg-emerald-900/10 dark:ring-emerald-700/40',
+                    !isSelected && !isToday && 'md:hover:bg-zinc-50 md:hover:shadow-sm dark:md:hover:bg-zinc-800/20',
+                    isWeekend && 'bg-zinc-50/50 dark:bg-zinc-900/30',
+                    dragOverDate === dateStr && 'ring-2 ring-emerald-300 bg-emerald-50/40 dark:ring-emerald-500 dark:bg-emerald-900/20'
                   )}
                 >
-                  <div className="mb-auto flex items-center justify-between">
-                    <span className={cn(
-                      'inline-flex h-6 w-6 items-center justify-center rounded-full text-xs font-medium md:h-7 md:w-7 md:text-sm',
-                      isToday && 'bg-emerald-500 text-white shadow-sm shadow-emerald-500/30',
-                      isSelected && !isToday && 'bg-emerald-100 text-emerald-600 dark:bg-emerald-800/50 dark:text-emerald-400',
-                      !isSelected && !isToday && 'text-zinc-600 dark:text-zinc-400'
-                    )}>
-                      {day}
-                    </span>
-                    <span
-                      onClick={(e) => { e.stopPropagation(); onDayDoubleClick(dateStr); }}
-                      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.stopPropagation(); onDayDoubleClick(dateStr); } }}
-                      role="button"
-                      tabIndex={0}
-                      className="flex h-5 w-5 cursor-pointer items-center justify-center rounded-full opacity-70 transition-all hover:bg-zinc-200 hover:opacity-100 group-hover:opacity-100 dark:hover:bg-zinc-700"
-                    >
-                      <Plus className="h-3 w-3 text-zinc-400" />
-                    </span>
+                  {/* Header: day number + today badge + count + add */}
+                  <div className="flex shrink-0 items-center justify-between gap-0.5">
+                    <div className="flex items-center gap-1">
+                      <span className={cn(
+                        'inline-flex h-7 w-7 items-center justify-center rounded-full text-xs font-medium transition-all duration-150 md:h-8 md:w-8 md:text-sm',
+                        isToday && 'bg-emerald-500 text-white shadow-sm shadow-emerald-200/50 dark:shadow-emerald-900/50',
+                        isSelected && !isToday && 'bg-emerald-100 text-emerald-600 dark:bg-emerald-800/50 dark:text-emerald-400',
+                        !isSelected && !isToday && 'text-zinc-600 dark:text-zinc-400'
+                      )}>
+                        {day}
+                      </span>
+                      {isToday && (
+                        <span className="rounded bg-emerald-500/10 px-1.5 py-0.5 text-[8px] font-semibold text-emerald-600 dark:text-emerald-400 md:text-[9px]">
+                          اليوم
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-0.5">
+                      {dayTasks.length > 0 && (
+                        <span className="text-[9px] font-medium text-zinc-400 dark:text-zinc-500">
+                          {dayTasks.length}
+                        </span>
+                      )}
+                      <span
+                        onClick={(e) => { e.stopPropagation(); onDayDoubleClick(dateStr); }}
+                        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.stopPropagation(); onDayDoubleClick(dateStr); } }}
+                        role="button"
+                        tabIndex={0}
+                        className="flex h-5 w-5 cursor-pointer items-center justify-center rounded-full opacity-0 transition-all duration-150 hover:bg-zinc-200 group-hover:opacity-100 group-hover:scale-110 dark:hover:bg-zinc-700"
+                      >
+                        <Plus className="h-3 w-3 text-zinc-400" />
+                      </span>
+                    </div>
                   </div>
-                  <div className="mt-0.5 space-y-0.5">
-                    {dayTasks.slice(0, 3).map((t: any) => (
+                  <div className="mt-0.5 min-h-0 flex-1 space-y-0.5 overflow-hidden">
+                    {/* Habit dots */}
+                    {dayHabits.length > 0 && (
+                      <div className="flex flex-wrap gap-1 px-0.5 pt-0.5">
+                        {dayHabits.slice(0, 3).map((h: any) => (
+                          <span key={h.id} className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: h.color || '#f59e0b' }} />
+                        ))}
+                      </div>
+                    )}
+                    {/* Task cards (max 2) */}
+                    {dayTasks.slice(0, 2).map((t: any) => (
                       <div
                         key={t.id}
+                        draggable
+                        onDragStart={(e) => { e.dataTransfer.setData('text/plain', t.id); e.dataTransfer.effectAllowed = 'move'; }}
                         onClick={(e) => { e.stopPropagation(); onTaskClick(t.id); }}
                           className={cn(
-                            'flex cursor-pointer items-center gap-1 rounded-lg border-r-2 px-1.5 py-1 text-[10px] font-medium leading-tight shadow-sm transition-all duration-200 md:text-xs',
+                            'flex cursor-grab items-center gap-1 rounded-lg border-r-2 px-1.5 py-1 text-[10px] font-medium leading-tight shadow-sm transition-all duration-150 hover:shadow-md active:cursor-grabbing md:text-xs',
                             categoryCardBase(t),
                             activeTaskId === t.id && 'ring-2 ring-emerald-400 dark:ring-emerald-500'
                           )}
@@ -505,21 +606,32 @@ function MonthView({
                           <span className="truncate">{t.title}</span>
                         </div>
                     ))}
-                    {dayTasks.length > 3 && (
-                      <div className="px-1 text-[10px] font-medium text-zinc-400 dark:text-zinc-500">
-                        +{dayTasks.length - 3} أكثر
+                    {dayTasks.length > 2 && (
+                      <div className="px-1 text-[10px] font-medium text-zinc-400 transition-all duration-150 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300">
+                        +{dayTasks.length - 2} أكثر
                       </div>
                     )}
-                      {dayTasks.length > 0 && dayTasks.length <= 3 && (
-                        <div className="flex gap-0.5 pt-0.5">
-                          {dayTasks.slice(0, 4).map((t: any) => (
-                            <span key={t.id} className={cn('h-1.5 w-1.5 rounded-full', getCategoryColors(t).dot, getCategoryColors(t).darkBorder)} />
-                          ))}
-                        </div>
-                      )}
-                      {dayTasks.length === 0 && dayHabits.length === 0 && (
-                      <div className="h-4" />
+                    {dayTasks.length === 0 && dayHabits.length === 0 && (
+                      <div className="flex items-center justify-center py-1.5">
+                        <p className="text-[9px] text-zinc-300 dark:text-zinc-600">لا توجد مهام</p>
+                      </div>
                     )}
+                  </div>
+                  {/* Progress bar */}
+                  {dayTasks.length > 0 && (
+                    <div className="mt-1 h-1 overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800">
+                      <div
+                        className="h-full rounded-full bg-emerald-400 transition-all duration-500"
+                        style={{ width: `${Math.round((dayTasks.filter((t: any) => t.completed).length / dayTasks.length) * 100)}%` }}
+                      />
+                    </div>
+                  )}
+                  {/* Heat indicator */}
+                  <div className="absolute bottom-0 start-0 end-0 flex justify-start">
+                    <div
+                      className="h-0.5 rounded-full bg-emerald-400/50 transition-all duration-300"
+                      style={{ width: `${Math.min(dayTasks.length / 6 * 100, 100)}%` }}
+                    />
                   </div>
                 </button>
               );
@@ -529,7 +641,7 @@ function MonthView({
       </div>
     </div>
   );
-}
+});
 
 function WeekView({
   weekDays, todayStr, selectedDate, activeTaskId, getTasksForDate, getHabitsForDate, onDayClick, onDayDoubleClick, onTaskClick,
@@ -594,7 +706,7 @@ function WeekView({
                     <div
                       key={t.id}
                       className={cn(
-                        'absolute start-1 end-1 overflow-hidden rounded-lg border-r-2 px-1.5 py-1 text-xs font-medium leading-tight shadow-sm transition-all duration-200 hover:shadow-md md:start-1.5 md:end-1.5',
+                        'absolute start-1 end-1 overflow-hidden rounded-lg border-r-2 px-1.5 py-1 text-xs font-medium leading-tight shadow-sm transition-all duration-150 hover:shadow-md md:start-1.5 md:end-1.5',
                         categoryCardBase(t)
                       )}
                       style={{ top: `${topOffset}px`, height: '60px' }}
@@ -637,6 +749,21 @@ function DayView({
           className="relative flex-1 overflow-y-auto"
           onDoubleClick={() => onDayDoubleClick(dateStr)}
         >
+          {/* Habit strip */}
+          {dayHabits.length > 0 && (
+            <div className="absolute start-0 end-0 top-0 z-10 flex flex-wrap gap-2 border-b border-zinc-100/60 bg-white/90 px-3 py-1.5 backdrop-blur-sm dark:border-zinc-800/30 dark:bg-zinc-900/90">
+              {dayHabits.map((h: any) => {
+                const HIcon = getHabitIcon(h.icon);
+                const hColor = h.color || '#f59e0b';
+                return (
+                  <span key={h.id} className="flex items-center gap-1 rounded-full bg-zinc-100 px-2 py-0.5 text-[10px] text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400">
+                    <HIcon className="h-3 w-3 shrink-0" style={{ color: hColor }} />
+                    {h.title}
+                  </span>
+                );
+              })}
+            </div>
+          )}
           {HOURS.map((h) => (
             <div key={h} className="h-16 border-b border-zinc-100/60 dark:border-zinc-800/30" />
           ))}
@@ -648,7 +775,7 @@ function DayView({
                 key={t.id}
                 onClick={(e) => { e.stopPropagation(); onTaskClick(t.id); }}
                 className={cn(
-                  'absolute start-2 end-2 cursor-pointer overflow-hidden rounded-lg border-r-2 px-3 py-2 shadow-sm transition-all duration-200 hover:shadow-md',
+                  'absolute start-2 end-2 cursor-pointer overflow-hidden rounded-lg border-r-2 px-3 py-2 shadow-sm transition-all duration-150 hover:shadow-md',
                   categoryCardBase(t)
                 )}
                 style={{ top: `${topOffset}px`, minHeight: '56px' }}
@@ -764,7 +891,7 @@ function AgendaView({
                       key={t.id}
                 onClick={(e) => { e.stopPropagation(); onTaskClick(t.id); }}
                   className={cn(
-                    'flex cursor-pointer items-center gap-3 rounded-xl border-r-2 px-3 py-2.5 shadow-sm transition-all duration-200 hover:shadow-md',
+                    'flex cursor-pointer items-center gap-3 rounded-xl border-r-2 px-3 py-2.5 shadow-sm transition-all duration-150 hover:shadow-md',
                     categoryCardBase(t),
                     activeTaskId === t.id && 'ring-2 ring-emerald-400 dark:ring-emerald-500'
                   )}
@@ -855,7 +982,7 @@ function CalendarRightPanel({
             <h4 className="text-xs font-medium text-zinc-500 dark:text-zinc-400">المهام ({dayTasks.length})</h4>
             <button
               onClick={onCreateTask}
-              className="flex items-center gap-1 rounded-lg bg-emerald-500 px-2.5 py-1.5 text-xs font-medium text-white transition-colors hover:bg-emerald-600"
+              className="flex cursor-pointer items-center gap-1 rounded-lg bg-emerald-500 px-2.5 py-1.5 text-xs font-medium text-white transition-all duration-150 hover:bg-emerald-600 active:scale-95"
             >
               <Plus className="h-3 w-3" />
               جديد
@@ -870,7 +997,7 @@ function CalendarRightPanel({
                 key={t.id}
                 onClick={() => onTaskClick(t.id)}
                 className={cn(
-                  'flex cursor-pointer items-center gap-2 rounded-lg border-r-2 px-2.5 py-2 text-xs font-medium shadow-sm transition-all duration-200',
+                  'flex cursor-pointer items-center gap-2 rounded-lg border-r-2 px-2.5 py-2 text-xs font-medium shadow-sm transition-all duration-150',
                   categoryCardBase(t)
                 )}
               >
@@ -950,9 +1077,9 @@ function CalendarRightPanel({
       animate={{ width: 280, opacity: 1 }}
       exit={{ width: 0, opacity: 0 }}
       transition={{ duration: 0.2 }}
-      className="hidden overflow-y-auto border-s border-zinc-200/60 bg-white dark:border-zinc-800/40 dark:bg-zinc-900/60 md:block"
+      className="hidden h-full overflow-y-auto border-s border-zinc-200/60 bg-white dark:border-zinc-800/40 dark:bg-zinc-900/60 md:flex md:flex-col"
     >
-      <div className="space-y-5 p-4">
+      <div className="flex flex-1 flex-col justify-between gap-6 p-5">
         {/* Today's Summary — merged tasks + habits */}
         <div>
           <div className="mb-2.5 flex items-center gap-2">
@@ -966,7 +1093,20 @@ function CalendarRightPanel({
             </div>
           )}
           {todayUpcoming.length === 0 && overdueTasks.length === 0 && todayHabits.length === 0 && (
-            <EmptyState icon={Calendar} title="يوم هادئ" description="أضف مهامك لبدء الإنتاجية" variant="compact" />
+            <div className="rounded-xl border border-zinc-100/60 bg-white/50 p-5 text-center shadow-sm dark:border-zinc-800/30 dark:bg-zinc-900/40">
+              <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-50 dark:bg-emerald-900/20">
+                <Calendar className="h-6 w-6 text-emerald-400" />
+              </div>
+              <h4 className="mb-1 text-sm font-semibold text-zinc-700 dark:text-zinc-300">يوم هادئ</h4>
+              <p className="mb-4 text-xs text-zinc-400 dark:text-zinc-500">لا توجد مهام أو عادات اليوم. ابدأ بإضافة مهمة جديدة.</p>
+              <button
+                onClick={onQuickAddTask}
+                className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg bg-emerald-500 px-4 py-2 text-xs font-medium text-white shadow-sm transition-all duration-150 hover:bg-emerald-600 hover:shadow-md active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
+              >
+                <Plus className="h-3.5 w-3.5" />
+                إضافة مهمة
+              </button>
+            </div>
           )}
           <div className="space-y-1">
             {[...overdueTasks, ...todayUpcoming].slice(0, 5).map((t: any) => (
@@ -974,7 +1114,7 @@ function CalendarRightPanel({
                 key={t.id}
                 onClick={() => onTaskClick(t.id)}
                 className={cn(
-                  'flex cursor-pointer items-center gap-2 rounded-lg border-e-2 px-2.5 py-2 text-xs font-medium shadow-sm transition-all hover:shadow-md',
+                  'flex cursor-pointer items-center gap-2 rounded-lg border-e-2 px-2.5 py-2 text-xs font-medium shadow-sm transition-all duration-150 hover:shadow-md',
                   categoryCardBase(t)
                 )}
               >
@@ -999,20 +1139,20 @@ function CalendarRightPanel({
 
         {/* Mini Calendar */}
         <div>
-          <div className="mb-2 flex items-center justify-between">
-            <button onClick={handlePrevMonth} className="flex h-7 w-7 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-zinc-100 dark:hover:bg-zinc-800" aria-label="الشهر السابق">
+          <div className="mb-2.5 flex items-center justify-between">
+            <button onClick={handlePrevMonth} className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-lg text-zinc-400 transition-all duration-150 hover:bg-zinc-100 hover:text-zinc-600 active:scale-95 dark:hover:bg-zinc-800 dark:hover:text-zinc-300" aria-label="الشهر السابق">
               <ChevronRight className="h-3.5 w-3.5" />
             </button>
             <span className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
               {MONTH_NAMES[mcMonth]} {mcYear}
             </span>
-            <button onClick={handleNextMonth} className="flex h-7 w-7 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-zinc-100 dark:hover:bg-zinc-800" aria-label="الشهر التالي">
+            <button onClick={handleNextMonth} className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-lg text-zinc-400 transition-all duration-150 hover:bg-zinc-100 hover:text-zinc-600 active:scale-95 dark:hover:bg-zinc-800 dark:hover:text-zinc-300" aria-label="الشهر التالي">
               <ChevronLeft className="h-3.5 w-3.5" />
             </button>
           </div>
-          <div className="grid grid-cols-7 gap-0.5 text-center">
+          <div className="grid grid-cols-7 gap-1 text-center">
             {DAY_NAMES_SHORT.map((dn) => (
-              <div key={dn} className="py-1 text-[10px] font-medium text-zinc-400 dark:text-zinc-500">{dn}</div>
+              <div key={dn} className="py-1 text-[10px] font-semibold text-zinc-500 dark:text-zinc-400">{dn}</div>
             ))}
             {mcWeeks.flat().map((d, i) => {
               const isTodayCell = d !== null && d === mcToday.getDate() && mcMonth === mcToday.getMonth() && mcYear === mcToday.getFullYear();
@@ -1022,9 +1162,9 @@ function CalendarRightPanel({
                 <div
                   key={i}
                   className={cn(
-                    'relative py-1 text-xs transition-all rounded-lg',
-                    d === null ? '' : 'cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-800',
-                    isTodayCell ? 'bg-emerald-500 font-semibold text-white shadow-sm' : 'text-zinc-600 dark:text-zinc-400'
+                    'relative py-1.5 text-xs transition-all duration-150 rounded-lg',
+                    d === null ? '' : 'cursor-pointer hover:bg-zinc-100 hover:text-zinc-700 dark:hover:bg-zinc-800 dark:hover:text-zinc-200',
+                    isTodayCell ? 'bg-emerald-500 font-semibold text-white shadow-sm hover:bg-emerald-600 hover:text-white' : 'text-zinc-600 dark:text-zinc-400'
                   )}
                   onClick={() => {
                     if (d !== null) {
@@ -1036,7 +1176,7 @@ function CalendarRightPanel({
                 >
                   {d}
                   {mcDayTasks.length > 0 && (
-                    <span className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 flex gap-[2px]">
+                    <span className="absolute -bottom-0 left-1/2 -translate-x-1/2 flex gap-[2px]">
                       {mcDayTasks.slice(0, 3).map((t: any) => (
                         <span key={t.id} className={cn('h-1 w-1 rounded-full', getCategoryColors(t).dot, t.completed && 'bg-zinc-300 dark:bg-zinc-600')} />
                       ))}
@@ -1048,6 +1188,78 @@ function CalendarRightPanel({
           </div>
         </div>
 
+        {/* Upcoming Events */}
+        {(() => {
+          const now = new Date(todayStr);
+          const weekLater = new Date(now);
+          weekLater.setDate(weekLater.getDate() + 7);
+          const weekLaterStr = `${weekLater.getFullYear()}-${String(weekLater.getMonth() + 1).padStart(2, '0')}-${String(weekLater.getDate()).padStart(2, '0')}`;
+          const upcomingList = tasks
+            .filter((t: any) => t.dueDate && t.dueDate > todayStr && t.dueDate <= weekLaterStr && !t.completed)
+            .sort((a: any, b: any) => (a.dueDate || '').localeCompare(b.dueDate || ''))
+            .slice(0, 4);
+          return (
+            <div>
+              <div className="mb-2.5 flex items-center gap-2">
+                <ListTodo className="h-4 w-4 text-emerald-500" />
+                <h4 className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">الأحداث القادمة</h4>
+                <span className="me-auto text-[10px] text-zinc-400 dark:text-zinc-500">{upcomingList.length > 0 ? `+${tasks.filter((t: any) => t.dueDate && t.dueDate > todayStr && !t.completed).length - upcomingList.length}` : ''}</span>
+              </div>
+              {upcomingList.length === 0 ? (
+                <div className="rounded-lg border border-dashed border-zinc-200/60 p-3 text-center dark:border-zinc-700/40">
+                  <p className="text-[10px] text-zinc-400 dark:text-zinc-500">لا توجد أحداث قادمة هذا الأسبوع</p>
+                </div>
+              ) : (
+                <div className="space-y-1">
+                  {upcomingList.map((t: any) => {
+                    const d = new Date(t.dueDate);
+                    const dayLabel = d.toLocaleDateString('ar-SA', { weekday: 'short', day: 'numeric' });
+                    return (
+                      <div
+                        key={t.id}
+                        onClick={() => onTaskClick(t.id)}
+                        className="flex cursor-pointer items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs transition-all duration-150 hover:bg-zinc-50 dark:hover:bg-zinc-800/30"
+                      >
+                        <span className={cn('h-2 w-2 shrink-0 rounded-full', getCategoryColors(t).dot)} />
+                        <span className="flex-1 truncate text-zinc-600 dark:text-zinc-400">{t.title}</span>
+                        <span className="shrink-0 text-[9px] text-zinc-400 dark:text-zinc-500">{dayLabel}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          );
+        })()}
+
+        {/* Month Summary */}
+        {(() => {
+          const mcMonthTasks = tasks.filter((t: any) => {
+            if (!t.dueDate) return false;
+            const d = new Date(t.dueDate);
+            return d.getMonth() === mcMonth && d.getFullYear() === mcYear;
+          });
+          const mcTotal = mcMonthTasks.length;
+          const mcCompleted = mcMonthTasks.filter((t: any) => t.completed).length;
+          const mcOverdue = mcMonthTasks.filter((t: any) => !t.completed && t.dueDate < todayStr).length;
+          return (
+            <div className="flex flex-col gap-2">
+              <div className="w-full rounded-lg border border-zinc-100/60 bg-zinc-50/50 p-3.5 text-center dark:border-zinc-800/30 dark:bg-zinc-900/40">
+                <p className="text-sm font-bold text-zinc-700 dark:text-zinc-300">{mcTotal}</p>
+                <p className="mt-0.5 text-[10px] text-zinc-400 dark:text-zinc-500">إجمالي مهام الشهر</p>
+              </div>
+              <div className="w-full rounded-lg border border-zinc-100/60 bg-zinc-50/50 p-3.5 text-center dark:border-zinc-800/30 dark:bg-zinc-900/40">
+                <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400">{mcCompleted}</p>
+                <p className="mt-0.5 text-[10px] text-zinc-400 dark:text-zinc-500">مهام مكتملة</p>
+              </div>
+              <div className="w-full rounded-lg border border-zinc-100/60 bg-zinc-50/50 p-3.5 text-center dark:border-zinc-800/30 dark:bg-zinc-900/40">
+                <p className={cn('text-sm font-bold', mcOverdue > 0 ? 'text-rose-500' : 'text-zinc-700 dark:text-zinc-300')}>{mcOverdue}</p>
+                <p className="mt-0.5 text-[10px] text-zinc-400 dark:text-zinc-500">مهام متأخرة</p>
+              </div>
+            </div>
+          );
+        })()}
+
         {/* Quick Actions */}
         <div>
           <div className="mb-2.5 flex items-center gap-2">
@@ -1057,14 +1269,14 @@ function CalendarRightPanel({
           <div className="space-y-1.5">
             <button
               onClick={onQuickAddTask}
-              className="flex w-full items-center gap-2.5 rounded-lg bg-emerald-50 px-3 py-2.5 text-xs font-medium text-emerald-600 transition-all hover:bg-emerald-100 hover:shadow-sm dark:bg-emerald-900/20 dark:text-emerald-400 dark:hover:bg-emerald-900/30"
+              className="flex w-full cursor-pointer items-center gap-2.5 rounded-lg bg-emerald-50 px-3 py-2.5 text-xs font-medium text-emerald-600 transition-all duration-150 hover:bg-emerald-100 hover:shadow-sm active:scale-[0.98] dark:bg-emerald-900/20 dark:text-emerald-400 dark:hover:bg-emerald-900/30"
             >
               <Plus className="h-4 w-4" />
               إضافة مهمة
             </button>
             <button
               onClick={onQuickViewDay}
-              className="flex w-full items-center gap-2.5 rounded-lg bg-zinc-50 px-3 py-2.5 text-xs font-medium text-zinc-600 transition-all hover:bg-zinc-100 hover:shadow-sm dark:bg-zinc-800/30 dark:text-zinc-400 dark:hover:bg-zinc-800/50"
+              className="flex w-full cursor-pointer items-center gap-2.5 rounded-lg bg-zinc-50 px-3 py-2.5 text-xs font-medium text-zinc-600 transition-all duration-150 hover:bg-zinc-100 hover:shadow-sm active:scale-[0.98] dark:bg-zinc-800/30 dark:text-zinc-400 dark:hover:bg-zinc-800/50"
             >
               <Calendar className="h-4 w-4" />
               عرض اليوم
