@@ -6,7 +6,7 @@ import { useUIStore } from '@/store/useUIStore';
 import { useTaskStore } from '@/store/useTaskStore';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { Search, Bell, Mail, Zap, Sun, Moon, Monitor, User, LogOut, ChevronDown, LayoutDashboard, Plus, Target, Flame, Calendar, BarChart3, Settings } from 'lucide-react';
+import { Search, Bell, Zap, Sun, Moon, Monitor, User, LogOut, ChevronDown, LayoutDashboard, Plus, Target, Flame, Calendar, BarChart3, Settings } from 'lucide-react';
 import { useRouter, usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
@@ -190,7 +190,7 @@ export function Topbar() {
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: 8, scale: 0.95 }}
                 transition={{ duration: 0.15 }}
-                className="absolute right-0 mt-2 w-80 md:w-96 rounded-2xl border border-zinc-200 bg-white shadow-xl dark:border-zinc-800 dark:bg-zinc-900/95"
+                className="absolute end-0 mt-2 w-[340px] md:w-[380px] rounded-2xl border border-zinc-200 bg-white shadow-xl dark:border-zinc-800 dark:bg-zinc-900/95"
                 role="menu"
               >
                 <div className="flex items-center justify-between border-b border-zinc-200 px-4 py-3 dark:border-zinc-800">
@@ -202,7 +202,7 @@ export function Topbar() {
                     تمييز الكل كمقروء
                   </button>
                 </div>
-                <div className="max-h-96 overflow-y-auto">
+                <div className="max-h-[500px] overflow-y-auto">
                   {unreadNotifications === 0 ? (
                     <div className="flex flex-col items-center justify-center py-8 text-center">
                       <Bell className="h-10 w-10 text-zinc-300 dark:text-zinc-600" />
@@ -242,17 +242,6 @@ export function Topbar() {
               </motion.div>
             )}
           </div>
-
-          {/* Messages / Inbox */}
-          <button
-            className="relative flex h-10 w-10 items-center justify-center rounded-xl text-zinc-500 transition-colors hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800/80"
-            aria-label="الرسائل"
-          >
-            <Mail className="h-5 w-5" />
-            <span className="absolute -top-0.5 -end-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-emerald-500 text-[8px] font-bold text-white ring-2 ring-white dark:ring-zinc-900">
-              3
-            </span>
-          </button>
 
           {/* Theme Toggle */}
           <button

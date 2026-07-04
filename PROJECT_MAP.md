@@ -249,6 +249,8 @@ User Input (keyboard/mouse/touch)
 | 94 | Phase 5 — Skeleton loading | إنشاء `Skeleton.tsx`: `Skeleton` (animate-pulse + rounded-md)، `SkeletonCard` (border + p-4 + 3 أسطر)، `SkeletonTable` (5 صفوف قابلة للتخصيص). | ✅ |
 | 95 | Phase 9 — Auto dark mode (system preference) | إضافة `themeMode: 'light' | 'dark' | 'auto'` إلى useUIStore. `toggleDarkMode` يدور بين light→dark→auto. `applyTheme()` تستخدم `window.matchMedia('prefers-color-scheme: dark')` في الوضع auto. Topbar و Sidebar يعرضان أيقونة Monitor للوضع auto مع نص "تلقائي". layout-client يستمع لتغييرات system preference عبر addEventListener('change'). | ✅ |
 | 96 | Phase 11 — Accessibility improvements | تغيير focus-visible ring من indigo-500 إلى emerald-500 في Button و Input و Select و Topbar و Sidebar. إضافة `aria-invalid` + `aria-describedby` لـ Input/Textarea/Select. إضافة `role="alert"` في Alert ورسائل الخطأ. توحيد `aria-label` لجميع الأزرار. | ✅ |
+| 103 | حذف أيقونة البريد من شريط التنقل (Topbar) | إزالة زر `<button>` الخاص بـ Mail (Inbox) مع البadge "3" من Topbar. إزالة استيراد `Mail` من lucide-react. Flexbox gap-1.5 يغلق الفراغ تلقائياً. No regression. | ✅ |
+| 104 | إصلاح تموضع نافذة الإشعارات (Notifications Dropdown) في RTL | تغيير `right-0` إلى `end-0` (خاصية CSS logical property `inset-inline-end: 0`) لتنعكس تلقائياً مع RTL/LTR. تغيير عرض النافذة إلى `w-[340px] md:w-[380px]`. تغيير أقصى ارتفاع إلى `max-h-[500px]` مع `overflow-y-auto`. الهوامش الآمنة 16px محققة عبر `px-4` للأب. | ✅ |
 
 ## [ORPHANS & PENDING]
 
