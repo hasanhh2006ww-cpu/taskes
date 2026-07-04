@@ -6,7 +6,7 @@ import { useUIStore } from '@/store/useUIStore';
 import { useTaskStore } from '@/store/useTaskStore';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { Search, Bell, Zap, Sun, Moon, Monitor, User, LogOut, ChevronDown, LayoutDashboard, Plus, Target, Flame, Calendar, BarChart3, Settings } from 'lucide-react';
+import { Search, Bell, Zap, Sun, Moon, Monitor, User, ChevronDown, LayoutDashboard, Plus, Target, Flame, Calendar, BarChart3, Settings } from 'lucide-react';
 import { useRouter, usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
@@ -270,7 +270,7 @@ export function Topbar() {
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: 8, scale: 0.95 }}
                 transition={{ duration: 0.15 }}
-                className="absolute right-0 mt-2 w-56 rounded-2xl border border-zinc-200 bg-white shadow-xl dark:border-zinc-800 dark:bg-zinc-900/95"
+                className="absolute end-0 mt-2 w-[300px] md:w-[340px] rounded-2xl border border-zinc-200 bg-white shadow-xl dark:border-zinc-800 dark:bg-zinc-900/95"
                 role="menu"
               >
                 <div className="px-4 py-3 border-b border-zinc-200 dark:border-zinc-800">
@@ -299,15 +299,7 @@ export function Topbar() {
                       {item.label}
                     </button>
                   ))}
-                  <hr className="my-1 border-zinc-200 dark:border-zinc-800" />
-                  <button
-                    onClick={() => { setUserMenuOpen(false); toast.success('تسجيل الخروج قريباً'); }}
-                    className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-rose-600 transition-colors hover:bg-rose-50 dark:hover:bg-rose-900/20 dark:text-rose-400"
-                    role="menuitem"
-                  >
-                    <LogOut className="h-4 w-4" />
-                    تسجيل الخروج
-                  </button>
+
                 </nav>
               </motion.div>
             )}

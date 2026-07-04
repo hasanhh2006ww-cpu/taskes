@@ -251,6 +251,7 @@ User Input (keyboard/mouse/touch)
 | 96 | Phase 11 — Accessibility improvements | تغيير focus-visible ring من indigo-500 إلى emerald-500 في Button و Input و Select و Topbar و Sidebar. إضافة `aria-invalid` + `aria-describedby` لـ Input/Textarea/Select. إضافة `role="alert"` في Alert ورسائل الخطأ. توحيد `aria-label` لجميع الأزرار. | ✅ |
 | 103 | حذف أيقونة البريد من شريط التنقل (Topbar) | إزالة زر `<button>` الخاص بـ Mail (Inbox) مع البadge "3" من Topbar. إزالة استيراد `Mail` من lucide-react. Flexbox gap-1.5 يغلق الفراغ تلقائياً. No regression. | ✅ |
 | 104 | إصلاح تموضع نافذة الإشعارات (Notifications Dropdown) في RTL | تغيير `right-0` إلى `end-0` (خاصية CSS logical property `inset-inline-end: 0`) لتنعكس تلقائياً مع RTL/LTR. تغيير عرض النافذة إلى `w-[340px] md:w-[380px]`. تغيير أقصى ارتفاع إلى `max-h-[500px]` مع `overflow-y-auto`. الهوامش الآمنة 16px محققة عبر `px-4` للأب. | ✅ |
+| 105 | إصلاح تموضع قائمة المستخدم (Profile Dropdown) في RTL + حذف تسجيل الخروج | تغيير `right-0` إلى `end-0` لخاصية CSS logical. تغيير العرض من `w-56` (224px) إلى `w-[300px] md:w-[340px]`. حذف قسم "تسجيل الخروج" بالكامل (`<hr>` + زر LogOut). إزالة استيراد `LogOut` من lucide-react. | ✅ |
 
 ## [ORPHANS & PENDING]
 
