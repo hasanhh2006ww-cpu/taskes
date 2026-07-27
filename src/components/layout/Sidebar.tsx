@@ -8,9 +8,11 @@ import { useTaskStore } from '@/store/useTaskStore';
 import { useProjectStore } from '@/store/useProjectStore';
 import { useUIStore } from '@/store/useUIStore';
 import { useHabitStore } from '@/store/useHabitStore';
+import { useSession } from 'next-auth/react';
 import { Button } from '@/components/ui/Button';
+import { getInitials } from '@/lib/utils';
 import { getToday } from '@/lib/constants';
-import { logger } from '@/lib/logger';
+import { signOut } from 'next-auth/react';
 import {
   LayoutDashboard,
   ListTodo,
@@ -26,6 +28,7 @@ import {
   Sun,
   Moon,
   Monitor,
+  LogOut,
 } from 'lucide-react';
 
 function NavTooltip({ label, show }: { label: string; show: boolean }) {
@@ -75,10 +78,14 @@ export function Sidebar() {
 
   const isFilterActive = (f: string) => isTasksPage && filter === f && !activeProjectId;
 
+  const { data: session, status } = useSession();
+  const user = status === 'authenticated' ? session?.user : null;
+  const initials = getInitials(user?.name ?? '');
+
   return (
     <aside
       className={cn(
-        'flex h-full w-full flex-col overflow-hidden  rounded-2xl',
+        'flex h-full w-full flex-col overflow-hidden rounded-2xl',
         sidebarCollapsed ? 'items-center' : '',
         'glass-card'
       )}
@@ -86,7 +93,7 @@ export function Sidebar() {
       <div className={cn('flex items-center', sidebarCollapsed ? 'justify-center gap-1 px-1 py-3' : 'justify-between px-4 pt-4 pb-3')}>
         <Link
           href="/dashboard"
-          onClick={() => { logger.info('Sidebar brand clicked, navigating to /dashboard'); closeSidebar(); }}
+          onClick={() => { closeSidebar(); }}
           className={cn(
             'group flex items-center transition-all duration-200',
             sidebarCollapsed ? '' : 'flex-1 gap-3'
@@ -116,7 +123,7 @@ export function Sidebar() {
         </button>
       </div>
 
-      <nav className="flex-1 space-y-0.5 px-2">
+      <nav className="flex-1 space-y-0.5 overflow-y-auto px-2">
         <div className="relative" onMouseEnter={() => setHoveredItem('dashboard')} onMouseLeave={() => setHoveredItem(null)}>
           <Link
             href="/dashboard"
@@ -302,9 +309,46 @@ export function Sidebar() {
           </Link>
           <NavTooltip label="العادات" show={sidebarCollapsed && hoveredItem === 'habits'} />
         </div>
+        <div className="flex items-center gap-3 px-3 py-3">
+          {user?.image ? (
+            <img
+              src={user.image}
+              alt={user.name ?? 'avatar'}
+              className="h-9 w-9 rounded-full object-cover"
+            />
+          ) : (
+            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-600 font-bold dark:bg-emerald-500/20 dark:text-emerald-400">
+              {initials}
+            </div>
+          )}
+          {!sidebarCollapsed && (
+            <div className="flex-1 min-w-0">
+              <p className="truncate text-sm font-medium text-zinc-800 dark:text-zinc-100">
+                {user?.name ?? 'مستخدم'}
+              </p>
+              <p className="truncate text-xs text-zinc-500 dark:text-zinc-400">
+                {user?.email ?? ''}
+              </p>
+            </div>
+          )}
+        </div>
       </nav>
 
-      <div className={cn('mx-2 mb-2 mt-auto', sidebarCollapsed ? '' : 'glass rounded-xl p-2')}>
+      <div className={cn('mx-2 mb-2 mt-auto shrink-0', sidebarCollapsed ? '' : 'glass rounded-xl p-2')}>
+        {!sidebarCollapsed && user && (
+          <div className="mb-2 flex items-center gap-2 px-1">
+            {user.image ? (
+              <img src={user.image} alt={user.name ?? ''} className="h-7 w-7 rounded-full object-cover" />
+            ) : (
+              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-600 font-bold text-xs dark:bg-emerald-500/20 dark:text-emerald-400">
+                {initials}
+              </div>
+            )}
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-xs font-medium text-zinc-800 dark:text-zinc-100">{user.name ?? 'مستخدم'}</p>
+            </div>
+          </div>
+        )}
         <div
           className="relative"
           onMouseEnter={() => setHoveredItem('focus')}
@@ -345,6 +389,24 @@ export function Sidebar() {
             {!sidebarCollapsed && <span>{themeMode === 'dark' ? 'داكن' : themeMode === 'auto' ? 'تلقائي' : 'فاتح'}</span>}
           </button>
           <NavTooltip label={themeMode === 'dark' ? 'الوضع الداكن' : themeMode === 'auto' ? 'الوضع التلقائي' : 'الوضع الفاتح'} show={sidebarCollapsed && hoveredItem === 'theme'} />
+        </div>
+      <div
+          className="relative"
+          onMouseEnter={() => setHoveredItem('logout')}
+          onMouseLeave={() => setHoveredItem(null)}
+        >
+          <button
+            onClick={() => signOut({ callbackUrl: '/login' })}
+            className={cn(
+              'group flex w-full items-center gap-3 rounded-xl text-sm transition-all duration-200',
+              sidebarCollapsed ? 'justify-center px-2 py-2.5' : 'px-3 py-2.5',
+              'text-zinc-500 hover:bg-rose-50 hover:text-rose-600 dark:text-zinc-400 dark:hover:bg-rose-950/30 dark:hover:text-rose-400'
+            )}
+          >
+            <LogOut className="h-4 w-4 shrink-0 transition-transform duration-200 group-hover:scale-110" />
+            {!sidebarCollapsed && <span className="flex-1 text-start">تسجيل الخروج</span>}
+          </button>
+          <NavTooltip label="تسجيل الخروج" show={sidebarCollapsed && hoveredItem === 'logout'} />
         </div>
       </div>
     </aside>

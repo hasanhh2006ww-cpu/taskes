@@ -4,13 +4,13 @@ import { useState, useRef, useEffect } from 'react';
 import { cn } from '@/lib/cn';
 import { useUIStore } from '@/store/useUIStore';
 import { useTaskStore } from '@/store/useTaskStore';
-import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
-import { Search, Bell, Zap, Sun, Moon, Monitor, User, ChevronDown, LayoutDashboard, Plus, Target, Flame, Calendar, BarChart3, Settings } from 'lucide-react';
+import { useSession } from 'next-auth/react';
+import { getInitials } from '@/lib/utils';
+import { Search, Bell, Zap, Sun, Moon, Monitor, ChevronDown, LayoutDashboard, Plus, Target, Flame, Calendar, BarChart3, Settings, LogOut } from 'lucide-react';
 import { useRouter, usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
-import { logger } from '@/lib/logger';
+import { signOut } from 'next-auth/react';
 
 interface QuickAction {
   icon: React.ElementType;
@@ -33,6 +33,7 @@ const QUICK_ACTIONS: QuickAction[] = [
 export function Topbar() {
   const { darkMode, themeMode, toggleDarkMode, toggleFocusMode } = useUIStore();
   const { tasks } = useTaskStore();
+  const { data: session, status } = useSession();
   const router = useRouter();
   const pathname = usePathname();
   const [searchOpen, setSearchOpen] = useState(false);
@@ -44,6 +45,7 @@ export function Topbar() {
   const userMenuRef = useRef<HTMLDivElement>(null);
   const quickActionsRef = useRef<HTMLDivElement>(null);
 
+  const user = status === 'authenticated' ? session?.user : null;
   const unreadNotifications = tasks.filter(t => t.dueDate && t.dueDate < new Date().toISOString().split('T')[0] && !t.completed).length;
 
   useEffect(() => {
@@ -71,13 +73,10 @@ export function Topbar() {
   const handleQuickAction = (action: QuickAction) => {
     if (action.action === 'focus') {
       toggleFocusMode();
-      logger.info('Quick action: Focus mode toggled');
     } else if (action.action === 'scroll-stats') {
       document.getElementById('stats-section')?.scrollIntoView({ behavior: 'smooth' });
-      logger.info('Quick action: Scroll to stats');
     } else {
       router.push(action.href);
-      logger.info('Quick action navigation', { href: action.href });
     }
     setQuickActionsOpen(false);
   };
@@ -87,7 +86,6 @@ export function Topbar() {
     const query = (e.currentTarget as HTMLFormElement).elements.namedItem('search') as HTMLInputElement;
     if (query.value.trim()) {
       router.push(`/tasks?search=${encodeURIComponent(query.value.trim())}`);
-      logger.info('Search submitted', { query: query.value.trim() });
       setSearchOpen(false);
       query.value = '';
     }
@@ -171,7 +169,7 @@ export function Topbar() {
           {/* Notifications */}
           <div className="relative" ref={notificationsRef}>
             <button
-              onClick={() => { setNotificationsOpen(!notificationsOpen); logger.info('Notifications toggled', { open: !notificationsOpen }); }}
+              onClick={() => { setNotificationsOpen(!notificationsOpen); }}
               className="relative flex h-10 w-10 items-center justify-center rounded-xl text-zinc-500 transition-colors hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800/80"
               aria-label="الإشعارات"
               aria-expanded={notificationsOpen}
@@ -256,12 +254,22 @@ export function Topbar() {
           {/* User Menu */}
           <div className="relative" ref={userMenuRef}>
             <button
-              onClick={() => { setUserMenuOpen(!userMenuOpen); logger.info('User menu toggled', { open: !userMenuOpen }); }}
-              className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 text-white font-bold text-sm shadow-sm shadow-emerald-500/20 transition-all hover:shadow-md hover:shadow-emerald-500/30"
+              onClick={() => { setUserMenuOpen(!userMenuOpen); }}
+              className="flex items-center gap-2 rounded-xl transition-colors hover:bg-zinc-100 dark:hover:bg-zinc-800/80"
               aria-label="حساب المستخدم"
               aria-expanded={userMenuOpen}
             >
-              م
+              {user?.image ? (
+                <img
+                  src={user.image}
+                  alt={user.name ?? 'avatar'}
+                  className="h-9 w-9 rounded-full object-cover"
+                />
+              ) : (
+                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-600 font-bold text-sm dark:bg-emerald-500/20 dark:text-emerald-400">
+                  {user?.name ? getInitials(user.name) : '?'}
+                </div>
+              )}
             </button>
 
             {userMenuOpen && (
@@ -274,8 +282,19 @@ export function Topbar() {
                 role="menu"
               >
                 <div className="px-4 py-3 border-b border-zinc-200 dark:border-zinc-800">
-                  <p className="font-semibold text-zinc-900 dark:text-zinc-100">مستخدم Stilldo</p>
-                  <p className="text-xs text-zinc-500 dark:text-zinc-400">user@stilldo.app</p>
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-600 font-bold dark:bg-emerald-500/20 dark:text-emerald-400">
+                      {user?.name ? getInitials(user.name) : '?'}
+                    </div>
+                    <div>
+                      <p className="font-semibold text-zinc-900 dark:text-zinc-100">
+                        {user?.name ?? 'مستخدم'}
+                      </p>
+                      <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                        {user?.email ?? ''}
+                      </p>
+                    </div>
+                  </div>
                 </div>
                 <nav className="py-1">
                   {[
@@ -284,12 +303,19 @@ export function Topbar() {
                     { icon: Calendar, label: 'التقويم', href: '/calendar' as const },
                     { icon: Flame, label: 'العادات', href: '/habits' as const },
                     { icon: Settings, label: 'الإعدادات', href: '/settings' as const },
+                    {
+                      icon: LogOut,
+                      label: 'تسجيل الخروج',
+                      action: 'logout' as const,
+                    },
                   ].map((item) => (
                     <button
                       key={item.label}
                       onClick={() => {
-                        if ('action' in item) toggleFocusMode();
-                        else router.push(item.href);
+                        if (item.action === 'focus') toggleFocusMode();
+                        else if (item.action === 'logout') {
+                          signOut({ callbackUrl: '/login' });
+                        } else router.push(item.href as string);
                         setUserMenuOpen(false);
                       }}
                       className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-zinc-700 transition-colors hover:bg-zinc-50 hover:text-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800/50 dark:hover:text-zinc-100"
@@ -299,7 +325,6 @@ export function Topbar() {
                       {item.label}
                     </button>
                   ))}
-
                 </nav>
               </motion.div>
             )}

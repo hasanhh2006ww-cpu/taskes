@@ -1,0 +1,471 @@
+// ─── Prisma Schema ─────────────────────────────────────────
+// Database: PostgreSQL
+// Generator: Prisma Client
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Enums ─────────────────────────────────────────────────
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum TaskCategory {
+  TASK
+  MEETING
+  FOCUS
+  PROJECT
+  CANCELLED
+}
+
+enum HabitType {
+  DAILY
+  WEEKLY
+  MONTHLY
+}
+
+enum MonthPeriod {
+  START
+  MIDDLE
+  END
+}
+
+enum EventType {
+  TASK
+  HABIT
+  REMINDER
+  DEADLINE
+  CUSTOM
+}
+
+enum NotificationType {
+  TASK_REMINDER
+  HABIT_REMINDER
+  HABIT_STREAK
+  DEADLINE
+  FOCUS_COMPLETE
+  WELCOME
+  EMAIL_VERIFIED
+  PASSWORD_RESET
+  GENERAL
+}
+
+// ─── User ──────────────────────────────────────────────────
+
+model User {
+  id            String   @id @default(uuid()) @db.Uuid
+  name          String   @db.VarChar(255)
+  email         String   @unique @db.VarChar(255)
+  password      String   @db.VarChar(255)
+  emailVerified Boolean  @default(false)
+  isActive      Boolean  @default(true)
+  rememberMe    Boolean  @default(false)
+  lastLoginAt   DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  settings               UserSettings?
+  projects               Project[]
+  tasks                  Task[]
+  tasksLabels            TaskLabel[]
+  habits                 Habit[]
+  pomodoroSessions       PomodoroSession[]
+  calendarEvents         CalendarEvent[]
+  notifications          Notification[]
+  activityLogs           ActivityLog[]
+  attachments            Attachment[]
+  dailyStats             DailyStats[]
+  habitCategories        HabitCategory[]
+  emailVerificationTokens EmailVerificationToken[]
+  passwordResetTokens    PasswordResetToken[]
+  refreshTokens          RefreshToken[]
+
+  @@index([email])
+  @@map("users")
+}
+
+model UserSettings {
+  id               String   @id @default(uuid()) @db.Uuid
+  userId           String   @unique @db.Uuid
+  theme            String   @default("light") @db.VarChar(20)
+  timezone         String   @default("UTC") @db.VarChar(100)
+  language         String   @default("ar") @db.VarChar(10)
+  notificationEmail Boolean @default(true)
+  notificationPush Boolean  @default(true)
+  workMinutes      Int      @default(25)
+  breakMinutes     Int      @default(5)
+  longBreakMinutes Int      @default(15)
+  sessionsBeforeLongBreak Int @default(4)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_settings")
+}
+
+// ─── Projects ──────────────────────────────────────────────
+
+model Project {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String   @db.VarChar(255)
+  color     String   @default("#6366f1") @db.VarChar(9)
+  icon      String?  @db.VarChar(100)
+  isActive  Boolean  @default(true)
+  userId    String   @db.Uuid
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tasks Task[]
+
+  @@index([userId])
+  @@index([userId, isActive])
+  @@map("projects")
+}
+
+// ─── Tasks ─────────────────────────────────────────────────
+
+model Task {
+  id            String        @id @default(uuid()) @db.Uuid
+  title         String        @db.VarChar(500)
+  description   String?       @db.Text
+  priority      Priority      @default(MEDIUM)
+  category      TaskCategory  @default(TASK)
+  dueDate       DateTime?
+  completed     Boolean       @default(false)
+  completedAt   DateTime?
+  important     Boolean       @default(false)
+  archived      Boolean       @default(false)
+  isRepeating   Boolean       @default(false)
+  repeatPattern String?       @db.VarChar(50)
+  reminderAt    DateTime?
+  notes         String?       @db.Text
+  pomodoroCount Int           @default(0)
+  order         Int           @default(0)
+  estimatedTime Int?          // in minutes
+  actualTime    Int?          // in minutes
+  projectId     String?       @db.Uuid
+  userId        String        @db.Uuid
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  deletedAt     DateTime?
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  project  Project?  @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  subtasks SubTask[]
+  labels   TaskLabelAssignment[]
+  activity    ActivityLog[]
+  sessions    PomodoroSession[]
+  events      CalendarEvent[]
+  attachments Attachment[]
+
+  @@index([userId])
+  @@index([userId, completed])
+  @@index([userId, dueDate])
+  @@index([userId, priority])
+  @@index([projectId])
+  @@map("tasks")
+}
+
+model SubTask {
+  id        String  @id @default(uuid()) @db.Uuid
+  title     String  @db.VarChar(500)
+  completed Boolean @default(false)
+  order     Int     @default(0)
+  taskId    String  @db.Uuid
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@index([taskId])
+  @@map("sub_tasks")
+}
+
+model TaskLabel {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String   @db.VarChar(100)
+  color     String   @default("#6366f1") @db.VarChar(9)
+  userId    String   @db.Uuid
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user  User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tasks TaskLabelAssignment[]
+
+  @@unique([name, userId])
+  @@index([userId])
+  @@map("task_labels")
+}
+
+model TaskLabelAssignment {
+  id      String @id @default(uuid()) @db.Uuid
+  taskId  String @db.Uuid
+  labelId String @db.Uuid
+
+  task  Task      @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  label TaskLabel @relation(fields: [labelId], references: [id], onDelete: Cascade)
+
+  @@unique([taskId, labelId])
+  @@map("task_label_assignments")
+}
+
+// ─── Habits ────────────────────────────────────────────────
+
+model HabitCategory {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String   @db.VarChar(255)
+  color     String   @default("#f59e0b") @db.VarChar(9)
+  icon      String?  @db.VarChar(100)
+  userId    String   @db.Uuid
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user  User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  habits Habit[]
+
+  @@unique([name, userId])
+  @@index([userId])
+  @@map("habit_categories")
+}
+
+model Habit {
+  id                String    @id @default(uuid()) @db.Uuid
+  title             String    @db.VarChar(255)
+  description       String?   @db.Text
+  type              HabitType
+  icon              String    @default("Flame") @db.VarChar(100)
+  color             String    @default("#f59e0b") @db.VarChar(9)
+  frequency         Int?      // For weekly: days per week
+  daysOfWeek        Int[]     @default([]) // For weekly: [1,3,5]
+  period            MonthPeriod? // For monthly
+  targetCount       Int?      // For monthly
+  streak            Int       @default(0)
+  bestStreak        Int       @default(0)
+  lastCompletedDate DateTime?
+  categoryId        String?   @db.Uuid
+  isActive          Boolean   @default(true)
+  userId            String    @db.Uuid
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  deletedAt         DateTime?
+
+  user     User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category HabitCategory?  @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  logs     HabitLog[]
+  events   CalendarEvent[]
+
+  @@index([userId])
+  @@index([userId, type])
+  @@index([userId, isActive])
+  @@map("habits")
+}
+
+model HabitLog {
+  id        String   @id @default(uuid()) @db.Uuid
+  date      DateTime
+  completed Boolean  @default(true)
+  habitId   String   @db.Uuid
+  createdAt DateTime @default(now())
+
+  habit Habit @relation(fields: [habitId], references: [id], onDelete: Cascade)
+
+  @@unique([habitId, date])
+  @@index([habitId])
+  @@index([date])
+  @@map("habit_logs")
+}
+
+// ─── Pomodoro / Focus ──────────────────────────────────────
+
+model PomodoroSession {
+  id              String   @id @default(uuid()) @db.Uuid
+  duration        Int      // in minutes
+  breakDuration   Int      // in minutes
+  completed       Boolean  @default(false)
+  interrupted     Boolean  @default(false)
+  sessionDate     DateTime @default(now())
+  taskId          String?  @db.Uuid
+  userId          String   @db.Uuid
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  user User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  task  Task? @relation(fields: [taskId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([userId, sessionDate])
+  @@index([taskId])
+  @@map("pomodoro_sessions")
+}
+
+// ─── Calendar ──────────────────────────────────────────────
+
+model CalendarEvent {
+  id          String    @id @default(uuid()) @db.Uuid
+  title       String    @db.VarChar(500)
+  description String?   @db.Text
+  startTime   DateTime?
+  endTime     DateTime?
+  date        DateTime
+  allDay      Boolean   @default(false)
+  type        EventType @default(CUSTOM)
+  taskId      String?   @db.Uuid
+  habitId     String?   @db.Uuid
+  userId      String    @db.Uuid
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  user  User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  task  Task?  @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  habit Habit? @relation(fields: [habitId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([userId, date])
+  @@map("calendar_events")
+}
+
+// ─── Notifications ─────────────────────────────────────────
+
+model Notification {
+  id        String           @id @default(uuid()) @db.Uuid
+  type      NotificationType
+  title     String           @db.VarChar(255)
+  message   String?          @db.Text
+  read      Boolean          @default(false)
+  link      String?          @db.VarChar(500)
+  userId    String           @db.Uuid
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([userId, read])
+  @@index([userId, createdAt])
+  @@map("notifications")
+}
+
+// ─── Activity Log ──────────────────────────────────────────
+
+model ActivityLog {
+  id        String   @id @default(uuid()) @db.Uuid
+  type      String   @db.VarChar(100)
+  message   String   @db.Text
+  taskId    String?  @db.Uuid
+  userId    String   @db.Uuid
+  timestamp DateTime @default(now())
+
+  user User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  task Task? @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([userId, timestamp])
+  @@index([taskId])
+  @@map("activity_logs")
+}
+
+// ─── Attachments (future-ready) ────────────────────────────
+
+model Attachment {
+  id        String   @id @default(uuid()) @db.Uuid
+  fileName  String   @db.VarChar(500)
+  fileSize  Int      // in bytes
+  mimeType  String   @db.VarChar(100)
+  url       String   @db.VarChar(1000)
+  taskId    String   @db.Uuid
+  userId    String   @db.Uuid
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  task Task? @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@index([taskId])
+  @@index([userId])
+  @@map("attachments")
+}
+
+// ─── Statistics ────────────────────────────────────────────
+
+model DailyStats {
+  id              String   @id @default(uuid()) @db.Uuid
+  date            DateTime
+  tasksCompleted  Int      @default(0)
+  tasksCreated    Int      @default(0)
+  habitsCompleted Int      @default(0)
+  focusMinutes    Int      @default(0)
+  focusSessions   Int      @default(0)
+  pomodoroCount   Int      @default(0)
+  userId          String   @db.Uuid
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, date])
+  @@index([userId])
+  @@index([userId, date])
+  @@map("daily_stats")
+}
+
+// ─── Auth Tokens ───────────────────────────────────────────
+
+model EmailVerificationToken {
+  id        String   @id @default(uuid()) @db.Uuid
+  token     String   @unique @db.VarChar(255)
+  userId    String   @db.Uuid
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([token])
+  @@index([userId])
+  @@map("email_verification_tokens")
+}
+
+model PasswordResetToken {
+  id        String   @id @default(uuid()) @db.Uuid
+  token     String   @unique @db.VarChar(255)
+  userId    String   @db.Uuid
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([token])
+  @@index([userId])
+  @@map("password_reset_tokens")
+}
+
+model RefreshToken {
+  id         String   @id @default(uuid()) @db.Uuid
+  token      String   @unique @db.VarChar(500)
+  userId     String   @db.Uuid
+  deviceInfo String?  @db.VarChar(500)
+  expiresAt  DateTime
+  revoked    Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([token])
+  @@index([userId])
+  @@index([userId, revoked])
+  @@map("refresh_tokens")
+}

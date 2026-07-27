@@ -1,16 +1,5 @@
-'use client';
-
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { logger } from '@/lib/logger';
+import { redirect } from 'next/navigation';
 
 export default function Home() {
-  const router = useRouter();
-
-  useEffect(() => {
-    logger.info('Root route accessed, redirecting to /dashboard');
-    router.replace('/dashboard');
-  }, [router]);
-
-  return null;
+  redirect('/login');
 }

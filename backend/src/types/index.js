@@ -1,0 +1,91 @@
+// ─── Type Definitions & Constants ──────────────────────────
+
+const PRIORITIES = {
+  LOW: 'LOW',
+  MEDIUM: 'MEDIUM',
+  HIGH: 'HIGH',
+};
+
+const TASK_CATEGORIES = {
+  TASK: 'TASK',
+  MEETING: 'MEETING',
+  FOCUS: 'FOCUS',
+  PROJECT: 'PROJECT',
+  CANCELLED: 'CANCELLED',
+};
+
+const HABIT_TYPES = {
+  DAILY: 'DAILY',
+  WEEKLY: 'WEEKLY',
+  MONTHLY: 'MONTHLY',
+};
+
+const MONTH_PERIODS = {
+  START: 'START',
+  MIDDLE: 'MIDDLE',
+  END: 'END',
+};
+
+const EVENT_TYPES = {
+  TASK: 'TASK',
+  HABIT: 'HABIT',
+  REMINDER: 'REMINDER',
+  DEADLINE: 'DEADLINE',
+  CUSTOM: 'CUSTOM',
+};
+
+const NOTIFICATION_TYPES = {
+  TASK_REMINDER: 'TASK_REMINDER',
+  HABIT_REMINDER: 'HABIT_REMINDER',
+  HABIT_STREAK: 'HABIT_STREAK',
+  DEADLINE: 'DEADLINE',
+  FOCUS_COMPLETE: 'FOCUS_COMPLETE',
+  WELCOME: 'WELCOME',
+  EMAIL_VERIFIED: 'EMAIL_VERIFIED',
+  PASSWORD_RESET: 'PASSWORD_RESET',
+  GENERAL: 'GENERAL',
+};
+
+const HTTP_STATUS = {
+  OK: 200,
+  CREATED: 201,
+  NO_CONTENT: 204,
+  BAD_REQUEST: 400,
+  UNAUTHORIZED: 401,
+  FORBIDDEN: 403,
+  NOT_FOUND: 404,
+  CONFLICT: 409,
+  TOO_MANY: 429,
+  INTERNAL: 500,
+};
+
+const TOKEN_TYPES = {
+  EMAIL_VERIFICATION: 'email_verification',
+  PASSWORD_RESET: 'password_reset',
+  ACCESS: 'access',
+  REFRESH: 'refresh',
+};
+
+const PROJECT_COLORS = [
+  '#6366f1', '#8b5cf6', '#ec4899', '#f43f5e',
+  '#f97316', '#eab308', '#22c55e', '#14b8a6',
+  '#06b6d4', '#3b82f6',
+];
+
+const WEEKLY_FREQUENCIES = [1, 2, 3, 4, 5];
+
+const DAYS_OF_WEEK = [0, 1, 2, 3, 4, 5, 6];
+
+module.exports = {
+  PRIORITIES,
+  TASK_CATEGORIES,
+  HABIT_TYPES,
+  MONTH_PERIODS,
+  EVENT_TYPES,
+  NOTIFICATION_TYPES,
+  HTTP_STATUS,
+  TOKEN_TYPES,
+  PROJECT_COLORS,
+  WEEKLY_FREQUENCIES,
+  DAYS_OF_WEEK,
+};

@@ -1,0 +1,74 @@
+▲ Next.js 16.2.6 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.56.1:3000
+- Environments: .env
+✓ Ready in 1554ms
+⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+
+ GET /login 200 in 4.0s (next.js: 2.6s, application-code: 1478ms)
+ GET /login 200 in 141ms (next.js: 11ms, application-code: 130ms)
+ GET /login 200 in 96ms (next.js: 7ms, application-code: 89ms)
+ GET /api/auth/csrf 200 in 2.6s (next.js: 2.5s, application-code: 64ms)
+(node:19620) Warning: SECURITY WARNING: The SSL modes 'prefer', 'require', and 'verify-ca' are treated as aliases for 'verify-full'.
+In the next major version (pg-connection-string v3.0.0 and pg v9.0.0), these modes will adopt standard libpq semantics, which have weaker security guarantees.
+
+To prepare for this change:
+- If you want the current behavior, explicitly use 'sslmode=verify-full'
+- If you want libpq compatibility now, use 'uselibpqcompat=true&sslmode=require'
+
+See https://www.postgresql.org/docs/current/libpq-ssl.html for libpq SSL mode definitions.
+(Use `node --trace-warnings ...` to show where the warning was created)
+ POST /api/auth/callback/credentials 302 in 13.0s (next.js: 36ms, application-code: 12.9s)
+○ Compiling /dashboard ...
+ GET /dashboard 200 in 4.0s (next.js: 3.4s, proxy.ts: 49ms, application-code: 568ms)
+ GET /login 200 in 400ms (next.js: 6ms, application-code: 394ms)
+✓ Compiled in 5.9s
+ GET /api/auth/signout 200 in 399ms (next.js: 364ms, application-code: 35ms)
+ GET /login 200 in 1689ms (next.js: 841ms, proxy.ts: 17ms, application-code: 831ms)
+ GET /api/auth/csrf 200 in 63ms (next.js: 37ms, application-code: 27ms)
+ POST /api/auth/callback/credentials 302 in 2.9s (next.js: 7ms, application-code: 2.9s)
+ GET /dashboard 200 in 965ms (next.js: 43ms, proxy.ts: 33ms, application-code: 888ms)
+ GET /tasks 200 in 3.4s (next.js: 2.8s, proxy.ts: 50ms, application-code: 468ms)
+○ Compiling /calendar ...
+ GET /calendar 200 in 3.9s (next.js: 3.2s, proxy.ts: 32ms, application-code: 660ms)
+ GET /habits 200 in 3.7s (next.js: 3.1s, proxy.ts: 35ms, application-code: 468ms)
+○ Compiling /profile ...
+ GET /profile 200 in 3.8s (next.js: 3.3s, proxy.ts: 24ms, application-code: 497ms)
+[WARN 1785050566155] Failed to load my-taske-focus-duration {}
+ GET /settings 200 in 3.1s (next.js: 2.7s, proxy.ts: 39ms, application-code: 389ms)
+○ Compiling /settings/account ...
+ GET /settings/account 200 in 4.1s (next.js: 3.6s, application-code: 481ms)
+ GET /settings/account 200 in 492ms (next.js: 6ms, application-code: 486ms)
+ GET /settings/account 200 in 384ms (next.js: 9ms, application-code: 375ms)
+ GET /login?callbackUrl=http%3A%2F%2Flocalhost%3A3000%2F 200 in 283ms (next.js: 10ms, proxy.ts: 18ms, application-code: 255ms)
+ GET /register 200 in 2.6s (next.js: 2.4s, proxy.ts: 16ms, application-code: 133ms)
+ GET /login 200 in 202ms (next.js: 18ms, proxy.ts: 29ms, application-code: 155ms)
+ GET /register 200 in 127ms (next.js: 24ms, proxy.ts: 15ms, application-code: 88ms)
+ GET /dashboard 200 in 532ms (next.js: 12ms, proxy.ts: 32ms, application-code: 487ms)
+ POST /register 303 in 6.5s (next.js: 9ms, proxy.ts: 26ms, application-code: 6.5s)
+  └─ ƒ registerAction({"error":{},"message":null}, {}) in 5798ms src/lib/actions/auth.ts
+ GET /settings 200 in 122ms (next.js: 14ms, proxy.ts: 27ms, application-code: 80ms)
+ GET /settings/account 200 in 96ms (next.js: 9ms, application-code: 87ms)
+ POST /settings/account 200 in 1473ms (next.js: 10ms, application-code: 1463ms)
+  └─ ƒ uploadAvatarAction({}) in 1162ms src/lib/actions/profile.ts
+ GET /api/auth/csrf 200 in 104ms (next.js: 45ms, application-code: 60ms)
+ POST /api/auth/session 200 in 114ms (next.js: 29ms, application-code: 85ms)
+ POST /settings/account 200 in 551ms (next.js: 7ms, application-code: 544ms)
+  └─ ƒ removeAvatarAction() in 307ms src/lib/actions/profile.ts
+ GET /api/auth/csrf 200 in 85ms (next.js: 44ms, application-code: 41ms)
+ POST /api/auth/session 200 in 66ms (next.js: 13ms, application-code: 53ms)
+ GET /api/auth/csrf 200 in 42ms (next.js: 22ms, application-code: 20ms)
+ POST /api/auth/signout 200 in 46ms (next.js: 9ms, application-code: 36ms)
+ GET /login 200 in 372ms (next.js: 14ms, proxy.ts: 21ms, application-code: 337ms)
+ GET /dashboard 200 in 467ms (next.js: 10ms, proxy.ts: 32ms, application-code: 425ms)
+ POST /login 303 in 3.4s (next.js: 11ms, proxy.ts: 26ms, application-code: 3.4s)
+  └─ ƒ loginAction({"error":{"form":[]},"message":null}, {}) in 2850ms src/lib/actions/auth.ts
+ GET /settings 200 in 163ms (next.js: 12ms, proxy.ts: 29ms, application-code: 121ms)
+ GET /settings/account 200 in 151ms (next.js: 10ms, application-code: 142ms)
+ POST /settings/account 200 in 1516ms (next.js: 13ms, application-code: 1503ms)
+  └─ ƒ uploadAvatarAction({}) in 1321ms src/lib/actions/profile.ts
+ GET /api/auth/csrf 200 in 152ms (next.js: 42ms, application-code: 111ms)
+ POST /api/auth/session 200 in 62ms (next.js: 10ms, application-code: 52ms)
+ GET /dashboard 200 in 152ms (next.js: 15ms, proxy.ts: 30ms, application-code: 107ms)
+ GET /settings 200 in 122ms (next.js: 15ms, proxy.ts: 27ms, application-code: 80ms)
+ GET /settings/account 200 in 108ms (next.js: 9ms, application-code: 99ms)

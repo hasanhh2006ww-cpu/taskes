@@ -7,6 +7,7 @@ import { useHabitStore } from '@/store/useHabitStore';
 import { AnimatePresence } from 'framer-motion';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { Topbar } from '@/components/layout/Topbar';
+import { DemoBanner } from '@/components/auth/DemoBanner';
 import { CommandPalette } from '@/components/command-palette/CommandPalette';
 import { FocusMode } from '@/components/focus/FocusMode';
 import { cn } from '@/lib/cn';
@@ -90,6 +91,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
       </button>
 
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+        <DemoBanner />
         <Topbar />
         <main className="flex min-w-0 flex-1 overflow-hidden">
           {children}

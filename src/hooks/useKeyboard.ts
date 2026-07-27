@@ -21,6 +21,7 @@ export function useKeyboard(shortcuts: Shortcut[]) {
     if (isMobile()) return;
 
     function onKeyDown(e: KeyboardEvent) {
+      if (typeof e.key !== 'string') return;
       for (const s of shortcutsRef.current) {
         const matchCtrl = s.ctrl ? e.ctrlKey || e.metaKey : !e.ctrlKey && !e.metaKey;
         if (e.key.toLowerCase() === s.key.toLowerCase() && matchCtrl) {

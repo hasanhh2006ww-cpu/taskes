@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import { Cairo } from "next/font/google";
+import { cookies } from "next/headers";
 import { Toaster } from "react-hot-toast";
 import { Analytics } from "@vercel/analytics/next";
-import ClientLayout from "./layout-client";
+import SessionProviderWrapper from "@/components/auth/SessionProviderWrapper";
+import { auth } from "@/lib/auth";
 import "./globals.css";
 
 const cairo = Cairo({
@@ -17,11 +19,13 @@ export const metadata: Metadata = {
     "A calm productivity app for managing tasks, habits and focus sessions.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  await cookies();
+  const session = await auth();
   return (
     <html
       lang="ar"
@@ -48,7 +52,9 @@ export default function RootLayout({
           }}
         />
 
-        <ClientLayout>{children}</ClientLayout>
+        <SessionProviderWrapper session={session}>
+          {children}
+        </SessionProviderWrapper>
 
         <Analytics />
       </body>

@@ -25,6 +25,9 @@ export const STORAGE_KEYS = {
   EXPANDED_TASKS: 'my-taske-expanded-tasks',
 } as const;
 
+export const DEMO_EMAIL = 'demo@stilldo.app';
+export const DEMO_PASSWORD = 'Demo@StillDo2024';
+
 export const FOCUS_PRESETS = [
   { label: '25 / 5', work: 25, break: 5 },
   { label: '50 / 10', work: 50, break: 10 },
